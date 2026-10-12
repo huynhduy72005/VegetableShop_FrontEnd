@@ -1,0 +1,223 @@
+.site-header {
+  background: #fff;
+  border-bottom: 1px solid #eae6df;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+}
+
+.top-announcement-bar {
+  background-color: #1b4332;
+  color: #fff;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 50px;
+}
+
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 50px;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.logo-icon {
+  background: #1b4332;
+  color: #fff;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 20px;
+}
+
+.logo-text h1 {
+  font-size: 20px;
+  color: #1b4332;
+  line-height: 1.1;
+}
+
+.logo-text span {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #6b705c;
+  font-weight: bold;
+}
+
+.search-bar-container {
+  display: flex;
+  align-items: center;
+  border: 1px solid #d8d3c9;
+  border-radius: 30px;
+  padding: 4px 4px 4px 18px;
+  width: 420px;
+  background: #fdfcf7;
+}
+
+.search-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font-size: 14px;
+}
+
+.search-btn {
+  background: #1b4332;
+  color: #fff;
+  border: none;
+  padding: 8px 22px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.user-actions {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.action-icon {
+  position: relative;
+  font-size: 20px;
+  cursor: pointer;
+  background: #f4f1ea;
+  padding: 8px;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #2d6a4f;
+  color: #fff;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 50%;
+  font-weight: bold;
+}
+
+.user-profile-menu {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  background: #f4f1ea;
+  padding: 6px 14px;
+  border-radius: 30px;
+}
+
+.user-avatar {
+  background: #e8f5e9;
+  padding: 6px 10px;
+  border-radius: 50%;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+}
+
+.user-info strong {
+  color: #1b4332;
+}
+
+.user-info small {
+  color: #7f8c8d;
+}
+
+.btn-login-header {
+  background: #1b4332;
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sub-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 50px;
+  border-top: 1px solid #f1ede4;
+  position: relative;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 35px;
+}
+
+.nav-links li {
+  padding: 14px 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #4f5d53;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+.nav-links li:hover, .nav-links li.active {
+  color: #1b4332;
+  border-bottom-color: #1b4332;
+}
+
+/* CSS cho Dropdown Menu Sản phẩm */
+.dropdown-container {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #fff;
+  border: 1px solid #eae6df;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  border-radius: 8px;
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  z-index: 100;
+}
+
+.dropdown-item {
+  padding: 10px 20px;
+  font-size: 14px;
+  color: #333;
+  transition: 0.2s;
+}
+
+.dropdown-item:hover {
+  background: #f4f1ea;
+  color: #1b4332;
+  padding-left: 25px;
+}
+
+.nav-slogan {
+  font-size: 13px;
+  color: #588157;
+  font-style: italic;
+}

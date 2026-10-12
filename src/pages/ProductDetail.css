@@ -1,0 +1,133 @@
+.product-detail-page {
+  padding: 30px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.breadcrumb {
+  font-size: 13px;
+  color: #7f8c8d;
+  margin-bottom: 25px;
+}
+
+.breadcrumb span {
+  cursor: pointer;
+}
+
+.breadcrumb strong {
+  color: #1b4332;
+}
+
+.detail-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 50px;
+  background: #fff;
+  padding: 40px;
+  border-radius: 20px;
+  border: 1px solid #eae6df;
+}
+
+.detail-image-box {
+  background: #fcfbf7;
+  border-radius: 16px;
+  overflow: hidden;
+  height: 450px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detail-image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.brand-tag {
+  font-size: 11px;
+  font-weight: bold;
+  color: #588157;
+  letter-spacing: 1px;
+}
+
+.detail-info-box h1 {
+  font-size: 36px;
+  color: #1b4332;
+  margin: 8px 0;
+}
+
+.location-tag {
+  font-size: 13px;
+  color: #7f8c8d;
+  margin-bottom: 20px;
+}
+
+.price-display {
+  font-size: 28px;
+  font-weight: bold;
+  color: #2d6a4f;
+  margin-bottom: 20px;
+}
+
+.unit-text {
+  font-size: 16px;
+  color: #7f8c8d;
+  font-weight: normal;
+}
+
+.description-text {
+  color: #4f5d53;
+  line-height: 1.6;
+  font-size: 15px;
+  margin-bottom: 25px;
+}
+
+.specs-table {
+  border-top: 1px solid #eae6df;
+  border-bottom: 1px solid #eae6df;
+  padding: 15px 0;
+  margin-bottom: 25px;
+}
+
+.spec-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  padding: 6px 0;
+  color: #4f5d53;
+}
+
+.action-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.btn-add-cart {
+  background: #1b4332;
+  color: #fff;
+  border: none;
+  padding: 14px 30px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 15px;
+  flex: 2;
+}
+
+.btn-wishlist {
+  background: #fff;
+  border: 1px solid #d8d3c9;
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-weight: 500;
+  flex: 1;
+}
+
+.view-cart-link {
+  font-size: 14px;
+  color: #1b4332;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}

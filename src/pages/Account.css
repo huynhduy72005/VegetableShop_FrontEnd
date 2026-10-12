@@ -1,0 +1,156 @@
+.account-page {
+  padding: 40px 50px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.account-page h2 {
+  color: #1b4332;
+  margin-bottom: 25px;
+}
+
+.account-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 30px;
+}
+
+.account-sidebar {
+  background: #fff;
+  border: 1px solid #eae6df;
+  border-radius: 16px;
+  padding: 20px;
+  height: fit-content;
+}
+
+.acc-user-brief {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eae6df;
+  margin-bottom: 15px;
+}
+
+.brief-avatar {
+  background: #e8f5e9;
+  font-size: 24px;
+  padding: 10px;
+  border-radius: 50%;
+}
+
+.acc-user-brief strong {
+  font-size: 15px;
+  color: #1b4332;
+}
+
+.acc-user-brief p {
+  font-size: 12px;
+  color: #7f8c8d;
+}
+
+.acc-menu {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.acc-menu li {
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4f5d53;
+  transition: 0.2s;
+}
+
+.acc-menu li:hover, .acc-menu li.active {
+  background: #f4f1ea;
+  color: #1b4332;
+}
+
+.logout-item {
+  color: #e74c3c !important;
+  margin-top: 10px;
+  border-top: 1px dashed #eae6df;
+  padding-top: 15px !important;
+}
+
+.account-content {
+  background: #fff;
+  border: 1px solid #eae6df;
+  border-radius: 16px;
+  padding: 30px;
+}
+
+.tab-pane h3 {
+  color: #1b4332;
+  margin-bottom: 20px;
+  font-size: 18px;
+  border-bottom: 1px solid #eae6df;
+  padding-bottom: 10px;
+}
+
+.profile-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.info-group {
+  background: #fdfcf7;
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #f1ede4;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.info-group span {
+  font-size: 13px;
+  color: #7f8c8d;
+}
+
+.info-group strong {
+  font-size: 15px;
+  color: #1b4332;
+}
+
+.orders-table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.orders-table-wrapper th, .orders-table-wrapper td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eae6df;
+  font-size: 14px;
+}
+
+.orders-table-wrapper th {
+  background: #f4f1ea;
+  color: #1b4332;
+}
+
+.status-badge {
+  background: #e8f5e9;
+  color: #2d6a4f;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.btn-print-invoice {
+  background: #2980b9;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}

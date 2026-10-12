@@ -1,0 +1,136 @@
+.cart-page {
+  padding: 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.cart-page h2 {
+  font-size: 28px;
+  color: #1b4332;
+  margin-bottom: 25px;
+}
+
+.cart-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 30px;
+}
+
+.cart-items-list {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #eae6df;
+  padding: 20px;
+}
+
+.cart-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 0;
+  border-bottom: 1px solid #f1ede4;
+}
+
+.cart-item img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.ci-info {
+  flex: 1;
+  padding-left: 15px;
+}
+
+.ci-info h4 {
+  font-size: 16px;
+  color: #1b4332;
+  margin-bottom: 4px;
+}
+
+.ci-price {
+  font-size: 13px;
+  color: #7f8c8d;
+}
+
+.ci-quantity {
+  display: flex;
+  align-items: center;
+  border: 1px solid #d8d3c9;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.ci-quantity button {
+  background: #f4f1ea;
+  border: none;
+  padding: 6px 12px;
+  font-weight: bold;
+}
+
+.ci-quantity span {
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+.ci-total {
+  width: 100px;
+  text-align: right;
+  color: #2d6a4f;
+  font-size: 15px;
+}
+
+.ci-remove {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  font-size: 16px;
+  cursor: pointer;
+  padding-left: 15px;
+}
+
+.cart-summary-box {
+  background: #fff;
+  border: 1px solid #eae6df;
+  border-radius: 16px;
+  padding: 25px;
+  height: fit-content;
+}
+
+.cart-summary-box h3 {
+  font-size: 18px;
+  color: #1b4332;
+  margin-bottom: 20px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  font-size: 14px;
+  color: #4f5d53;
+}
+
+.summary-row.total {
+  font-size: 18px;
+  margin-top: 15px;
+  color: #1b4332;
+}
+
+.total-price {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.btn-checkout {
+  width: 100%;
+  background: #1b4332;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: bold;
+  margin-top: 20px;
+  font-size: 15px;
+}
