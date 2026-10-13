@@ -14,7 +14,7 @@ import AboutUs from './pages/AboutUs';
 import KitchenTips from './pages/KitchenTips';
 import Promotions from './pages/Promotions';
 import Reviews from './pages/Reviews';
-
+import ChatWidget from './components/ChatWidget';
 import './App.css';
 
 export default function App() {
@@ -24,17 +24,88 @@ export default function App() {
     const [wishlistItems, setWishlistItems] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
 
-    // Thêm vào giỏ hàng
+    // Thêm một sản phẩm vào giỏ hàng
     const handleAddToCart = (product) => {
         setCartItems(prev => {
             const exist = prev.find(item => item.id === product.id);
             const qty = product.quantity || 1;
             if (exist) {
-                return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + qty } : item);
+                return prev.map(item =>
+                    item.id === product.id
+                        ? { ...item, quantity: item.quantity + qty }
+                        : item
+                );
             }
             return [...prev, { ...product, quantity: qty }];
         });
         alert(`Đã thêm ${product.name} vào giỏ hàng!`);
+    };
+
+    // Thêm nhiều sản phẩm do Gemini AI đề xuất vào giỏ hàng
+    const handleAddMultipleToCart = (products) => {
+        if (!Array.isArray(products) || products.length === 0) {
+            alert('Không có sản phẩm để thêm.');
+            return;
+        }
+
+        const updatedCart = [...cartItems];
+        const processedIds = new Set();
+        let addedCount = 0;
+        let skippedCount = 0;
+
+        products.forEach(product => {
+            const id = Number(product.id);
+            const stock = Number(product.stockQuantity);
+            const price = Number(product.price);
+
+            if (
+                !Number.isInteger(id) ||
+                id <= 0 ||
+                !Number.isInteger(stock) ||
+                stock <= 0 ||
+                !Number.isFinite(price) ||
+                price < 0 ||
+                processedIds.has(id)
+            ) {
+                skippedCount++;
+                return;
+            }
+
+            processedIds.add(id);
+            const index = updatedCart.findIndex(item => Number(item.id) === id);
+            const currentQuantity = index >= 0
+                ? Number(updatedCart[index].quantity) || 0
+                : 0;
+
+            if (currentQuantity >= stock) {
+                skippedCount++;
+                return;
+            }
+
+            if (index >= 0) {
+                updatedCart[index] = {
+                    ...updatedCart[index],
+                    quantity: currentQuantity + 1
+                };
+            } else {
+                updatedCart.push({ ...product, id, quantity: 1 });
+            }
+
+            addedCount++;
+        });
+
+        if (addedCount === 0) {
+            alert('Không có sản phẩm nào có thể thêm vào giỏ hàng.');
+            return;
+        }
+
+        setCartItems(updatedCart);
+        alert(
+            `Đã thêm ${addedCount} sản phẩm vào giỏ hàng!` +
+            (skippedCount > 0
+                ? ` Bỏ qua ${skippedCount} sản phẩm do trùng lặp, hết hàng hoặc đã đạt giới hạn tồn kho.`
+                : '')
+        );
     };
 
     // Thêm / Xóa khỏi danh sách yêu thích
@@ -44,87 +115,100 @@ export default function App() {
             if (exist) {
                 alert(`Đã xóa ${product.name} khỏi sản phẩm yêu thích.`);
                 return prev.filter(item => item.id !== product.id);
-            } else {
-                alert(`Đã thêm ${product.name} vào sản phẩm yêu thích!`);
-                return [...prev, product];
             }
+            alert(`Đã thêm ${product.name} vào sản phẩm yêu thích!`);
+            return [...prev, product];
         });
     };
 
     return (
         <div className="app-container">
-            <Header 
-                setActivePage={setActivePage} 
+            <Header
+                setActivePage={setActivePage}
                 activePage={activePage}
-                cartCount={cartItems.reduce((sum, i) => sum + i.quantity, 0)} 
+                cartCount={cartItems.reduce((sum, i) => sum + i.quantity, 0)}
                 wishlistCount={wishlistItems.length}
-                currentUser={currentUser} 
+                currentUser={currentUser}
             />
 
             <main className="main-content">
                 {activePage === 'home' && (
-                    <Home 
-                        onViewDetail={(p) => { setSelectedProduct(p); setActivePage('detail'); }} 
-                        onAddToCart={handleAddToCart} 
+                    <Home
+                        onViewDetail={(p) => { setSelectedProduct(p); setActivePage('detail'); }}
+                        onAddToCart={handleAddToCart}
                         onToggleWishlist={handleToggleWishlist}
                     />
                 )}
                 {activePage === 'about' && <AboutUs />}
                 {activePage === 'tips' && <KitchenTips />}
-                {activePage === 'promotions' && <Promotions onBrowseProducts={() => setActivePage('home')} />}
+                {activePage === 'promotions' && (
+                    <Promotions onBrowseProducts={() => setActivePage('home')} />
+                )}
                 {activePage === 'reviews' && <Reviews />}
+
                 {activePage === 'detail' && (
-                    <ProductDetail 
-                        product={selectedProduct} 
-                        onAddToCart={handleAddToCart} 
+                    <ProductDetail
+                        product={selectedProduct}
+                        onAddToCart={handleAddToCart}
                         onToggleWishlist={handleToggleWishlist}
-                        onBack={() => setActivePage('home')} 
+                        onBack={() => setActivePage('home')}
                     />
                 )}
                 {activePage === 'cart' && (
-                    <Cart 
-                        cartItems={cartItems} 
-                        onUpdateQuantity={(id, q) => setCartItems(prev => prev.map(i => i.id === id ? {...i, quantity: q} : i).filter(i => i.quantity > 0))} 
-                        onRemoveItem={(id) => setCartItems(prev => prev.filter(i => i.id !== id))} 
-                        onProceedCheckout={() => setActivePage('checkout')} 
+                    <Cart
+                        cartItems={cartItems}
+                        onUpdateQuantity={(id, q) => setCartItems(prev =>
+                            prev.map(i => i.id === id ? { ...i, quantity: q } : i)
+                                .filter(i => i.quantity > 0)
+                        )}
+                        onRemoveItem={(id) => setCartItems(prev =>
+                            prev.filter(i => i.id !== id)
+                        )}
+                        onProceedCheckout={() => setActivePage('checkout')}
                     />
                 )}
                 {activePage === 'checkout' && (
-                    <Checkout 
-                        cartItems={cartItems} 
-                        currentUser={currentUser} 
-                        onOrderSuccess={() => { setCartItems([]); setActivePage('home'); }} 
+                    <Checkout
+                        cartItems={cartItems}
+                        currentUser={currentUser}
+                        onOrderSuccess={() => { setCartItems([]); setActivePage('home'); }}
                     />
                 )}
                 {activePage === 'wishlist' && (
-                    <Wishlist 
+                    <Wishlist
                         wishlistItems={wishlistItems}
                         onViewDetail={(p) => { setSelectedProduct(p); setActivePage('detail'); }}
                         onAddToCart={handleAddToCart}
-                        onRemoveWishlist={(id) => setWishlistItems(prev => prev.filter(i => i.id !== id))}
+                        onRemoveWishlist={(id) => setWishlistItems(prev =>
+                            prev.filter(i => i.id !== id)
+                        )}
                     />
                 )}
                 {activePage === 'account' && (
-                    <Account 
-                        currentUser={currentUser} 
-                        onLogout={() => { setCurrentUser(null); setActivePage('home'); }} 
+                    <Account
+                        currentUser={currentUser}
+                        onLogout={() => { setCurrentUser(null); setActivePage('home'); }}
                     />
                 )}
                 {activePage === 'admin' && <Admin />}
                 {activePage === 'login' && (
-                    <Login 
-                        onLoginSuccess={(user) => { setCurrentUser(user); setActivePage('home'); }} 
-                        onSwitchToRegister={() => setActivePage('register')} 
+                    <Login
+                        onLoginSuccess={(user) => { setCurrentUser(user); setActivePage('home'); }}
+                        onSwitchToRegister={() => setActivePage('register')}
                     />
                 )}
                 {activePage === 'register' && (
-                    <Register 
-                        onSwitchToLogin={() => setActivePage('login')} 
-                    />
+                    <Register onSwitchToLogin={() => setActivePage('login')} />
                 )}
             </main>
 
             <Footer />
+
+            {/* Gemini AI Chatbot */}
+            <ChatWidget
+                onAddToCart={handleAddToCart}
+                onAddMultipleToCart={handleAddMultipleToCart}
+            />
         </div>
     );
 }
