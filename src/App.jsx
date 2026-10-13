@@ -13,6 +13,7 @@ import Wishlist from './pages/Wishlist';
 import AboutUs from './pages/AboutUs';
 import KitchenTips from './pages/KitchenTips';
 import Promotions from './pages/Promotions';
+import Reviews from './pages/Reviews';
 
 import './App.css';
 
@@ -71,6 +72,7 @@ export default function App() {
                 {activePage === 'about' && <AboutUs />}
                 {activePage === 'tips' && <KitchenTips />}
                 {activePage === 'promotions' && <Promotions onBrowseProducts={() => setActivePage('home')} />}
+                {activePage === 'reviews' && <Reviews />}
                 {activePage === 'detail' && (
                     <ProductDetail 
                         product={selectedProduct} 
