@@ -11,6 +11,7 @@ import Account from './pages/Account';
 import Admin from './pages/Admin';
 import Wishlist from './pages/Wishlist';
 import AboutUs from './pages/AboutUs';
+import KitchenTips from './pages/KitchenTips';
 
 import './App.css';
 
@@ -59,7 +60,7 @@ export default function App() {
             />
 
             <main className="main-content">
-                {(activePage === 'home' || activePage === 'tips' || activePage === 'contact') && (
+                {activePage === 'home' && (
                     <Home 
                         onViewDetail={(p) => { setSelectedProduct(p); setActivePage('detail'); }} 
                         onAddToCart={handleAddToCart} 
@@ -67,6 +68,7 @@ export default function App() {
                     />
                 )}
                 {activePage === 'about' && <AboutUs />}
+                {activePage === 'tips' && <KitchenTips />}
                 {activePage === 'detail' && (
                     <ProductDetail 
                         product={selectedProduct} 
