@@ -4,8 +4,11 @@ import './Header.css';
 
 const navItems = [
     { key: 'home', label: 'Trang chủ' },
+    { key: 'products', label: 'Sản phẩm' },
+    { key: 'promotions', label: 'Khuyến mãi' },
     { key: 'about', label: 'Về chúng tôi' },
     { key: 'tips', label: 'Mẹo hay nhà bếp' },
+    { key: 'reviews', label: 'Đánh giá' },
     { key: 'contact', label: 'Liên hệ' },
 ];
 
@@ -71,7 +74,26 @@ export default function Header({ setActivePage, activePage, cartCount, wishlistC
 
             <nav className="sub-nav">
                 <ul className="nav-links">
-                    {navItems.map(item => (
+                    {navItems.map(item => item.key === 'products' ? (
+                        <li
+                            key={item.key}
+                            className={`dropdown-container ${isActive(item.key) ? 'active' : ''}`}
+                            onMouseEnter={() => setShowDropdown(true)}
+                            onMouseLeave={() => setShowDropdown(false)}
+                            onClick={() => setActivePage(item.key)}
+                        >
+                            {item.label} ▾
+                            {showDropdown && (
+                                <div className="dropdown-menu">
+                                    {categories.map(cat => (
+                                        <div key={cat.id} className="dropdown-item" onClick={() => setActivePage(item.key)}>
+                                            {cat.name}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </li>
+                    ) : (
                         <li
                             key={item.key}
                             onClick={() => setActivePage(item.key)}
@@ -80,24 +102,6 @@ export default function Header({ setActivePage, activePage, cartCount, wishlistC
                             {item.label}
                         </li>
                     ))}
-
-                    <li
-                        className={`dropdown-container ${isActive('products') ? 'active' : ''}`}
-                        onMouseEnter={() => setShowDropdown(true)}
-                        onMouseLeave={() => setShowDropdown(false)}
-                        onClick={() => setActivePage('products')}
-                    >
-                        Sản phẩm ▾
-                        {showDropdown && (
-                            <div className="dropdown-menu">
-                                {categories.map(cat => (
-                                    <div key={cat.id} className="dropdown-item" onClick={() => setActivePage('products')}>
-                                        {cat.name}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </li>
 
                     {currentUser && currentUser.role === 'Admin' && (
                         <li onClick={() => setActivePage('admin')} className={isActive('admin') ? 'active admin-link' : 'admin-link'}>

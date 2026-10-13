@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -12,6 +12,7 @@ import Admin from './pages/Admin';
 import Wishlist from './pages/Wishlist';
 import AboutUs from './pages/AboutUs';
 import KitchenTips from './pages/KitchenTips';
+import Promotions from './pages/Promotions';
 
 import './App.css';
 
@@ -69,6 +70,7 @@ export default function App() {
                 )}
                 {activePage === 'about' && <AboutUs />}
                 {activePage === 'tips' && <KitchenTips />}
+                {activePage === 'promotions' && <Promotions onBrowseProducts={() => setActivePage('home')} />}
                 {activePage === 'detail' && (
                     <ProductDetail 
                         product={selectedProduct} 
