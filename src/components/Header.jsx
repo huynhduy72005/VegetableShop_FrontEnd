@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import './Header.css';
 
+const navItems = [
+    { key: 'home', label: 'Trang chủ' },
+    { key: 'about', label: 'Về chúng tôi' },
+    { key: 'tips', label: 'Mẹo hay nhà bếp' },
+    { key: 'contact', label: 'Liên hệ' },
+];
+
 export default function Header({ setActivePage, activePage, cartCount, wishlistCount, currentUser, onLogout }) {
     const [categories, setCategories] = useState([]);
     const [showDropdown, setShowDropdown] = useState(false);
@@ -9,44 +16,43 @@ export default function Header({ setActivePage, activePage, cartCount, wishlistC
     const isActive = (page) => activePage === page;
 
     useEffect(() => {
-        // Lấy danh mục động từ Database qua API
         api.getCategories()
             .then(res => setCategories(res.data))
-            .catch(err => console.error("Lỗi tải danh mục:", err));
+            .catch(err => console.error('Lỗi tải danh mục:', err));
     }, []);
 
     return (
         <header className="site-header">
             <div className="top-announcement-bar">
-                <span>🌱 Tươi ngon cho bữa ăn mỗi ngày - Giao hàng nhanh nội thành</span>
+                <span>🌱 Tươi ngon cho bữa ăn mỗi ngày • Giao hàng nhanh nội thành</span>
                 <span>Hỗ trợ khách hàng: 1900 6868 ↗</span>
             </div>
 
             <div className="main-header">
                 <div className="logo-area" onClick={() => setActivePage('home')}>
-                    <div className="logo-icon">🌱</div>
+                    <div className="logo-icon">🌿</div>
                     <div className="logo-text">
                         <h1>Vườn Nhà</h1>
-                        <span>RAU CỦ & TRÁI CÂY</span>
+                        <span>RAU CỦ &amp; TRÁI CÂY</span>
                     </div>
                 </div>
 
                 <div className="search-bar-container">
                     <input type="text" placeholder="Tìm kiếm rau củ tươi sạch..." className="search-input" />
-                    <button className="search-btn">Tìm kiếm</button>
+                    <button className="search-btn" type="button">Tìm kiếm</button>
                 </div>
 
-                <div className="user-actions">
-                    {/* Icon Yêu thích */}
+                <div className="header-actions">
                     <div className="action-icon" onClick={() => setActivePage('wishlist')} title="Sản phẩm yêu thích">
-                        ❤️ <span className="badge">{wishlistCount}</span>
-                    </div>
-                    {/* Icon Giỏ hàng */}
-                    <div className="action-icon" onClick={() => setActivePage('cart')} title="Giỏ hàng">
-                        🛒 <span className="badge">{cartCount}</span>
+                        ❤️
+                        {wishlistCount > 0 && <span className="badge">{wishlistCount}</span>}
                     </div>
 
-                    {/* Khu vực Tài khoản */}
+                    <div className="action-icon" onClick={() => setActivePage('cart')} title="Giỏ hàng">
+                        🛒
+                        {cartCount > 0 && <span className="badge">{cartCount}</span>}
+                    </div>
+
                     {currentUser ? (
                         <div className="user-profile-menu" onClick={() => setActivePage('account')}>
                             <span className="user-avatar">👤</span>
@@ -56,18 +62,26 @@ export default function Header({ setActivePage, activePage, cartCount, wishlistC
                             </div>
                         </div>
                     ) : (
-                        <button onClick={() => setActivePage('login')} className="btn-login-header">Đăng nhập</button>
+                        <button onClick={() => setActivePage('login')} className="btn-login-header" type="button">Đăng nhập</button>
                     )}
+
+                    <button className="header-cta" type="button" onClick={() => setActivePage('home')}>Đặt hàng ngay</button>
                 </div>
             </div>
 
-            {/* Menu điều hướng chính */}
             <nav className="sub-nav">
                 <ul className="nav-links">
-                    <li onClick={() => setActivePage('home')} className={isActive('home') ? 'active' : ''}>Trang chủ</li>
-                    
-                    {/* Menu Sản phẩm có Dropdown xổ xuống */}
-                    <li 
+                    {navItems.map(item => (
+                        <li
+                            key={item.key}
+                            onClick={() => setActivePage(item.key)}
+                            className={isActive(item.key) ? 'active' : ''}
+                        >
+                            {item.label}
+                        </li>
+                    ))}
+
+                    <li
                         className={`dropdown-container ${isActive('products') ? 'active' : ''}`}
                         onMouseEnter={() => setShowDropdown(true)}
                         onMouseLeave={() => setShowDropdown(false)}
@@ -85,13 +99,13 @@ export default function Header({ setActivePage, activePage, cartCount, wishlistC
                         )}
                     </li>
 
-                    <li onClick={() => setActivePage('about')} className={isActive('about') ? 'active' : ''}>Về chúng tôi</li>
-                    <li onClick={() => setActivePage('tips')} className={isActive('tips') ? 'active' : ''}>Mẹo hay nhà bếp</li>
-                    <li onClick={() => setActivePage('contact')} className={isActive('contact') ? 'active' : ''}>Liên hệ</li>
                     {currentUser && currentUser.role === 'Admin' && (
-                        <li onClick={() => setActivePage('admin')} className={isActive('admin') ? 'active admin-link' : 'admin-link'} style={{color: '#e74c3c', fontWeight: 'bold'}}>⚙️ Trang quản trị Admin</li>
+                        <li onClick={() => setActivePage('admin')} className={isActive('admin') ? 'active admin-link' : 'admin-link'}>
+                            ⚙️ Admin
+                        </li>
                     )}
                 </ul>
+
                 <div className="nav-slogan">🌿 Nông trại xanh đến căn bếp sạch</div>
             </nav>
         </header>
