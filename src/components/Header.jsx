@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import './Header.css';
 
-export default function Header({ setActivePage, cartCount, wishlistCount, currentUser, onLogout }) {
+export default function Header({ setActivePage, activePage, cartCount, wishlistCount, currentUser, onLogout }) {
     const [categories, setCategories] = useState([]);
     const [showDropdown, setShowDropdown] = useState(false);
+
+    const isActive = (page) => activePage === page;
 
     useEffect(() => {
         // Lấy danh mục động từ Database qua API
@@ -62,11 +64,11 @@ export default function Header({ setActivePage, cartCount, wishlistCount, curren
             {/* Menu điều hướng chính */}
             <nav className="sub-nav">
                 <ul className="nav-links">
-                    <li onClick={() => setActivePage('home')} className="active">Trang chủ</li>
+                    <li onClick={() => setActivePage('home')} className={isActive('home') ? 'active' : ''}>Trang chủ</li>
                     
                     {/* Menu Sản phẩm có Dropdown xổ xuống */}
                     <li 
-                        className="dropdown-container"
+                        className={`dropdown-container ${isActive('products') ? 'active' : ''}`}
                         onMouseEnter={() => setShowDropdown(true)}
                         onMouseLeave={() => setShowDropdown(false)}
                         onClick={() => setActivePage('products')}
@@ -83,11 +85,11 @@ export default function Header({ setActivePage, cartCount, wishlistCount, curren
                         )}
                     </li>
 
-                    <li onClick={() => setActivePage('home')}>Về chúng tôi</li>
-                    <li onClick={() => setActivePage('home')}>Mẹo hay nhà bếp</li>
-                    <li onClick={() => setActivePage('home')}>Liên hệ</li>
+                    <li onClick={() => setActivePage('about')} className={isActive('about') ? 'active' : ''}>Về chúng tôi</li>
+                    <li onClick={() => setActivePage('tips')} className={isActive('tips') ? 'active' : ''}>Mẹo hay nhà bếp</li>
+                    <li onClick={() => setActivePage('contact')} className={isActive('contact') ? 'active' : ''}>Liên hệ</li>
                     {currentUser && currentUser.role === 'Admin' && (
-                        <li onClick={() => setActivePage('admin')} style={{color: '#e74c3c', fontWeight: 'bold'}}>⚙️ Trang quản trị Admin</li>
+                        <li onClick={() => setActivePage('admin')} className={isActive('admin') ? 'active admin-link' : 'admin-link'} style={{color: '#e74c3c', fontWeight: 'bold'}}>⚙️ Trang quản trị Admin</li>
                     )}
                 </ul>
                 <div className="nav-slogan">🌿 Nông trại xanh đến căn bếp sạch</div>

@@ -10,6 +10,8 @@ import Register from './pages/Register';
 import Account from './pages/Account';
 import Admin from './pages/Admin';
 import Wishlist from './pages/Wishlist';
+import AboutUs from './pages/AboutUs';
+
 import './App.css';
 
 export default function App() {
@@ -50,19 +52,21 @@ export default function App() {
         <div className="app-container">
             <Header 
                 setActivePage={setActivePage} 
+                activePage={activePage}
                 cartCount={cartItems.reduce((sum, i) => sum + i.quantity, 0)} 
                 wishlistCount={wishlistItems.length}
                 currentUser={currentUser} 
             />
 
             <main className="main-content">
-                {activePage === 'home' && (
+                {(activePage === 'home' || activePage === 'tips' || activePage === 'contact') && (
                     <Home 
                         onViewDetail={(p) => { setSelectedProduct(p); setActivePage('detail'); }} 
                         onAddToCart={handleAddToCart} 
                         onToggleWishlist={handleToggleWishlist}
                     />
                 )}
+                {activePage === 'about' && <AboutUs />}
                 {activePage === 'detail' && (
                     <ProductDetail 
                         product={selectedProduct} 
