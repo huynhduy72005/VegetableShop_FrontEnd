@@ -37,4 +37,9 @@ export const api = {
 
     login: (credentials) => axios.post(`${API_BASE_URL}/users/login`, credentials),
     register: (userData) => axios.post(`${API_BASE_URL}/users/register`, userData),
+
+    // Quản lý người dùng (Admin)
+    getUsers: () => axios.get(`${API_BASE_URL}/users`),
+    updateUserRole: (id, roleData) => axios.put(`${API_BASE_URL}/users/${id}/role`, roleData),
+    deleteUser: (id) => axios.delete(`${API_BASE_URL}/users/${id}`),
 };
