@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import './ProductDetail.css';
 
-export default function ProductDetail({ product, onAddToCart, onBack }) {
+export default function ProductDetail({ product, onAddToCart, onToggleWishlist, isWishlisted, onViewCart, onBack }) {
     const [quantity, setQuantity] = useState(1);
 
     if (!product) return <div style={{ padding: '40px' }}>Đang tải sản phẩm...</div>;
+
+    const stockQuantity = Number(product.quantity) || 0;
 
     return (
         <div className="product-detail-page">
@@ -37,22 +39,47 @@ export default function ProductDetail({ product, onAddToCart, onBack }) {
                         </div>
                         <div className="spec-row">
                             <span>Tình trạng</span>
-                            <strong>Còn {product.quantity} đơn vị</strong>
+                            <strong>{stockQuantity > 0 ? `Còn ${stockQuantity} đơn vị` : 'Tạm hết hàng'}</strong>
                         </div>
                     </div>
 
                     <div className="action-row">
-                        <button onClick={() => onAddToCart({ ...product, quantity })} className="btn-add-cart">
-                            🛒 Thêm vào giỏ hàng
+                        <label className="quantity-control">
+                            <span>Số lượng</span>
+                            <input
+                                type="number"
+                                min="1"
+                                max={stockQuantity}
+                                value={quantity}
+                                onChange={(event) => {
+                                    const nextQuantity = Number(event.target.value);
+                                    if (nextQuantity >= 1 && nextQuantity <= stockQuantity) {
+                                        setQuantity(nextQuantity);
+                                    }
+                                }}
+                                aria-label="Số lượng sản phẩm"
+                            />
+                        </label>
+                        <button
+                            onClick={() => onAddToCart({ ...product, quantity })}
+                            className="btn-add-cart"
+                            disabled={stockQuantity < 1 || quantity > stockQuantity}
+                        >
+                            {stockQuantity > 0 ? '🛒 Thêm vào giỏ hàng' : 'Tạm hết hàng'}
                         </button>
-                       const [isLiked, setIsLiked] = useState(false);
-// Tại nút Yêu thích:
-<button onClick={() => { setIsLiked(!isLiked); alert(isLiked ? "Đã xóa khỏi yêu thích" : "Đã thêm vào sản phẩm yêu thích!"); }} style={{background: isLiked ? '#ffebee' : '#fff', color: isLiked ? 'red' : '#333'}} className="btn-wishlist">
-    {isLiked ? '❤️ Đã yêu thích' : '🤍 Yêu thích'}
-</button>
+                        <button
+                            type="button"
+                            onClick={() => onToggleWishlist(product)}
+                            className="btn-wishlist"
+                            aria-pressed={isWishlisted}
+                        >
+                            {isWishlisted ? '❤️ Đã yêu thích' : '🤍 Yêu thích'}
+                        </button>
                     </div>
 
-                    <div className="view-cart-link" onClick={() => {}}>Xem giỏ hàng của bạn</div>
+                    <button type="button" className="view-cart-link" onClick={onViewCart}>
+                        Xem giỏ hàng của bạn
+                    </button>
                 </div>
             </div>
         </div>

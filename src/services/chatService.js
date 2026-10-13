@@ -1,5 +1,5 @@
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || 'https://localhost:7179';
 
 export async function sendChatMessage(message) {
   const response = await fetch(`${API_URL}/api/chat`, {

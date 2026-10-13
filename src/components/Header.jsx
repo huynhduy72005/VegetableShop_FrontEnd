@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import './Header.css';
 
@@ -12,7 +12,7 @@ const navItems = [
     { key: 'contact', label: 'Liên hệ' },
 ];
 
-export default function Header({ setActivePage, activePage, cartCount, wishlistCount, currentUser, onLogout }) {
+export default function Header({ setActivePage, activePage, cartCount, wishlistCount, currentUser }) {
     const [categories, setCategories] = useState([]);
     const [showDropdown, setShowDropdown] = useState(false);
 

@@ -100,8 +100,35 @@
 
 .action-row {
   display: flex;
+  align-items: stretch;
   gap: 15px;
   margin-bottom: 20px;
+}
+
+.quantity-control {
+  display: flex;
+  flex: 0 0 90px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  color: #4f5d53;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.quantity-control input {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid #d8d3c9;
+  border-radius: 8px;
+  color: #1b4332;
+  font: inherit;
+}
+
+.quantity-control input:focus-visible {
+  outline: 3px solid #b7e4c7;
+  outline-offset: 2px;
 }
 
 .btn-add-cart {
@@ -115,6 +142,11 @@
   flex: 2;
 }
 
+.btn-add-cart:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .btn-wishlist {
   background: #fff;
   border: 1px solid #d8d3c9;
@@ -125,6 +157,9 @@
 }
 
 .view-cart-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
   font-size: 14px;
   color: #1b4332;
   font-weight: 600;

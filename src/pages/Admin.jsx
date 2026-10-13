@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { api } from '../services/api';
 import './Admin.css';
 
@@ -10,20 +10,29 @@ export default function Admin() {
     const [formData, setFormData] = useState({ id: null, name: '', price: '', quantity: '', unit: 'kg', image: '', description: '', categoryId: 1 });
     const [isEditing, setIsEditing] = useState(false); // Biến kiểm soát việc chuyển "trang"
 
-    useEffect(() => {
-        loadData();
+    const loadData = useCallback(async () => {
+        const [prodRes, revRes] = await Promise.all([
+            api.getProducts(),
+            api.getRevenue()
+        ]);
+        return { products: prodRes.data, revenueStats: revRes.data };
     }, []);
 
-    const loadData = async () => {
-        try {
-            const prodRes = await api.getProducts();
-            setProducts(prodRes.data);
-            const revRes = await api.getRevenue();
-            setRevenueStats(revRes.data);
-        } catch (err) {
-            console.error("Lỗi tải dữ liệu:", err);
-        }
-    };
+    useEffect(() => {
+        let isCurrent = true;
+        loadData()
+            .then(({ products: loadedProducts, revenueStats: loadedRevenueStats }) => {
+                if (isCurrent) {
+                    setProducts(loadedProducts);
+                    setRevenueStats(loadedRevenueStats);
+                }
+            })
+            .catch(err => console.error("Lỗi tải dữ liệu:", err));
+
+        return () => {
+            isCurrent = false;
+        };
+    }, [loadData]);
 
     const handleSaveProduct = async (e) => {
         e.preventDefault();
@@ -39,7 +48,8 @@ export default function Admin() {
                 await api.updateProduct(payload.id, payload);
                 alert("Cập nhật sản phẩm thành công!");
             } else {
-                const { id, ...postData } = payload; 
+                const postData = { ...payload };
+                delete postData.id;
                 await api.createProduct(postData);
                 alert("Thêm sản phẩm mới thành công!");
             }
@@ -47,7 +57,9 @@ export default function Admin() {
             // Đặt lại form và quay về trang danh sách
             setFormData({ id: null, name: '', price: '', quantity: '', unit: 'kg', image: '', description: '', categoryId: 1 });
             setIsEditing(false);
-            loadData();
+            const data = await loadData();
+            setProducts(data.products);
+            setRevenueStats(data.revenueStats);
         } catch (err) {
             console.error(err.response?.data);
             alert("Lỗi khi lưu sản phẩm! Vui lòng kiểm tra Console (F12).");
@@ -64,8 +76,10 @@ export default function Admin() {
             try {
                 await api.deleteProduct(id);
                 alert("Xóa thành công!");
-                loadData();
-            } catch (err) {
+                const data = await loadData();
+                setProducts(data.products);
+                setRevenueStats(data.revenueStats);
+            } catch {
                 alert("Xóa thất bại!");
             }
         }

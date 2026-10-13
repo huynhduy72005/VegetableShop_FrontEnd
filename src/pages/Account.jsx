@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { api } from '../services/api';
 import './Account.css';
 
@@ -6,27 +6,25 @@ export default function Account({ currentUser, onLogout }) {
     const [activeTab, setActiveTab] = useState('profile');
     const [usersList, setUsersList] = useState([]);
 
+    const loadUsers = useCallback(async () => {
+        const res = await api.getUsers();
+        return res.data;
+    }, []);
+
     useEffect(() => {
         if (currentUser && currentUser.role === 'Admin') {
-            loadUsers();
+            loadUsers()
+                .then(setUsersList)
+                .catch(err => console.error("Lỗi tải danh sách người dùng:", err));
         }
-    }, [currentUser]);
-
-    const loadUsers = async () => {
-        try {
-            const res = await api.getUsers();
-            setUsersList(res.data);
-        } catch (err) {
-            console.error("Lỗi tải danh sách người dùng:", err);
-        }
-    };
+    }, [currentUser, loadUsers]);
 
     const handleRoleChange = async (userId, newRole) => {
         try {
             await api.updateUserRole(userId, { role: newRole });
             alert("Đã cập nhật quyền thành công!");
-            loadUsers();
-        } catch (err) {
+            setUsersList(await loadUsers());
+        } catch {
             alert("Lỗi khi cập nhật quyền!");
         }
     };
@@ -36,8 +34,8 @@ export default function Account({ currentUser, onLogout }) {
             try {
                 await api.deleteUser(userId);
                 alert("Đã xóa tài khoản thành công!");
-                loadUsers();
-            } catch (err) {
+                setUsersList(await loadUsers());
+            } catch {
                 alert("Xóa thất bại!");
             }
         }

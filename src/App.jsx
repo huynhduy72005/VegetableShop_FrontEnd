@@ -14,7 +14,9 @@ import AboutUs from './pages/AboutUs';
 import KitchenTips from './pages/KitchenTips';
 import Promotions from './pages/Promotions';
 import Reviews from './pages/Reviews';
+import Contact from './pages/Contact';
 import ChatWidget from './components/ChatWidget';
+
 import './App.css';
 
 export default function App() {
@@ -145,12 +147,14 @@ export default function App() {
                     <Promotions onBrowseProducts={() => setActivePage('home')} />
                 )}
                 {activePage === 'reviews' && <Reviews />}
-
+                {activePage === 'contact' && <Contact />}
                 {activePage === 'detail' && (
                     <ProductDetail
                         product={selectedProduct}
                         onAddToCart={handleAddToCart}
                         onToggleWishlist={handleToggleWishlist}
+                        isWishlisted={wishlistItems.some(item => item.id === selectedProduct?.id)}
+                        onViewCart={() => setActivePage('cart')}
                         onBack={() => setActivePage('home')}
                     />
                 )}
