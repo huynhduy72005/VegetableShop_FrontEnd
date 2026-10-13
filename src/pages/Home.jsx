@@ -35,6 +35,7 @@ export default function Home({ onViewDetail, onAddToCart }) {
                 </div>
 
                 <div className="hero-visual">
+                    <div className="hero-visual-circle"></div>
                     <div className="banner-card-float">
                         <div className="bc-title">Gợi ý hôm nay</div>
                         <div className="bc-name">Cà chua tươi</div>
@@ -85,6 +86,38 @@ export default function Home({ onViewDetail, onAddToCart }) {
                             onAddToCart={onAddToCart} 
                         />
                     ))}
+                </div>
+            </div>
+
+            {/* Cam kết chất lượng */}
+            <div className="trust-bar">
+                <div className="trust-item">
+                    <div className="trust-icon">🚚</div>
+                    <div className="trust-text">
+                        <strong>Giao hàng nhanh</strong>
+                        <span>Nội thành trong 2–4 giờ</span>
+                    </div>
+                </div>
+                <div className="trust-item">
+                    <div className="trust-icon">🌿</div>
+                    <div className="trust-text">
+                        <strong>100% Tươi sạch</strong>
+                        <span>Đạt chuẩn VietGAP</span>
+                    </div>
+                </div>
+                <div className="trust-item">
+                    <div className="trust-icon">🔄</div>
+                    <div className="trust-text">
+                        <strong>Đổi trả dễ dàng</strong>
+                        <span>Hoàn tiền trong 24h</span>
+                    </div>
+                </div>
+                <div className="trust-item">
+                    <div className="trust-icon">💬</div>
+                    <div className="trust-text">
+                        <strong>Hỗ trợ 24/7</strong>
+                        <span>Hotline: 1900 6868</span>
+                    </div>
                 </div>
             </div>
         </div>

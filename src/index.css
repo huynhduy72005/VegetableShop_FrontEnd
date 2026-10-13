@@ -1,111 +1,117 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+/* ===========================================
+   index.css  –  Global Reset & Root Layout
+   =========================================== */
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+/* ---- Reset ---- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+/* ---- Root Design Tokens ---- */
+:root {
+  /* Typography */
+  --font: 'Be Vietnam Pro', 'Segoe UI', system-ui, sans-serif;
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+  /* Green Palette */
+  --g-900: #0d2b1a;
+  --g-800: #1b4332;
+  --g-700: #2d6a4f;
+  --g-600: #40916c;
+  --g-500: #52b788;
+  --g-400: #74c69d;
+  --g-300: #95d5b2;
+  --g-200: #b7e4c7;
+  --g-100: #d8f3dc;
+  --g-50 : #f0faf4;
+
+  /* Neutral */
+  --n-900: #111827;
+  --n-800: #1f2937;
+  --n-700: #374151;
+  --n-600: #4b5563;
+  --n-500: #6b7280;
+  --n-400: #9ca3af;
+  --n-300: #d1d5db;
+  --n-200: #e5e7eb;
+  --n-100: #f3f4f6;
+  --n-50 : #f9fafb;
+  --white: #ffffff;
+
+  /* Accent */
+  --red  : #ef4444;
+  --red-l: #fee2e2;
+  --amber: #f59e0b;
+
+  /* Shadow */
+  --sh-xs: 0 1px 3px rgba(0,0,0,0.06);
+  --sh-sm: 0 2px 8px rgba(0,0,0,0.07);
+  --sh-md: 0 4px 16px rgba(0,0,0,0.09);
+  --sh-lg: 0 8px 32px rgba(0,0,0,0.11);
+  --sh-xl: 0 16px 48px rgba(0,0,0,0.13);
+  --sh-green: 0 6px 20px rgba(45,106,79,0.35);
+  --sh-green-lg: 0 10px 30px rgba(45,106,79,0.45);
+
+  /* Radius */
+  --r-xs  : 6px;
+  --r-sm  : 8px;
+  --r-md  : 12px;
+  --r-lg  : 16px;
+  --r-xl  : 20px;
+  --r-2xl : 24px;
+  --r-full: 9999px;
+
+  /* Transition */
+  --ease: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---- Base ---- */
+html {
+  scroll-behavior: smooth;
+  font-size: 15px;
 }
 
 body {
-  margin: 0;
+  font-family: var(--font);
+  background: var(--n-50);
+  color: var(--n-700);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
+  width: 100%;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
+  /* Remove old 1126px limit + center text that broke layout */
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font);
+  line-height: 1.25;
+  font-weight: 700;
+  color: var(--n-900);
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
+p { margin: 0; line-height: 1.65; }
+
+button {
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: inherit;
+  border: none;
+  transition: var(--ease);
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
+a { text-decoration: none; color: inherit; }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+img { max-width: 100%; display: block; }
+
+hr {
+  border: none;
+  border-top: 1px solid var(--n-200);
+  margin: 16px 0;
 }

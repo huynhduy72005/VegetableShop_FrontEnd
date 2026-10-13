@@ -1,15 +1,13 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+/* ===========================================
+   App.css  –  App-level layout + main-content
+   =========================================== */
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
 }
 
-body {
-  background-color: #fcfbf7;
-  color: #2c3e35;
-}
-
-button {
-  cursor: pointer;
+.main-content {
+  flex: 1;
 }
