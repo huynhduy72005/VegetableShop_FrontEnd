@@ -6,9 +6,9 @@ export default function Admin() {
     const [products, setProducts] = useState([]);
     const [revenueStats, setRevenueStats] = useState({ totalRevenue: 0, totalOrders: 0, pendingOrders: 0 });
     
-    // Form state cho Thêm / Sửa sản phẩm
+    // Form state
     const [formData, setFormData] = useState({ id: null, name: '', price: '', quantity: '', unit: 'kg', image: '', description: '', categoryId: 1 });
-    const [isEditing, setIsEditing] = useState(false);
+    const [isEditing, setIsEditing] = useState(false); // Biến kiểm soát việc chuyển "trang"
 
     useEffect(() => {
         loadData();
@@ -21,31 +21,42 @@ export default function Admin() {
             const revRes = await api.getRevenue();
             setRevenueStats(revRes.data);
         } catch (err) {
-            console.error("Lỗi tải dữ liệu Admin:", err);
+            console.error("Lỗi tải dữ liệu:", err);
         }
     };
 
     const handleSaveProduct = async (e) => {
         e.preventDefault();
         try {
+            const payload = {
+                ...formData,
+                price: Number(formData.price),
+                quantity: Number(formData.quantity),
+                categoryId: formData.categoryId || 1
+            };
+
             if (isEditing) {
-                await api.updateProduct(formData.id, formData);
+                await api.updateProduct(payload.id, payload);
                 alert("Cập nhật sản phẩm thành công!");
             } else {
-                await api.createProduct(formData);
-                alert("Thêm sản phẩm mới vào Database thành công!");
+                const { id, ...postData } = payload; 
+                await api.createProduct(postData);
+                alert("Thêm sản phẩm mới thành công!");
             }
+
+            // Đặt lại form và quay về trang danh sách
             setFormData({ id: null, name: '', price: '', quantity: '', unit: 'kg', image: '', description: '', categoryId: 1 });
             setIsEditing(false);
             loadData();
         } catch (err) {
-            alert("Lỗi khi lưu sản phẩm: " + (err.response?.data?.message || err.message));
+            console.error(err.response?.data);
+            alert("Lỗi khi lưu sản phẩm! Vui lòng kiểm tra Console (F12).");
         }
     };
 
     const handleEditClick = (product) => {
         setFormData(product);
-        setIsEditing(true);
+        setIsEditing(true); // Bật chế độ sửa -> Tự động chuyển sang giao diện trang sửa
     };
 
     const handleDeleteClick = async (id) => {
@@ -60,11 +71,41 @@ export default function Admin() {
         }
     };
 
+    // =========================================================
+    // GIAO DIỆN 1: TRANG CHỈNH SỬA SẢN PHẨM (MỞ RA KHI BẤM SỬA)
+    // =========================================================
+    if (isEditing) {
+        return (
+            <div className="admin-page">
+                <button onClick={() => { setIsEditing(false); setFormData({ id: null, name: '', price: '', quantity: '', unit: 'kg', image: '', description: '', categoryId: 1 }); }} className="btn-back">
+                    ← Quay lại danh sách
+                </button>
+                
+                <h2 style={{ marginTop: '20px' }}>✏️ Cập nhật sản phẩm: <span style={{color: '#27ae60'}}>{formData.name}</span></h2>
+                
+                <div className="admin-form-box" style={{ marginTop: '20px' }}>
+                    <form onSubmit={handleSaveProduct} className="product-form">
+                        <input type="text" placeholder="Tên sản phẩm" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                        <input type="number" placeholder="Giá tiền (VNĐ)" required value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} />
+                        <input type="number" placeholder="Số lượng tồn kho" required value={formData.quantity} onChange={e => setFormData({...formData, quantity: e.target.value})} />
+                        <input type="text" placeholder="Đơn vị (kg, bó...)" required value={formData.unit} onChange={e => setFormData({...formData, unit: e.target.value})} />
+                        <input type="text" placeholder="Link hình ảnh" value={formData.image} onChange={e => setFormData({...formData, image: e.target.value})} />
+                        <input type="text" placeholder="Mô tả" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+                        <button type="submit" className="btn-save">Lưu thay đổi</button>
+                    </form>
+                </div>
+            </div>
+        );
+    }
+
+    // =========================================================
+    // GIAO DIỆN 2: TRANG QUẢN TRỊ CHÍNH (MẶC ĐỊNH)
+    // =========================================================
     return (
         <div className="admin-page">
-            <h2>Trang Quản Trị Hệ Thống (Admin Dashboard)</h2>
+            <h2>⚙️ Trang Quản Trị Hệ Thống (Admin Dashboard)</h2>
 
-            {/* Thống kê Doanh thu */}
+            {/* Thống kê */}
             <div className="stats-container">
                 <div className="stat-card">
                     <h4>Tổng doanh thu</h4>
@@ -80,24 +121,23 @@ export default function Admin() {
                 </div>
             </div>
 
-            {/* Form Thêm / Sửa sản phẩm */}
+            {/* Form Thêm Mới */}
             <div className="admin-form-box">
-                <h3>{isEditing ? 'Sửa thông tin sản phẩm' : 'Thêm sản phẩm mới vào Database'}</h3>
+                <h3>Thêm sản phẩm mới</h3>
                 <form onSubmit={handleSaveProduct} className="product-form">
                     <input type="text" placeholder="Tên sản phẩm" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
                     <input type="number" placeholder="Giá tiền (VNĐ)" required value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} />
                     <input type="number" placeholder="Số lượng tồn kho" required value={formData.quantity} onChange={e => setFormData({...formData, quantity: e.target.value})} />
-                    <input type="text" placeholder="Đơn vị (kg, bó, quả...)" required value={formData.unit} onChange={e => setFormData({...formData, unit: e.target.value})} />
-                    <input type="text" placeholder="Link hình ảnh sản phẩm" value={formData.image} onChange={e => setFormData({...formData, image: e.target.value})} />
-                    <input type="text" placeholder="Mô tả sản phẩm" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
-                    <button type="submit" className="btn-save">{isEditing ? 'Cập nhật sản phẩm' : 'Lưu vào Database'}</button>
-                    {isEditing && <button type="button" onClick={() => { setIsEditing(false); setFormData({ id: null, name: '', price: '', quantity: '', unit: 'kg', image: '', description: '', categoryId: 1 }); }} className="btn-cancel">Hủy</button>}
+                    <input type="text" placeholder="Đơn vị (kg, bó...)" required value={formData.unit} onChange={e => setFormData({...formData, unit: e.target.value})} />
+                    <input type="text" placeholder="Link hình ảnh" value={formData.image} onChange={e => setFormData({...formData, image: e.target.value})} />
+                    <input type="text" placeholder="Mô tả" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+                    <button type="submit" className="btn-save">Thêm vào Database</button>
                 </form>
             </div>
 
-            {/* Bảng danh sách sản phẩm */}
+            {/* Bảng Danh Sách */}
             <div className="admin-table-box">
-                <h3>Danh sách sản phẩm trong cơ sở dữ liệu</h3>
+                <h3>Danh sách sản phẩm</h3>
                 <table>
                     <thead>
                         <tr>
