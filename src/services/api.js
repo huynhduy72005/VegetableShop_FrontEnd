@@ -31,6 +31,7 @@ export const api = {
     deleteProduct: (id) => axios.delete(`${API_BASE_URL}/products/${id}`),
 
     getCategories: () => axios.get(`${API_BASE_URL}/categories`),
+    
 
     createOrder: (orderData) => axios.post(`${API_BASE_URL}/orders`, orderData),
     getRevenue: () => axios.get(`${API_BASE_URL}/orders/revenue`),

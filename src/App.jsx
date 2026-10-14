@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
+import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
@@ -22,6 +23,7 @@ import './App.css';
 export default function App() {
     const [activePage, setActivePage] = useState('home');
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [selectedCategoryId, setSelectedCategoryId] = useState(null);
     const [cartItems, setCartItems] = useState([]);
     const [wishlistItems, setWishlistItems] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
@@ -125,20 +127,48 @@ export default function App() {
 
     return (
         <div className="app-container">
-            <Header
-                setActivePage={setActivePage}
-                activePage={activePage}
-                cartCount={cartItems.reduce((sum, i) => sum + i.quantity, 0)}
-                wishlistCount={wishlistItems.length}
-                currentUser={currentUser}
-            />
+          <Header
+            setActivePage={setActivePage}
+            activePage={activePage}
+            cartCount={cartItems.reduce(
+                (sum, item) => sum + item.quantity,
+                0
+            )}
+            wishlistCount={wishlistItems.length}
+            currentUser={currentUser}
+            onSelectCategory={setSelectedCategoryId}
+            onViewProduct={(product) => {
+                setSelectedProduct(product);
+                setActivePage('detail');
+            }}
+/>
 
             <main className="main-content">
                 {activePage === 'home' && (
-                    <Home
+    <Home
+        onViewDetail={(product) => {
+            setSelectedProduct(product);
+            setActivePage('detail');
+        }}
+        onAddToCart={handleAddToCart}
+        onToggleWishlist={handleToggleWishlist}
+        wishlistItems={wishlistItems}
+        onBrowseProducts={(categoryId = null) => {
+            setSelectedCategoryId(categoryId);
+            setActivePage('products');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        onNavigate={(page) => {
+            setActivePage(page);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+    />
+)}
+                {activePage === 'products' && (
+                    <Products
+                        categoryId={selectedCategoryId}
                         onViewDetail={(p) => { setSelectedProduct(p); setActivePage('detail'); }}
                         onAddToCart={handleAddToCart}
-                        onToggleWishlist={handleToggleWishlist}
                     />
                 )}
                 {activePage === 'about' && <AboutUs />}
