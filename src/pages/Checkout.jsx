@@ -72,6 +72,14 @@ export default function Checkout({ cartItems, currentUser, onOrderSuccess }) {
                         ))}
                     </div>
                     <hr />
+                    <div className="checkout-cost-row">
+                        <span>Tạm tính</span>
+                        <strong>{subtotal.toLocaleString()} đ</strong>
+                    </div>
+                    <div className="checkout-cost-row">
+                        <span>Phí giao hàng</span>
+                        <strong>{shippingFee.toLocaleString()} đ</strong>
+                    </div>
                     <div className="payment-options">
                         <h4>Phương thức thanh toán</h4>
                         <label className="radio-label">

@@ -22,7 +22,7 @@ function categoryIcon(name) {
 function HomeProductCard({
     product,
     onViewDetail,
-    onAddToCart,
+    onBuyNow,
     onToggleWishlist,
     liked,
     tag
@@ -94,14 +94,14 @@ function HomeProductCard({
                         className="vn-add"
                         disabled={!inStock}
                         onClick={() =>
-                            onAddToCart({
+                            onBuyNow({
                                 ...product,
                                 stockQuantity: product.quantity,
                                 quantity: 1
                             })
                         }
                     >
-                        + Thêm giỏ
+                        Mua ngay <span aria-hidden="true">→</span>
                     </button>
                 </div>
             </div>
@@ -111,7 +111,7 @@ function HomeProductCard({
 
 export default function Home({
     onViewDetail,
-    onAddToCart,
+    onBuyNow,
     onToggleWishlist,
     wishlistItems = [],
     onBrowseProducts,
@@ -218,7 +218,7 @@ export default function Home({
                         product={product}
                         tag={tag}
                         onViewDetail={onViewDetail}
-                        onAddToCart={onAddToCart}
+                        onBuyNow={onBuyNow}
                         onToggleWishlist={onToggleWishlist}
                         liked={wishlistItems.some(
                             item => item.id === product.id

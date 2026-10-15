@@ -363,7 +363,7 @@ function ProductDetailContent({
                     [
                         'box',
                         'Mua sắm thuận tiện',
-                        'Thêm giỏ và kiểm tra đơn hàng.'
+                        'Thanh toán nhanh sản phẩm bạn chọn.'
                     ]
                 ].map(([icon, title, text]) => (
                     <article key={title}>

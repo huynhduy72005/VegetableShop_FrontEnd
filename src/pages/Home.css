@@ -487,19 +487,26 @@
 }
 
 .vn-add {
-    background: #eaf2df;
-    color: #39623d;
-    border: 1px solid #dce8cf;
-    border-radius: 8px;
-    padding: 7px 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    background: var(--vn-green);
+    color: #fff;
+    border: 1px solid var(--vn-green);
+    border-radius: 9px;
+    padding: 8px 12px;
     font-size: 11px !important;
     font-weight: 700 !important;
+    box-shadow: 0 3px 10px #24634724;
+    transition: background .2s, border-color .2s, transform .2s, box-shadow .2s;
 }
 
 .vn-add:hover:not(:disabled) {
-    background: var(--vn-green);
-    border-color: var(--vn-green);
-    color: white;
+    background: #184d36;
+    border-color: #184d36;
+    box-shadow: 0 6px 14px #24634730;
+    transform: translateY(-1px);
 }
 
 /* Đang tải và thông báo */

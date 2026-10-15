@@ -1,6 +1,6 @@
 import './ProductCard.css';
 
-export default function ProductCard({ product, onViewDetail, onAddToCart }) {
+export default function ProductCard({ product, onViewDetail, onBuyNow }) {
     return (
         <div className="product-card" onClick={() => onViewDetail(product)}>
             <div className="pc-image-box">
@@ -15,7 +15,18 @@ export default function ProductCard({ product, onViewDetail, onAddToCart }) {
                 </div>
                 <div className="pc-actions" onClick={(e) => e.stopPropagation()}>
                     <button onClick={() => onViewDetail(product)} className="btn-detail">Chi tiết</button>
-                    <button onClick={() => onAddToCart(product)} className="btn-add">Thêm giỏ</button>
+                    <button
+                        onClick={() =>
+                            onBuyNow({
+                                ...product,
+                                stockQuantity: product.quantity,
+                                quantity: 1
+                            })
+                        }
+                        className="btn-add"
+                    >
+                        Mua ngay
+                    </button>
                 </div>
             </div>
         </div>

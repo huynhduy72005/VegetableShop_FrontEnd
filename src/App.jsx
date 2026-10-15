@@ -25,8 +25,29 @@ export default function App() {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [selectedCategoryId, setSelectedCategoryId] = useState(null);
     const [cartItems, setCartItems] = useState([]);
+    const [checkoutItems, setCheckoutItems] = useState(null);
     const [wishlistItems, setWishlistItems] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
+
+    const handleBuyNow = (product) => {
+        setCheckoutItems([{
+            ...product,
+            quantity: Number(product.quantity) || 1
+        }]);
+        setActivePage('checkout');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleCheckoutFromCart = () => {
+        setCheckoutItems(null);
+        setActivePage('checkout');
+    };
+
+    const handleOrderSuccess = () => {
+        if (checkoutItems === null) setCartItems([]);
+        setCheckoutItems(null);
+        setActivePage('home');
+    };
 
     // Thêm một sản phẩm vào giỏ hàng
     const handleAddToCart = (product) => {
@@ -150,7 +171,7 @@ export default function App() {
             setSelectedProduct(product);
             setActivePage('detail');
         }}
-        onAddToCart={handleAddToCart}
+        onBuyNow={handleBuyNow}
         onToggleWishlist={handleToggleWishlist}
         wishlistItems={wishlistItems}
         onBrowseProducts={(categoryId = null) => {
@@ -168,7 +189,7 @@ export default function App() {
                     <Products
                         categoryId={selectedCategoryId}
                         onViewDetail={(p) => { setSelectedProduct(p); setActivePage('detail'); }}
-                        onAddToCart={handleAddToCart}
+                        onBuyNow={handleBuyNow}
                     />
                 )}
                 {activePage === 'about' && <AboutUs />}
@@ -198,14 +219,14 @@ export default function App() {
                         onRemoveItem={(id) => setCartItems(prev =>
                             prev.filter(i => i.id !== id)
                         )}
-                        onProceedCheckout={() => setActivePage('checkout')}
+                        onProceedCheckout={handleCheckoutFromCart}
                     />
                 )}
                 {activePage === 'checkout' && (
                     <Checkout
-                        cartItems={cartItems}
+                        cartItems={checkoutItems ?? cartItems}
                         currentUser={currentUser}
-                        onOrderSuccess={() => { setCartItems([]); setActivePage('home'); }}
+                        onOrderSuccess={handleOrderSuccess}
                     />
                 )}
                 {activePage === 'wishlist' && (

@@ -69,6 +69,20 @@
   color: #4f5d53;
 }
 
+.checkout-cost-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 10px 0;
+  color: #657268;
+  font-size: 13px;
+}
+
+.checkout-cost-row strong {
+  color: #3f5447;
+  white-space: nowrap;
+}
+
 .payment-options {
   margin: 20px 0;
 }
