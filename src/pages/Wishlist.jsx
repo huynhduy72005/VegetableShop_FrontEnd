@@ -44,7 +44,7 @@ function WishlistIcon({ name, size = 20 }) {
 function WishlistCard({
     product,
     onViewDetail,
-    onAddToCart,
+    onBuyNow,
     onRemoveWishlist
 }) {
     const [imageError, setImageError] = useState(false);
@@ -118,18 +118,17 @@ function WishlistCard({
 
                     <button
                         type="button"
-                        className="wl-add-button"
+                        className="wl-buy-button"
                         disabled={!inStock}
                         onClick={() =>
-                            onAddToCart({
+                            onBuyNow({
                                 ...product,
                                 stockQuantity: stock,
                                 quantity: 1
                             })
                         }
                     >
-                        <WishlistIcon name="cart" size={16} />
-                        {inStock ? 'Thêm giỏ' : 'Hết hàng'}
+                        {inStock ? 'Mua ngay' : 'Hết hàng'}
                     </button>
                 </div>
 
@@ -163,7 +162,7 @@ function WishlistCard({
 export default function Wishlist({
     wishlistItems = [],
     onViewDetail,
-    onAddToCart,
+    onBuyNow,
     onRemoveWishlist,
     onBrowseProducts
 }) {
@@ -335,7 +334,7 @@ export default function Wishlist({
                                     key={product.id}
                                     product={product}
                                     onViewDetail={onViewDetail}
-                                    onAddToCart={onAddToCart}
+                                    onBuyNow={onBuyNow}
                                     onRemoveWishlist={onRemoveWishlist}
                                 />
                             ))}

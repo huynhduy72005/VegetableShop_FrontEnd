@@ -233,7 +233,7 @@ export default function App() {
                     <Wishlist
                         wishlistItems={wishlistItems}
                         onViewDetail={(p) => { setSelectedProduct(p); setActivePage('detail'); }}
-                        onAddToCart={handleAddToCart}
+                        onBuyNow={handleBuyNow}
                         onRemoveWishlist={(id) => setWishlistItems(prev =>
                             prev.filter(i => i.id !== id)
                         )}
