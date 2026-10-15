@@ -383,7 +383,7 @@
     color: #899a78;
 }
 
-/* Nút xem và thêm giỏ */
+/* Nút xem và mua ngay */
 
 .wl-card-actions {
     display: grid;
@@ -393,7 +393,7 @@
 }
 
 .wl-detail-button,
-.wl-add-button {
+.wl-buy-button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -416,13 +416,13 @@
     border-color: #c7d8b5;
 }
 
-.wl-add-button {
+.wl-buy-button {
     border: 1px solid #d8e5c9;
     background: #edf4e3;
     color: #4f7540;
 }
 
-.wl-add-button:hover:not(:disabled) {
+.wl-buy-button:hover:not(:disabled) {
     border-color: var(--wl-green);
     background: var(--wl-green);
     color: white;
