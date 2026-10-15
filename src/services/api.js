@@ -43,4 +43,6 @@ export const api = {
     getUsers: () => axios.get(`${API_BASE_URL}/users`),
     updateUserRole: (id, roleData) => axios.put(`${API_BASE_URL}/users/${id}/role`, roleData),
     deleteUser: (id) => axios.delete(`${API_BASE_URL}/users/${id}`),
+
+    updateProfile: (id, data) => axios.put(`${API_URL}/users/profile/${id}`, data),
 };
