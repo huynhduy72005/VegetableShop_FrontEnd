@@ -36,6 +36,9 @@ export const api = {
     createOrder: (orderData) => axios.post(`${API_BASE_URL}/orders`, orderData),
     getRevenue: () => axios.get(`${API_BASE_URL}/orders/revenue`),
 
+    getOrders: () => axios.get(`${API_BASE_URL}/orders`),
+    getOrderById: (id) => axios.get(`${API_BASE_URL}/orders/${id}`),
+
     login: (credentials) => axios.post(`${API_BASE_URL}/users/login`, credentials),
     register: (userData) => axios.post(`${API_BASE_URL}/users/register`, userData),
 
