@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -26,26 +26,48 @@ export default function App() {
     const [selectedCategoryId, setSelectedCategoryId] = useState(null);
     const [cartItems, setCartItems] = useState([]);
     const [checkoutItems, setCheckoutItems] = useState(null);
+    const [checkoutCartItemIds, setCheckoutCartItemIds] = useState(null);
     const [wishlistItems, setWishlistItems] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
+    const detailPreviousPage = useRef('home');
+
+    const handleViewDetail = (product) => {
+        if (activePage !== 'detail') {
+            detailPreviousPage.current = activePage;
+        }
+        setSelectedProduct(product);
+        setActivePage('detail');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleBackFromDetail = () => {
+        setActivePage(detailPreviousPage.current);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     const handleBuyNow = (product) => {
         setCheckoutItems([{
             ...product,
             quantity: Number(product.quantity) || 1
         }]);
+        setCheckoutCartItemIds(null);
         setActivePage('checkout');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    const handleCheckoutFromCart = () => {
-        setCheckoutItems(null);
+    const handleCheckoutFromCart = (selectedItems) => {
+        setCheckoutItems(selectedItems);
+        setCheckoutCartItemIds(selectedItems.map(item => item.id));
         setActivePage('checkout');
     };
 
     const handleOrderSuccess = () => {
-        if (checkoutItems === null) setCartItems([]);
+        if (checkoutCartItemIds !== null) {
+            const orderedItemIds = new Set(checkoutCartItemIds);
+            setCartItems(prev => prev.filter(item => !orderedItemIds.has(item.id)));
+        }
         setCheckoutItems(null);
+        setCheckoutCartItemIds(null);
         setActivePage('home');
     };
 
@@ -158,19 +180,13 @@ export default function App() {
             wishlistCount={wishlistItems.length}
             currentUser={currentUser}
             onSelectCategory={setSelectedCategoryId}
-            onViewProduct={(product) => {
-                setSelectedProduct(product);
-                setActivePage('detail');
-            }}
+            onViewProduct={handleViewDetail}
 />
 
             <main className="main-content">
                 {activePage === 'home' && (
     <Home
-        onViewDetail={(product) => {
-            setSelectedProduct(product);
-            setActivePage('detail');
-        }}
+        onViewDetail={handleViewDetail}
         onBuyNow={handleBuyNow}
         onToggleWishlist={handleToggleWishlist}
         wishlistItems={wishlistItems}
@@ -188,8 +204,9 @@ export default function App() {
                 {activePage === 'products' && (
                     <Products
                         categoryId={selectedCategoryId}
-                        onViewDetail={(p) => { setSelectedProduct(p); setActivePage('detail'); }}
+                        onViewDetail={handleViewDetail}
                         onBuyNow={handleBuyNow}
+                        onAddToCart={handleAddToCart}
                     />
                 )}
                 {activePage === 'about' && <AboutUs />}
@@ -206,7 +223,7 @@ export default function App() {
                         onToggleWishlist={handleToggleWishlist}
                         isWishlisted={wishlistItems.some(item => item.id === selectedProduct?.id)}
                         onViewCart={() => setActivePage('cart')}
-                        onBack={() => setActivePage('home')}
+                        onBack={handleBackFromDetail}
                     />
                 )}
                 {activePage === 'cart' && (
