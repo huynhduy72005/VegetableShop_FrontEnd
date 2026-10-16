@@ -124,10 +124,18 @@ function ProductDetailContent({
                 className="vd-breadcrumb"
                 aria-label="Đường dẫn"
             >
-                <button type="button" onClick={onBack}>
-                    Trang chủ
+                <button
+                    type="button"
+                    className="vd-return-button"
+                    onClick={onBack}
+                    aria-label="Quay lại trang trước"
+                >
+                    <DetailIcon name="back" size={17} />
+                    <span>Quay lại</span>
                 </button>
 
+                <span>/</span>
+                <span>Cửa hàng</span>
                 <span>/</span>
                 <span>Chi tiết sản phẩm</span>
                 <span>/</span>

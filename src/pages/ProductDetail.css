@@ -63,7 +63,29 @@
 
 .vd-breadcrumb button:hover {
     color: var(--vd-green);
-    text-decoration: underline;
+}
+
+.vd-breadcrumb .vd-return-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid #dce7d7;
+    border-radius: 999px;
+    background: #fff;
+    color: var(--vd-green);
+    font-size: 12px;
+    font-weight: 700;
+    box-shadow: 0 2px 8px #203f300d;
+    transition: background .2s ease, border-color .2s ease, transform .2s ease;
+}
+
+.vd-breadcrumb .vd-return-button:hover {
+    border-color: #b8ceb0;
+    background: #f4f8f0;
+    text-decoration: none;
+    transform: translateX(-2px);
 }
 
 .vd-breadcrumb strong {

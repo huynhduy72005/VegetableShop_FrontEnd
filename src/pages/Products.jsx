@@ -19,7 +19,7 @@ const priceRanges = [
     { id: 'gt50', label: 'Trên 50.000 đ', test: (price) => price > 50000 },
 ];
 
-export default function Products({ categoryId, onViewDetail, onBuyNow }) {
+export default function Products({ categoryId, onViewDetail, onBuyNow, onAddToCart }) {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [activeCategory, setActiveCategory] = useState(categoryId ?? null);
@@ -163,6 +163,7 @@ export default function Products({ categoryId, onViewDetail, onBuyNow }) {
                                     product={product}
                                     onViewDetail={onViewDetail}
                                     onBuyNow={onBuyNow}
+                                    onAddToCart={onAddToCart}
                                 />
                             ))}
                         </div>
