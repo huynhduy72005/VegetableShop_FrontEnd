@@ -54,6 +54,19 @@ export default function Admin() {
         setNotice(null);
         setForm(product ? { ...product } : { ...emptyProduct, categoryId: categories[0]?.id || '' });
     }
+
+    // Xử lý chọn file ảnh từ máy tính
+    function handleFileChange(e) {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setForm(prev => ({ ...prev, image: reader.result }));
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
     async function saveProduct(event) {
         event.preventDefault();
         if (saving) return;
@@ -100,7 +113,12 @@ export default function Admin() {
         {notice && <div role={notice.error ? 'alert' : 'status'} className={`adm-notice ${notice.error ? 'error' : ''}`}>{notice.text}<button aria-label="Đóng thông báo" onClick={() => setNotice(null)}>×</button></div>}
         {form ? <section className="adm-panel"><div className="adm-panel-head"><h2>Thông tin sản phẩm</h2><button disabled={saving} onClick={() => setForm(null)}>← Quay lại</button></div><form onSubmit={saveProduct} className="adm-form">
             {[['name', 'Tên sản phẩm', 'text'], ['price', 'Giá bán (VNĐ)', 'number'], ['quantity', 'Số lượng tồn kho', 'number'], ['unit', 'Đơn vị', 'text']].map(([key, label, type]) => <label key={key}>{label}<input required type={type} min={type === 'number' ? 0 : undefined} step={key === 'price' ? '0.01' : key === 'quantity' ? '1' : undefined} value={form[key]} onChange={e => setForm({ ...form, [key]: e.target.value })} /></label>)}
-            <label>Danh mục<select required value={form.categoryId} onChange={e => setForm({ ...form, categoryId: e.target.value })}><option value="">Chọn danh mục</option>{categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label><label>Đường dẫn ảnh<input value={form.image || ''} onChange={e => setForm({ ...form, image: e.target.value })} placeholder="https://… hoặc /images/…" /></label><label className="adm-wide">Mô tả<textarea rows="4" value={form.description || ''} onChange={e => setForm({ ...form, description: e.target.value })} /></label><div className="adm-wide adm-actions"><button className="adm-primary" disabled={saving || loading || !categories.length}>{saving ? 'Đang lưu…' : 'Lưu sản phẩm'}</button><button type="button" disabled={saving} onClick={() => setForm(null)}>Hủy</button></div>
+            <label>Danh mục<select required value={form.categoryId} onChange={e => setForm({ ...form, categoryId: e.target.value })}><option value="">Chọn danh mục</option>{categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
+            <label>Hình ảnh sản phẩm
+                <input value={form.image || ''} onChange={e => setForm({ ...form, image: e.target.value })} placeholder="https://… hoặc /images/…" />
+                <input type="file" accept="image/*" onChange={handleFileChange} style={{ marginTop: '8px' }} />
+            </label>
+            <label className="adm-wide">Mô tả<textarea rows="4" value={form.description || ''} onChange={e => setForm({ ...form, description: e.target.value })} /></label><div className="adm-wide adm-actions"><button className="adm-primary" disabled={saving || loading || !categories.length}>{saving ? 'Đang lưu…' : 'Lưu sản phẩm'}</button><button type="button" disabled={saving} onClick={() => setForm(null)}>Hủy</button></div>
         </form></section> : <>
         {tab === 'overview' && <><div className="adm-stats">{[['Giá trị tất cả đơn hàng', money(stats.totalRevenue), 'Theo API hiện tại, gồm mọi trạng thái'], ['Tổng đơn hàng', stats.totalOrders ?? '—', 'Đơn hàng trong hệ thống'], ['Chờ xử lý', stats.pendingOrders ?? '—', 'Cần được xác nhận'], ['Sản phẩm', products.length, `${lowStock.length} sản phẩm tồn kho ≤ 10`]].map(([title, value, detail]) => <article key={title}><span>{title}</span><strong>{loading ? '…' : value}</strong><small>{detail}</small></article>)}</div><div className="adm-welcome"><div><p className="adm-eyebrow">CHĂM CHÚT CỬA HÀNG CỦA BẠN</p><h2>Sản phẩm tươi mới.<br />Vận hành gọn gàng.</h2><p>Thêm sản phẩm, cập nhật giá và kiểm tra lượng hàng sẵn có.</p><button className="adm-primary" disabled={loading} onClick={() => startForm()}>+ Thêm sản phẩm</button></div><span aria-hidden="true">✿</span></div><section className="adm-panel"><div className="adm-panel-head"><div><h2>Cần bổ sung hàng</h2><p>Các sản phẩm có tồn kho từ 10 trở xuống.</p></div><button onClick={() => setTab('inventory')}>Xem tất cả →</button></div>{table(lowStock.slice(0, 5))}</section></>}
         {tab === 'products' && <section className="adm-panel"><div className="adm-panel-head"><div><h2>Danh sách sản phẩm</h2><p>{filtered.length} kết quả</p></div><div className="adm-actions"><button disabled={loading || !filtered.length} onClick={exportCSV}>↓ Xuất CSV</button><button disabled={loading} className="adm-primary" onClick={() => startForm()}>+ Thêm mới</button></div></div><div className="adm-filters"><input aria-label="Tìm sản phẩm" placeholder="Tìm tên sản phẩm…" value={search} onChange={e => updateFilter(setSearch, e.target.value)} /><select aria-label="Danh mục" value={category} onChange={e => updateFilter(setCategory, e.target.value)}><option value="">Tất cả danh mục</option>{categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select><select aria-label="Tồn kho" value={stock} onChange={e => updateFilter(setStock, e.target.value)}><option value="">Mọi tồn kho</option><option value="out">Hết hàng</option><option value="low">Sắp hết (1–10)</option><option value="available">Còn nhiều (&gt;10)</option></select><select aria-label="Sắp xếp" value={sort} onChange={e => updateFilter(setSort, e.target.value)}><option value="newest">Mới nhất</option><option value="price">Giá tăng dần</option><option value="stock">Tồn kho tăng dần</option></select></div>{table(visible)}<div className="adm-pagination"><span>Trang {currentPage} / {pageCount}</span><div className="adm-actions"><button disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>← Trước</button><button disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>Sau →</button></div></div></section>}
