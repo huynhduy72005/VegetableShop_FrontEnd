@@ -26,6 +26,7 @@ export default function App() {
     const [selectedCategoryId, setSelectedCategoryId] = useState(null);
     const [cartItems, setCartItems] = useState([]);
     const [checkoutItems, setCheckoutItems] = useState(null);
+    const [checkoutCartItemIds, setCheckoutCartItemIds] = useState(null);
     const [wishlistItems, setWishlistItems] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
 
@@ -34,18 +35,24 @@ export default function App() {
             ...product,
             quantity: Number(product.quantity) || 1
         }]);
+        setCheckoutCartItemIds(null);
         setActivePage('checkout');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    const handleCheckoutFromCart = () => {
-        setCheckoutItems(null);
+    const handleCheckoutFromCart = (selectedItems) => {
+        setCheckoutItems(selectedItems);
+        setCheckoutCartItemIds(selectedItems.map(item => item.id));
         setActivePage('checkout');
     };
 
     const handleOrderSuccess = () => {
-        if (checkoutItems === null) setCartItems([]);
+        if (checkoutCartItemIds !== null) {
+            const orderedItemIds = new Set(checkoutCartItemIds);
+            setCartItems(prev => prev.filter(item => !orderedItemIds.has(item.id)));
+        }
         setCheckoutItems(null);
+        setCheckoutCartItemIds(null);
         setActivePage('home');
     };
 
