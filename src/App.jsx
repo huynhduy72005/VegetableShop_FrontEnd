@@ -18,6 +18,8 @@ import Reviews from './pages/Reviews';
 import Contact from './pages/Contact';
 import ChatWidget from './components/ChatWidget';
 
+import OrderHistory from './pages/OrderHistory'; // Đường dẫn tới file vừa tạo
+
 import './App.css';
 
 export default function App() {
@@ -282,5 +284,8 @@ export default function App() {
                 onAddMultipleToCart={handleAddMultipleToCart}
             />
         </div>
+
+        
     );
+    
 }
