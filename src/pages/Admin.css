@@ -7,5 +7,102 @@
 .adm-order-info .adm-badge{align-self:flex-start}
 .adm-shell .adm-right{text-align:right}
 .adm-shell tfoot td{border-bottom:0;background:#fbfcf9}
+.adm-badge.blue{background:#e7f1ff;color:#3169a8}.adm-badge.purple{background:#f0eaff;color:#6b4caf}
+.adm-order-status-control{align-items:flex-start}
+.adm-status-editor{display:flex;align-items:center;gap:7px;width:100%;margin-top:5px}
+.adm-shell .adm-status-editor select{min-width:0;flex:1;padding:8px;font-size:11px}
+.adm-shell .adm-status-save{flex-shrink:0;padding:8px 10px;background:#21634b;color:#fff;border-color:#21634b;font-size:11px}
+.adm-shell .adm-status-save:hover:not(:disabled){background:#174b39}
+.adm-status-message,.adm-status-error{margin:0 24px 18px!important;padding:11px 14px;border-radius:9px;font-size:12px!important}
+.adm-status-message{background:#eaf5e7;color:#386943}
+.adm-status-error{background:#fff0e9;color:#9c4126}
 @media(max-width:1100px){.adm-order-info{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.adm-order-info{grid-template-columns:1fr;padding:0 18px 18px}}
+@media(max-width:700px){.adm-status-message,.adm-status-error{margin:0 18px 18px!important}}
+
+/* ===== Giao dien don hang ===== */
+.adm-orders{border-color:#e3eae1;box-shadow:0 12px 35px rgba(33,63,45,.055)}
+.adm-orders .adm-panel-head{padding:24px 26px 20px;border-bottom:1px solid #edf1eb}
+.adm-orders .adm-panel-head h2{font-size:19px;letter-spacing:-.35px}
+.adm-orders .adm-panel-head p{margin-top:7px}
+.adm-orders .adm-panel-head>button{font-weight:650}
+.adm-orders .adm-filters{padding:18px 26px;gap:12px;background:#fbfcfa;border-bottom:1px solid #edf1eb}
+.adm-orders .adm-filters input{flex:1 1 300px;min-height:44px;padding:12px 15px}
+.adm-orders .adm-filters select{flex:0 1 220px;min-height:44px;padding:10px 14px}
+.adm-orders-table{min-width:900px}
+.adm-orders .adm-table-scroll{overscroll-behavior-x:contain}
+.adm-orders .adm-table-scroll thead{position:sticky;top:0;z-index:1}
+.adm-orders .adm-table-scroll th{padding-top:15px;padding-bottom:15px;background:#f6f8f4;text-transform:uppercase;letter-spacing:.055em;font-size:10px}
+.adm-orders .adm-table-scroll td{height:72px;padding-top:12px;padding-bottom:12px;color:#47594c}
+.adm-orders-table tbody tr{transition:background .15s ease}
+.adm-orders-table tbody tr:hover{background:#f8fbf6}
+.adm-orders-table td:first-child strong{display:inline-flex;align-items:center;min-height:31px;padding:0 10px;border-radius:8px;background:#f0f5ec;color:#315c40;font-size:12px}
+.adm-orders-table td:nth-child(2) strong{display:block;color:#263e30;font-size:13px}
+.adm-orders-table td:nth-child(2) small{margin-top:3px}
+.adm-orders-table td:nth-child(5) strong{color:#285f43;font-size:13px}
+.adm-orders .adm-actions button{white-space:nowrap;font-size:12px;font-weight:650}
+.adm-orders .adm-badge{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;font-size:11px;font-weight:650;white-space:nowrap}
+.adm-orders .adm-badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.8}
+.adm-orders .adm-pagination{border-top:1px solid #edf1eb}
+.adm-order-detail .adm-panel-head{padding:24px 26px;background:linear-gradient(120deg,#fbfdf9,#f4f8f1)}
+.adm-order-detail .adm-panel-head h2{font-size:21px}
+.adm-order-detail .adm-order-info{grid-template-columns:repeat(3,minmax(0,1fr))}
+.adm-order-info{gap:14px;padding:22px 26px 24px}
+.adm-order-info>div{min-height:124px;padding:17px 18px;background:linear-gradient(145deg,#fff,#fafcf9);border-color:#e7ede4;border-radius:14px;box-shadow:0 4px 13px rgba(40,69,46,.035)}
+.adm-order-info>div>small{font-size:10px;text-transform:uppercase;letter-spacing:.055em;font-weight:700}
+.adm-order-info strong{color:#2c4434;font-size:14px;line-height:1.5}
+.adm-order-info p{overflow-wrap:anywhere}
+.adm-order-info>div:last-child strong{color:#266443;font-size:19px;letter-spacing:-.35px}
+.adm-order-info .adm-order-status-control{background:#f7faf3}
+.adm-order-info .adm-order-shipping{grid-column:1/-1;min-height:0;gap:0}
+.adm-order-shipping>small{margin-bottom:10px}
+.adm-shipping-line{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:10px 0;border-top:1px solid #edf1eb}
+.adm-shipping-line span{color:#778579;font-size:11px;font-weight:600}
+.adm-shipping-line strong{color:#304a38;font-size:13px;white-space:pre-line;overflow-wrap:anywhere}
+.adm-orders .adm-status-editor{margin-top:7px;gap:8px}
+.adm-shell .adm-status-editor select{min-height:36px;padding:8px 10px;font-size:12px}
+.adm-shell .adm-status-save{min-height:36px;padding:8px 12px;font-size:12px;font-weight:700}
+.adm-order-items{padding:0 26px 26px}
+.adm-order-items table{min-width:620px;border:1px solid #e9eee7;border-radius:12px;border-collapse:separate;border-spacing:0;overflow:hidden}
+.adm-order-items th{padding:14px 18px}
+.adm-order-items td{padding:14px 18px}
+.adm-order-items .adm-product{gap:14px}
+.adm-order-items .adm-thumb{width:68px;height:68px;flex:none;border:1px solid #e6ecdf;border-radius:13px;background:linear-gradient(145deg,#f1f6e9,#e7efdf);box-shadow:0 3px 10px rgba(47,75,44,.08)}
+.adm-order-items .adm-thumb img{object-fit:cover}
+.adm-order-items .adm-thumb-fallback{color:#719450;font-size:25px}
+.adm-order-items .adm-thumb-fallback span{line-height:1}
+.adm-order-items .adm-product strong{color:#2b4232;font-size:13px}
+.adm-order-items .adm-product small{margin-top:4px}
+.adm-order-items tfoot td{padding-top:11px;padding-bottom:11px;background:#fbfcfa;color:#667568}
+.adm-order-items tfoot tr:last-child td{padding-top:15px;padding-bottom:15px;background:#f2f7ee;color:#2b583d;font-size:14px}
+.adm-orders .adm-empty{color:#7b887c}
+.adm-order-detail>.adm-empty{margin:20px}
+@media(max-width:1100px){
+    .adm-orders .adm-panel-head,.adm-order-detail .adm-panel-head{padding-left:22px;padding-right:22px}
+    .adm-orders .adm-filters{padding-left:22px;padding-right:22px}
+    .adm-order-info{padding:20px 22px 22px}
+    .adm-order-detail .adm-order-info{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .adm-order-items{padding:0 22px 22px}
+}
+@media(max-width:700px){
+    .adm-orders .adm-panel-head,.adm-order-detail .adm-panel-head{padding:18px}
+    .adm-orders .adm-panel-head h2{font-size:17px}
+    .adm-orders .adm-filters{padding:14px 18px}
+    .adm-orders .adm-filters input,.adm-orders .adm-filters select{flex:1 1 100%;width:100%}
+    .adm-orders-table{min-width:820px}
+    .adm-orders .adm-pagination{padding:15px 18px}
+    .adm-order-info{grid-template-columns:repeat(2,minmax(0,1fr));padding:16px 18px 18px;gap:10px}
+    .adm-order-info>div{min-height:118px;padding:14px}
+    .adm-order-info>div:last-child strong{font-size:17px}
+    .adm-order-items{padding:0 18px 18px}
+    .adm-order-items .adm-thumb{width:58px;height:58px}
+}
+@media(max-width:420px){
+    .adm-order-info{grid-template-columns:1fr}
+    .adm-order-detail .adm-order-info{grid-template-columns:1fr}
+    .adm-order-info>div{min-height:unset}
+    .adm-orders .adm-pagination{align-items:flex-start;gap:10px;flex-direction:column}
+}
+@media(prefers-reduced-motion:reduce){
+    .adm-orders-table tbody tr{transition:none}
+}

@@ -18,7 +18,7 @@ import Reviews from './pages/Reviews';
 import Contact from './pages/Contact';
 import ChatWidget from './components/ChatWidget';
 
-import OrderHistory from './pages/OrderHistory'; // Đường dẫn tới file vừa tạo
+import Orders from './pages/Orders';
 
 import './App.css';
 
@@ -52,6 +52,13 @@ export default function App() {
             ...product,
             quantity: Number(product.quantity) || 1
         }]);
+        setCheckoutCartItemIds(null);
+        setActivePage('checkout');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleBuyAgain = (products) => {
+        setCheckoutItems(products);
         setCheckoutCartItemIds(null);
         setActivePage('checkout');
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -218,6 +225,7 @@ export default function App() {
                 )}
                 {activePage === 'reviews' && <Reviews />}
                 {activePage === 'contact' && <Contact />}
+                {activePage === 'orders' && <Orders currentUser={currentUser} onBuyAgain={handleBuyAgain} />}
                 {activePage === 'detail' && (
                     <ProductDetail
                         product={selectedProduct}

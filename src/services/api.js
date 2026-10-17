@@ -21,7 +21,9 @@
 
 import axios from 'axios';
 
-const API_BASE_URL = 'https://localhost:7179/api';
+const API_BASE_URL = (
+    import.meta.env.VITE_API_BASE_URL || 'https://localhost:7179/api'
+).replace(/\/+$/, '');
 
 export const api = {
     getProducts: () => axios.get(`${API_BASE_URL}/products`),
@@ -36,8 +38,10 @@ export const api = {
     createOrder: (orderData) => axios.post(`${API_BASE_URL}/orders`, orderData),
     getRevenue: () => axios.get(`${API_BASE_URL}/orders/revenue`),
 
-    getOrders: () => axios.get(`${API_BASE_URL}/orders`),
+    getOrders: (params) => axios.get(`${API_BASE_URL}/orders`, { params }),
     getOrderById: (id) => axios.get(`${API_BASE_URL}/orders/${id}`),
+    cancelOrder: (id) => axios.put(`${API_BASE_URL}/orders/${id}/cancel`),
+    updateOrderStatus: (id, status) => axios.put(`${API_BASE_URL}/orders/${id}/status`, { status }),
 
     login: (credentials) => axios.post(`${API_BASE_URL}/users/login`, credentials),
     register: (userData) => axios.post(`${API_BASE_URL}/users/register`, userData),
@@ -47,5 +51,5 @@ export const api = {
     updateUserRole: (id, roleData) => axios.put(`${API_BASE_URL}/users/${id}/role`, roleData),
     deleteUser: (id) => axios.delete(`${API_BASE_URL}/users/${id}`),
 
-    updateProfile: (id, data) => axios.put(`${API_URL}/users/profile/${id}`, data),
+    updateProfile: (id, data) => axios.put(`${API_BASE_URL}/users/profile/${id}`, data),
 };

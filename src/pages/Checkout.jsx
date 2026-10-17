@@ -19,7 +19,12 @@ export default function Checkout({ cartItems, currentUser, onOrderSuccess }) {
         e.preventDefault();
         const orderData = {
             userId: currentUser ? currentUser.id : 1,
-            shippingAddress: `${formData.address} - SĐT: ${formData.phone} - Ghi chú: ${formData.note}`,
+            recipientName: formData.fullName.trim(),
+            phone: formData.phone.trim(),
+            shippingAddress: formData.address.trim(),
+            note: formData.note.trim(),
+            paymentMethod,
+            shippingFee,
             totalPrice: total,
             items: cartItems.map(item => ({
                 productId: item.id,
