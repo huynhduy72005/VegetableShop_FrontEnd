@@ -19,11 +19,20 @@ const priceRanges = [
     { id: 'gt50', label: 'Trên 50.000 đ', test: (price) => price > 50000 },
 ];
 
+const sortOptions = [
+    { id: 'default', label: 'Mặc định' },
+    { id: 'price-asc', label: 'Giá: Thấp đến cao' },
+    { id: 'price-desc', label: 'Giá: Cao đến thấp' },
+    { id: 'name-asc', label: 'Tên: A - Z' },
+    { id: 'name-desc', label: 'Tên: Z - A' },
+];
+
 export default function Products({ categoryId, onViewDetail, onBuyNow, onAddToCart }) {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [activeCategory, setActiveCategory] = useState(categoryId ?? null);
     const [activePriceRange, setActivePriceRange] = useState('all');
+    const [sortBy, setSortBy] = useState('default');
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -56,6 +65,21 @@ export default function Products({ categoryId, onViewDetail, onBuyNow, onAddToCa
         const matchSearch = p.name.toLowerCase().includes(search.trim().toLowerCase());
         const matchPrice = selectedPriceRange.test(p.price);
         return matchCategory && matchSearch && matchPrice;
+    });
+
+    const sortedProducts = [...filteredProducts].sort((a, b) => {
+        switch (sortBy) {
+            case 'price-asc':
+                return Number(a.price) - Number(b.price);
+            case 'price-desc':
+                return Number(b.price) - Number(a.price);
+            case 'name-asc':
+                return a.name.localeCompare(b.name, 'vi', { sensitivity: 'base' });
+            case 'name-desc':
+                return b.name.localeCompare(a.name, 'vi', { sensitivity: 'base' });
+            default:
+                return 0;
+        }
     });
 
     const activeCategoryName = activeCategory
@@ -128,11 +152,16 @@ export default function Products({ categoryId, onViewDetail, onBuyNow, onAddToCa
                         </ul>
                     </div>
 
-                    {(activeCategory !== null || activePriceRange !== 'all' || search) && (
+                    {(activeCategory !== null || activePriceRange !== 'all' || search || sortBy !== 'default') && (
                         <button
                             type="button"
                             className="sidebar-reset"
-                            onClick={() => { setActiveCategory(null); setActivePriceRange('all'); setSearch(''); }}
+                            onClick={() => {
+                                setActiveCategory(null);
+                                setActivePriceRange('all');
+                                setSortBy('default');
+                                setSearch('');
+                            }}
                         >
                             ✕ Xóa bộ lọc
                         </button>
@@ -149,15 +178,37 @@ export default function Products({ categoryId, onViewDetail, onBuyNow, onAddToCa
                         <div className="products-state products-error">{error}</div>
                     )}
 
-                    {!loading && !error && filteredProducts.length === 0 && (
+                    {!loading && !error && (
+                        <div className="products-toolbar">
+                            <p className="products-results-count">
+                                Hiển thị <strong>{sortedProducts.length}</strong> sản phẩm
+                            </p>
+                            <label className="products-sort">
+                                <span>Sắp xếp theo</span>
+                                <select
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                    aria-label="Sắp xếp sản phẩm"
+                                >
+                                    {sortOptions.map(option => (
+                                        <option key={option.id} value={option.id}>
+                                            {option.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+                        </div>
+                    )}
+
+                    {!loading && !error && sortedProducts.length === 0 && (
                         <div className="products-state">
                             Không tìm thấy sản phẩm nào phù hợp với bộ lọc hiện tại.
                         </div>
                     )}
 
-                    {!loading && !error && filteredProducts.length > 0 && (
+                    {!loading && !error && sortedProducts.length > 0 && (
                         <div className="product-grid">
-                            {filteredProducts.map(product => (
+                            {sortedProducts.map(product => (
                                 <ProductCard
                                     key={product.id}
                                     product={product}
