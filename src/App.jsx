@@ -266,11 +266,12 @@ export default function App() {
                         )}
                     />
                 )}
-                {activePage === 'account' && (
+               {activePage === 'account' && (
                     <Account
-                        currentUser={currentUser}
-                        onLogout={() => { setCurrentUser(null); setActivePage('home'); }}
-                    />
+                      currentUser={currentUser}
+                     onLogout={() => { setCurrentUser(null); setActivePage('home'); }}
+               onBuyAgain={handleBuyAgain}
+                  />
                 )}
                 {activePage === 'admin' && <Admin />}
                 {activePage === 'login' && (

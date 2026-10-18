@@ -5,7 +5,6 @@ import './Header.css';
 const navItems = [
     { key: 'home', label: 'Trang chủ' },
     { key: 'products', label: 'Sản phẩm' },
-    { key: 'orders', label: 'Đơn hàng' },
     { key: 'promotions', label: 'Khuyến mãi' },
     { key: 'about', label: 'Về chúng tôi' },
     { key: 'tips', label: 'Mẹo hay nhà bếp' },

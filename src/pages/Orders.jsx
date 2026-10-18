@@ -63,7 +63,7 @@ function getAuthHeaders() {
     return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export default function Orders({ currentUser, onBuyAgain }) {
+export default function Orders({ currentUser, onBuyAgain, embedded = false }) {
     const userId = currentUser?.id;
     const [orders, setOrders] = useState([]);
     const [activeStatus, setActiveStatus] = useState('Pending');
@@ -209,7 +209,11 @@ export default function Orders({ currentUser, onBuyAgain }) {
                 return;
             }
 
-            onBuyAgain(products);
+            if (typeof onBuyAgain === 'function') {
+                onBuyAgain(products);
+            } else {
+                setNotice('Chức năng mua lại chưa được kết nối.');
+            }
         } catch (requestError) {
             console.error('Lỗi tải sản phẩm để mua lại:', requestError);
             setNotice(requestError.response?.data?.message || 'Không thể tải sản phẩm của đơn hàng để mua lại. Vui lòng thử lại.');
@@ -233,16 +237,20 @@ export default function Orders({ currentUser, onBuyAgain }) {
         Number(orderDetail?.totalPrice ?? orderDetail?.totalAmount ?? 0) - detailSubtotal
     );
 
+    const Wrapper = embedded ? 'div' : 'main';
+
     return (
-        <main className="orders-page">
-            <section className="orders-hero">
-                <div className="orders-container orders-hero-content">
-                    <span className="orders-eyebrow">VƯỜN NHÀ · ĐƠN HÀNG CỦA BẠN</span>
-                    <h1>Theo dõi đơn hàng</h1>
-                    <p>Cập nhật hành trình đơn hàng và xem lại lịch sử mua sắm của bạn.</p>
-                    <div className="orders-hero-note"><span aria-hidden="true">✦</span> Nông sản tươi ngon, giao tận nhà</div>
-                </div>
-            </section>
+        <Wrapper className={`orders-page${embedded ? ' orders-embedded' : ''}`}>
+            {!embedded && (
+                <section className="orders-hero">
+                    <div className="orders-container orders-hero-content">
+                        <span className="orders-eyebrow">VƯỜN NHÀ · ĐƠN HÀNG CỦA BẠN</span>
+                        <h1>Theo dõi đơn hàng</h1>
+                        <p>Cập nhật hành trình đơn hàng và xem lại lịch sử mua sắm của bạn.</p>
+                        <div className="orders-hero-note"><span aria-hidden="true">✦</span> Nông sản tươi ngon, giao tận nhà</div>
+                    </div>
+                </section>
+            )}
 
             <div className="orders-container orders-content">
                 {notice && <div className="orders-notice" role="status">
@@ -438,6 +446,6 @@ export default function Orders({ currentUser, onBuyAgain }) {
                     </>
                 )}
             </div>
-        </main>
+        </Wrapper>
     );
 }
