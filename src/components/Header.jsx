@@ -660,28 +660,7 @@ export default function Header({
                                 </li>
                             )
                         )}
-
-                        {currentUser?.role === 'Admin' && (
-                            <li>
-                                <button
-                                    type="button"
-                                    className={`vh-nav-button vh-admin ${
-                                        activePage === 'admin'
-                                            ? 'is-active'
-                                            : ''
-                                    }`}
-                                    onClick={() => navigate('admin')}
-                                    aria-current={
-                                        activePage === 'admin'
-                                            ? 'page'
-                                            : undefined
-                                    }
-                                >
-                                    <Icon name="grid" size={15} />
-                                    Quản trị
-                                </button>
-                            </li>
-                        )}
+                        {/* Đã xóa phần hiển thị điều kiện role Admin ở đây */}
                     </ul>
 
                     <span className="vh-nav-note">

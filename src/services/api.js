@@ -1,24 +1,3 @@
-// import axios from 'axios';
-
-// // Đảm bảo cổng 7179 khớp với Backend .NET Core của bạn
-// const API_BASE_URL = 'https://localhost:7179/api';
-
-// export const api = {
-//     // Sản phẩm
-//     getProducts: () => axios.get(`${API_BASE_URL}/products`),
-//     getProductById: (id) => axios.get(`${API_BASE_URL}/products/${id}`),
-
-//     // Danh mục
-//     getCategories: () => axios.get(`${API_BASE_URL}/categories`),
-
-//     // Đơn hàng
-//     createOrder: (orderData) => axios.post(`${API_BASE_URL}/orders`, orderData),
-
-//     // Tài khoản
-//     login: (credentials) => axios.post(`${API_BASE_URL}/users/login`, credentials),
-//     register: (userData) => axios.post(`${API_BASE_URL}/users/register`, userData),
-// };
-
 import axios from 'axios';
 
 const API_BASE_URL = (
@@ -34,6 +13,11 @@ export const api = {
 
     getCategories: () => axios.get(`${API_BASE_URL}/categories`),
     
+    // --- 3 HÀM QUẢN LÝ DANH MỤC ĐƯỢC THÊM VÀO ĐÂY ---
+    createCategory: (data) => axios.post(`${API_BASE_URL}/categories`, data),
+    updateCategory: (id, data) => axios.put(`${API_BASE_URL}/categories/${id}`, data),
+    deleteCategory: (id) => axios.delete(`${API_BASE_URL}/categories/${id}`),
+    // ------------------------------------------------
 
     createOrder: (orderData) => axios.post(`${API_BASE_URL}/orders`, orderData),
     getRevenue: () => axios.get(`${API_BASE_URL}/orders/revenue`),

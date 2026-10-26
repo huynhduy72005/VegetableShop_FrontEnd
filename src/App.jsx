@@ -266,12 +266,17 @@ export default function App() {
                         )}
                     />
                 )}
-               {activePage === 'account' && (
+           {activePage === 'account' && (
                     <Account
-                      currentUser={currentUser}
-                     onLogout={() => { setCurrentUser(null); setActivePage('home'); }}
-               onBuyAgain={handleBuyAgain}
-                  />
+                        currentUser={currentUser}
+                        onLogout={() => { setCurrentUser(null); setActivePage('home'); }}
+                        onViewOrders={() => setActivePage('orders')}
+                        // THÊM DÒNG NÀY ĐỂ CHUYỂN SANG TRANG QUẢN TRỊ TOÀN MÀN HÌNH
+                        onNavigateToAdmin={() => { 
+                            setActivePage('admin'); 
+                            window.scrollTo({ top: 0, behavior: 'smooth' }); 
+                        }}
+                    />
                 )}
                 {activePage === 'admin' && <Admin />}
                 {activePage === 'login' && (
