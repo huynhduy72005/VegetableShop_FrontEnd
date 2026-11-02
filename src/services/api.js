@@ -29,6 +29,8 @@ export const api = {
 
     login: (credentials) => axios.post(`${API_BASE_URL}/users/login`, credentials),
     register: (userData) => axios.post(`${API_BASE_URL}/users/register`, userData),
+    changePassword: (id, passwordData) =>
+        axios.put(`${API_BASE_URL}/users/change-password/${id}`, passwordData),
 
     // Quản lý người dùng (Admin)
     getUsers: () => axios.get(`${API_BASE_URL}/users`),

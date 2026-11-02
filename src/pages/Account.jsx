@@ -16,6 +16,11 @@ export default function Account({ currentUser, onLogout, onBuyAgain, onNavigateT
     const [loading, setLoading] = useState(currentUser?.role === 'Admin');
     const [busy, setBusy] = useState(false);
     const [notice, setNotice] = useState(null);
+    const [passwords, setPasswords] = useState({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    });
     const isAdmin = currentUser?.role === 'Admin';
 
     useEffect(() => {
@@ -57,6 +62,42 @@ export default function Account({ currentUser, onLogout, onBuyAgain, onNavigateT
         finally { setBusy(false); }
     }
 
+    async function changePassword(event) {
+        event.preventDefault();
+        if (busy) return;
+
+        if (passwords.newPassword.length < 8) {
+            setNotice({ error: true, text: 'Mật khẩu mới phải có ít nhất 8 ký tự.' });
+            return;
+        }
+        if (passwords.newPassword !== passwords.confirmPassword) {
+            setNotice({ error: true, text: 'Mật khẩu xác nhận không khớp.' });
+            return;
+        }
+        if (passwords.currentPassword === passwords.newPassword) {
+            setNotice({ error: true, text: 'Mật khẩu mới phải khác mật khẩu hiện tại.' });
+            return;
+        }
+
+        setBusy(true);
+        setNotice(null);
+        try {
+            const response = await api.changePassword(currentUser.id, {
+                currentPassword: passwords.currentPassword,
+                newPassword: passwords.newPassword
+            });
+            setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
+            setNotice({ text: response.data?.message || 'Đổi mật khẩu thành công.' });
+        } catch (error) {
+            setNotice({
+                error: true,
+                text: error.response?.data?.message || 'Đổi mật khẩu thất bại. Vui lòng kiểm tra mật khẩu hiện tại và thử lại.'
+            });
+        } finally {
+            setBusy(false);
+        }
+    }
+
     if (!currentUser) return <div className="acc2-login"><span>◈</span><h2>Không gian tài khoản</h2><p>Vui lòng đăng nhập.</p></div>;
 
     const filtered = users.filter(user => (!role || user.role === role) && `${user.fullName} ${user.email} ${user.id}`.toLocaleLowerCase('vi').includes(search.trim().toLocaleLowerCase('vi')));
@@ -88,6 +129,9 @@ export default function Account({ currentUser, onLogout, onBuyAgain, onNavigateT
                     <nav aria-label="Tài khoản">
                         <button className={tab === 'profile' ? 'active' : ''} onClick={() => setTab('profile')}>
                             <span>◉</span>Thông tin cá nhân
+                        </button>
+                        <button className={tab === 'change_password' ? 'active' : ''} onClick={() => { setTab('change_password'); setNotice(null); }}>
+                            <span>♙</span>Đổi mật khẩu
                         </button>
                         
                         {isAdmin && (
@@ -157,6 +201,53 @@ export default function Account({ currentUser, onLogout, onBuyAgain, onNavigateT
                                 </div>
                             </section>
                         </>
+                    ) : tab === 'change_password' ? (
+                        <section className="acc2-panel">
+                            <header className="acc2-panel-head">
+                                <div>
+                                    <h2>Đổi mật khẩu</h2>
+                                    <p>Nhập mật khẩu hiện tại để xác nhận thay đổi bảo mật tài khoản.</p>
+                                </div>
+                            </header>
+                            <form className="acc2-password-form" onSubmit={changePassword}>
+                                <label>
+                                    Mật khẩu hiện tại
+                                    <input
+                                        type="password"
+                                        autoComplete="current-password"
+                                        required
+                                        value={passwords.currentPassword}
+                                        onChange={event => setPasswords(previous => ({ ...previous, currentPassword: event.target.value }))}
+                                    />
+                                </label>
+                                <label>
+                                    Mật khẩu mới
+                                    <input
+                                        type="password"
+                                        autoComplete="new-password"
+                                        minLength={8}
+                                        required
+                                        value={passwords.newPassword}
+                                        onChange={event => setPasswords(previous => ({ ...previous, newPassword: event.target.value }))}
+                                    />
+                                </label>
+                                <label>
+                                    Xác nhận mật khẩu mới
+                                    <input
+                                        type="password"
+                                        autoComplete="new-password"
+                                        minLength={8}
+                                        required
+                                        value={passwords.confirmPassword}
+                                        onChange={event => setPasswords(previous => ({ ...previous, confirmPassword: event.target.value }))}
+                                    />
+                                </label>
+                                <p className="acc2-password-help">Mật khẩu mới cần có ít nhất 8 ký tự.</p>
+                                <button className="acc2-password-submit" type="submit" disabled={busy}>
+                                    {busy ? 'Đang cập nhật…' : 'Cập nhật mật khẩu'}
+                                </button>
+                            </form>
+                        </section>
                     ) : tab === 'profile' ? (
                         <section className="acc2-panel">
                             <div className="acc2-profile-banner"><h2>Xin chào, {currentUser.fullName}!</h2></div>
