@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
 import { api } from '../services/api';
-import Orders from './Orders';
 import './Account.css';
 
 const roles = { Admin: 'Quản trị viên', Staff: 'Nhân viên', Customer: 'Khách hàng' };
 const initials = name => (name || '?').trim().split(/\s+/).slice(-2).map(word => word[0]).join('').toUpperCase();
 
 // THÊM: Truyền onNavigateToAdmin vào props
-export default function Account({ currentUser, onLogout, onBuyAgain, onNavigateToAdmin }) {
+export default function Account({ currentUser, onLogout, onNavigateToAdmin }) {
     const [tab, setTab] = useState('profile');
     const [users, setUsers] = useState([]);
-    const [search, setSearch] = useState('');
-    const [role, setRole] = useState('');
-    const [page, setPage] = useState(1);
+    const [passwordResetRequests, setPasswordResetRequests] = useState([]);
+    const search = '';
+    const role = '';
+    const page = 1;
     const [loading, setLoading] = useState(currentUser?.role === 'Admin');
     const [busy, setBusy] = useState(false);
     const [notice, setNotice] = useState(null);
@@ -26,7 +26,13 @@ export default function Account({ currentUser, onLogout, onBuyAgain, onNavigateT
     useEffect(() => {
         let active = true;
         if (isAdmin) {
-            api.getUsers().then(res => { if (active) setUsers(res.data); })
+            Promise.all([api.getUsers(), api.getPasswordResetRequests()])
+                .then(([usersResponse, requestsResponse]) => {
+                    if (active) {
+                        setUsers(usersResponse.data);
+                        setPasswordResetRequests(requestsResponse.data);
+                    }
+                })
                 .catch(() => { if (active) setNotice({ error: true, text: 'Không tải được danh sách tài khoản.' }); }).finally(() => { if (active) setLoading(false); });
         }
         return () => { active = false; };
@@ -34,9 +40,41 @@ export default function Account({ currentUser, onLogout, onBuyAgain, onNavigateT
 
     async function reload() {
         setLoading(true); setNotice(null);
-        try { const res = await api.getUsers(); setUsers(res.data); }
+        try {
+            const [usersResponse, requestsResponse] = await Promise.all([
+                api.getUsers(),
+                api.getPasswordResetRequests()
+            ]);
+            setUsers(usersResponse.data);
+            setPasswordResetRequests(requestsResponse.data);
+        }
         catch { setNotice({ error: true, text: 'Không tải được dữ liệu.' }); }
         finally { setLoading(false); }
+    }
+
+    async function reviewPasswordResetRequest(request, decision) {
+        if (!isAdmin || busy) return;
+        const action = decision === 'approve' ? 'chấp nhận' : 'từ chối';
+        if (!window.confirm(`Bạn có chắc muốn ${action} yêu cầu của ${request.email}?`)) return;
+
+        setBusy(true);
+        setNotice(null);
+        try {
+            const response = decision === 'approve'
+                ? await api.approvePasswordResetRequest(request.id)
+                : await api.rejectPasswordResetRequest(request.id);
+            setPasswordResetRequests(previous =>
+                previous.filter(item => item.id !== request.id)
+            );
+            setNotice({ text: response.data?.message || 'Đã xử lý yêu cầu.' });
+        } catch (error) {
+            setNotice({
+                error: true,
+                text: error.response?.data?.message || 'Không thể xử lý yêu cầu đổi mật khẩu.'
+            });
+        } finally {
+            setBusy(false);
+        }
     }
 
     async function changeRole(user, newRole) {
@@ -199,6 +237,43 @@ export default function Account({ currentUser, onLogout, onBuyAgain, onNavigateT
                                         </tbody>
                                     </table>
                                 </div>
+                            </section>
+                            <section className="acc2-panel acc2-reset-requests">
+                                <header className="acc2-panel-head">
+                                    <div>
+                                        <h2>Yêu cầu đổi mật khẩu <span>{passwordResetRequests.length}</span></h2>
+                                        <p>Chấp nhận yêu cầu sẽ thay đổi mật khẩu tài khoản ngay lập tức.</p>
+                                    </div>
+                                </header>
+                                {passwordResetRequests.length === 0 ? (
+                                    <div className="acc2-empty"><p>Hiện không có yêu cầu đang chờ duyệt.</p></div>
+                                ) : (
+                                    <div className="acc2-table-scroll">
+                                        <table>
+                                            <thead><tr><th>TÀI KHOẢN</th><th>THỜI GIAN</th><th>TRẠNG THÁI</th><th>THAO TÁC</th></tr></thead>
+                                            <tbody>
+                                                {passwordResetRequests.map(request => (
+                                                    <tr key={request.id}>
+                                                        <td>
+                                                            <div className="acc2-member">
+                                                                <span className="acc2-avatar">{initials(request.fullName)}</span>
+                                                                <div><strong>{request.fullName}</strong><small>{request.email}</small></div>
+                                                            </div>
+                                                        </td>
+                                                        <td>{new Date(request.createdAtUtc).toLocaleString('vi-VN')}</td>
+                                                        <td><span className="acc2-reset-pending">Chờ duyệt</span></td>
+                                                        <td>
+                                                            <div className="acc2-reset-actions">
+                                                                <button disabled={busy || loading} onClick={() => reviewPasswordResetRequest(request, 'approve')}>Chấp nhận</button>
+                                                                <button className="acc2-delete" disabled={busy || loading} onClick={() => reviewPasswordResetRequest(request, 'reject')}>Từ chối</button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
                             </section>
                         </>
                     ) : tab === 'change_password' ? (

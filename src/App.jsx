@@ -30,7 +30,14 @@ export default function App() {
     const [checkoutItems, setCheckoutItems] = useState(null);
     const [checkoutCartItemIds, setCheckoutCartItemIds] = useState(null);
     const [wishlistItems, setWishlistItems] = useState([]);
-    const [currentUser, setCurrentUser] = useState(null);
+    const [currentUser, setCurrentUser] = useState(() => {
+        try {
+            const storedUser = sessionStorage.getItem('currentUser');
+            return storedUser ? JSON.parse(storedUser) : null;
+        } catch {
+            return null;
+        }
+    });
     const detailPreviousPage = useRef('home');
 
     const handleViewDetail = (product) => {
@@ -269,7 +276,12 @@ export default function App() {
            {activePage === 'account' && (
                     <Account
                         currentUser={currentUser}
-                        onLogout={() => { setCurrentUser(null); setActivePage('home'); }}
+                        onLogout={() => {
+                            sessionStorage.removeItem('token');
+                            sessionStorage.removeItem('currentUser');
+                            setCurrentUser(null);
+                            setActivePage('home');
+                        }}
                         onViewOrders={() => setActivePage('orders')}
                         // THÊM DÒNG NÀY ĐỂ CHUYỂN SANG TRANG QUẢN TRỊ TOÀN MÀN HÌNH
                         onNavigateToAdmin={() => { 
@@ -281,7 +293,12 @@ export default function App() {
                 {activePage === 'admin' && <Admin />}
                 {activePage === 'login' && (
                     <Login
-                        onLoginSuccess={(user) => { setCurrentUser(user); setActivePage('home'); }}
+                        onLoginSuccess={(user, token) => {
+                            sessionStorage.setItem('token', token);
+                            sessionStorage.setItem('currentUser', JSON.stringify(user));
+                            setCurrentUser(user);
+                            setActivePage('home');
+                        }}
                         onSwitchToRegister={() => setActivePage('register')}
                     />
                 )}

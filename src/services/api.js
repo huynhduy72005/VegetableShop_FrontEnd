@@ -3,39 +3,60 @@ import axios from 'axios';
 const API_BASE_URL = (
     import.meta.env.VITE_API_BASE_URL || 'https://localhost:7179/api'
 ).replace(/\/+$/, '');
+const client = axios.create();
+
+client.interceptors.request.use(config => {
+    const token = sessionStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
 
 export const api = {
-    getProducts: () => axios.get(`${API_BASE_URL}/products`),
-    getProductById: (id) => axios.get(`${API_BASE_URL}/products/${id}`),
-    createProduct: (productData) => axios.post(`${API_BASE_URL}/products`, productData),
-    updateProduct: (id, productData) => axios.put(`${API_BASE_URL}/products/${id}`, productData),
-    deleteProduct: (id) => axios.delete(`${API_BASE_URL}/products/${id}`),
+    getProducts: () => client.get(`${API_BASE_URL}/products`),
+    getProductById: (id) => client.get(`${API_BASE_URL}/products/${id}`),
+    createProduct: (productData) => client.post(`${API_BASE_URL}/products`, productData),
+    updateProduct: (id, productData) => client.put(`${API_BASE_URL}/products/${id}`, productData),
+    deleteProduct: (id) => client.delete(`${API_BASE_URL}/products/${id}`),
 
-    getCategories: () => axios.get(`${API_BASE_URL}/categories`),
+    getCategories: () => client.get(`${API_BASE_URL}/categories`),
     
     // --- 3 HÀM QUẢN LÝ DANH MỤC ĐƯỢC THÊM VÀO ĐÂY ---
-    createCategory: (data) => axios.post(`${API_BASE_URL}/categories`, data),
-    updateCategory: (id, data) => axios.put(`${API_BASE_URL}/categories/${id}`, data),
-    deleteCategory: (id) => axios.delete(`${API_BASE_URL}/categories/${id}`),
+    createCategory: (data) => client.post(`${API_BASE_URL}/categories`, data),
+    updateCategory: (id, data) => client.put(`${API_BASE_URL}/categories/${id}`, data),
+    deleteCategory: (id) => client.delete(`${API_BASE_URL}/categories/${id}`),
     // ------------------------------------------------
 
-    createOrder: (orderData) => axios.post(`${API_BASE_URL}/orders`, orderData),
-    getRevenue: () => axios.get(`${API_BASE_URL}/orders/revenue`),
+    createOrder: (orderData) => client.post(`${API_BASE_URL}/orders`, orderData),
+    getRevenue: () => client.get(`${API_BASE_URL}/orders/revenue`),
 
-    getOrders: (params) => axios.get(`${API_BASE_URL}/orders`, { params }),
-    getOrderById: (id) => axios.get(`${API_BASE_URL}/orders/${id}`),
-    cancelOrder: (id) => axios.put(`${API_BASE_URL}/orders/${id}/cancel`),
-    updateOrderStatus: (id, status) => axios.put(`${API_BASE_URL}/orders/${id}/status`, { status }),
+    getOrders: (params) => client.get(`${API_BASE_URL}/orders`, { params }),
+    getOrderById: (id) => client.get(`${API_BASE_URL}/orders/${id}`),
+    cancelOrder: (id) => client.put(`${API_BASE_URL}/orders/${id}/cancel`),
+    updateOrderStatus: (id, status) => client.put(`${API_BASE_URL}/orders/${id}/status`, { status }),
 
-    login: (credentials) => axios.post(`${API_BASE_URL}/users/login`, credentials),
-    register: (userData) => axios.post(`${API_BASE_URL}/users/register`, userData),
+    login: (credentials) => client.post(`${API_BASE_URL}/users/login`, credentials),
+    register: (userData) => client.post(`${API_BASE_URL}/users/register`, userData),
+    checkPasswordResetEligibility: (email) =>
+        client.post(`${API_BASE_URL}/users/password-reset-eligibility`, { email }),
+    createPasswordResetRequest: (data) =>
+        client.post(`${API_BASE_URL}/users/password-reset-requests`, data),
+    getPasswordResetRequestStatus: (id) =>
+        client.get(`${API_BASE_URL}/users/password-reset-requests/${id}/status`),
+    getPasswordResetRequests: () =>
+        client.get(`${API_BASE_URL}/users/password-reset-requests`),
+    approvePasswordResetRequest: (id) =>
+        client.post(`${API_BASE_URL}/users/password-reset-requests/${id}/approve`),
+    rejectPasswordResetRequest: (id) =>
+        client.post(`${API_BASE_URL}/users/password-reset-requests/${id}/reject`),
     changePassword: (id, passwordData) =>
-        axios.put(`${API_BASE_URL}/users/change-password/${id}`, passwordData),
+        client.put(`${API_BASE_URL}/users/change-password/${id}`, passwordData),
 
     // Quản lý người dùng (Admin)
-    getUsers: () => axios.get(`${API_BASE_URL}/users`),
-    updateUserRole: (id, roleData) => axios.put(`${API_BASE_URL}/users/${id}/role`, roleData),
-    deleteUser: (id) => axios.delete(`${API_BASE_URL}/users/${id}`),
+    getUsers: () => client.get(`${API_BASE_URL}/users`),
+    updateUserRole: (id, roleData) => client.put(`${API_BASE_URL}/users/${id}/role`, roleData),
+    deleteUser: (id) => client.delete(`${API_BASE_URL}/users/${id}`),
 
-    updateProfile: (id, data) => axios.put(`${API_BASE_URL}/users/profile/${id}`, data),
+    updateProfile: (id, data) => client.put(`${API_BASE_URL}/users/profile/${id}`, data),
 };
