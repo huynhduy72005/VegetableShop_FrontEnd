@@ -276,6 +276,10 @@ export default function App() {
            {activePage === 'account' && (
                     <Account
                         currentUser={currentUser}
+                        onUserUpdated={user => {
+                            sessionStorage.setItem('currentUser', JSON.stringify(user));
+                            setCurrentUser(user);
+                        }}
                         onLogout={() => {
                             sessionStorage.removeItem('token');
                             sessionStorage.removeItem('currentUser');

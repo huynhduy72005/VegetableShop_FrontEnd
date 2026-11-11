@@ -3,13 +3,41 @@ import { api } from '../services/api';
 import './Account.css';
 
 const roles = { Admin: 'Quản trị viên', Staff: 'Nhân viên', Customer: 'Khách hàng' };
+const genders = ['Nam', 'Nữ', 'Khác', 'Không muốn tiết lộ'];
 const initials = name => (name || '?').trim().split(/\s+/).slice(-2).map(word => word[0]).join('').toUpperCase();
+const formatDateOfBirth = date => {
+    if (!date) return 'Chưa cập nhật';
+    const [year, month, day] = date.split('-');
+    return `${day}/${month}/${year}`;
+};
+const isVietnamesePhoneNumber = phone => /^(?:0(?:3|5|7|8|9)\d{8}|02\d{8,9}|\+84(?:3|5|7|8|9)\d{8}|\+842\d{8,9})$/.test(phone.trim().replace(/[\s().-]/g, ''));
+const profileUpdateErrorMessage = error => {
+    const data = error.response?.data;
+    if (typeof data === 'string' && data.trim()) return data;
+    if (data?.message || data?.detail || data?.title) {
+        return data.message || data.detail || data.title;
+    }
+    if (data?.errors && typeof data.errors === 'object') {
+        return Object.values(data.errors).flat().join(' ');
+    }
+    if (error.response?.status === 401) return 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+    if (error.response?.status === 403) return 'Bạn không có quyền cập nhật thông tin này.';
+    if (error.response) return `Máy chủ từ chối cập nhật (HTTP ${error.response.status}).`;
+    return 'Không kết nối được máy chủ. Vui lòng kiểm tra backend và địa chỉ API.';
+};
 
-// THÊM: Truyền onNavigateToAdmin vào props
-export default function Account({ currentUser, onLogout, onNavigateToAdmin }) {
+export default function Account({ currentUser, onLogout, onNavigateToAdmin, onUserUpdated }) {
     const [tab, setTab] = useState('profile');
     const [users, setUsers] = useState([]);
     const [passwordResetRequests, setPasswordResetRequests] = useState([]);
+    const [profile, setProfile] = useState({
+        fullName: currentUser?.fullName || '',
+        email: currentUser?.email || '',
+        phone: currentUser?.phone || '',
+        gender: currentUser?.gender || '',
+        dateOfBirth: currentUser?.dateOfBirth || ''
+    });
+    const [isEditingProfile, setIsEditingProfile] = useState(false);
     const search = '';
     const role = '';
     const page = 1;
@@ -100,6 +128,48 @@ export default function Account({ currentUser, onLogout, onNavigateToAdmin }) {
         finally { setBusy(false); }
     }
 
+    async function updateProfile(event) {
+        event.preventDefault();
+        if (busy) return;
+
+        const updatedProfile = {
+            fullName: profile.fullName.trim(),
+            email: profile.email.trim(),
+            phone: profile.phone.trim(),
+            gender: profile.gender,
+            dateOfBirth: profile.dateOfBirth || null
+        };
+        if (!isVietnamesePhoneNumber(updatedProfile.phone)) {
+            setNotice({ error: true, text: 'Vui lòng nhập số điện thoại Việt Nam hợp lệ.' });
+            return;
+        }
+
+        setBusy(true);
+        setNotice(null);
+        try {
+            const response = await api.updateProfile(currentUser.id, updatedProfile);
+            const savedUser = response.data?.user || {};
+            const updatedUser = { ...currentUser, ...updatedProfile, ...savedUser };
+            onUserUpdated(updatedUser);
+            setProfile({
+                fullName: updatedUser.fullName,
+                email: updatedUser.email,
+                phone: updatedUser.phone || '',
+                gender: updatedUser.gender || '',
+                dateOfBirth: updatedUser.dateOfBirth || ''
+            });
+            setIsEditingProfile(false);
+            setNotice({ text: response.data?.message || 'Đã cập nhật thông tin cá nhân.' });
+        } catch (error) {
+            setNotice({
+                error: true,
+                text: profileUpdateErrorMessage(error)
+            });
+        } finally {
+            setBusy(false);
+        }
+    }
+
     async function changePassword(event) {
         event.preventDefault();
         if (busy) return;
@@ -161,7 +231,7 @@ export default function Account({ currentUser, onLogout, onNavigateToAdmin }) {
                         <div className="acc2-avatar large">{initials(currentUser.fullName)}</div>
                         <h2>{currentUser.fullName}</h2>
                         <p>{currentUser.email}</p>
-                        <span className={`acc2-badge ${currentUser.role}`}>{roles[currentUser.role] || currentUser.role}</span>
+                        {isAdmin && <span className="acc2-badge Admin">{roles[currentUser.role]}</span>}
                     </div>
 
                     <nav aria-label="Tài khoản">
@@ -325,12 +395,118 @@ export default function Account({ currentUser, onLogout, onNavigateToAdmin }) {
                         </section>
                     ) : tab === 'profile' ? (
                         <section className="acc2-panel">
-                            <div className="acc2-profile-banner"><h2>Xin chào, {currentUser.fullName}!</h2></div>
-                            <div className="acc2-profile-fields">
-                                {[['Họ và tên', currentUser.fullName], ['Email', currentUser.email], ['Vai trò', roles[currentUser.role] || currentUser.role], ['Mã', `#${currentUser.id}`]].map(([label, value]) => (
-                                    <div key={label}><small>{label}</small><strong>{value}</strong></div>
-                                ))}
+                            <header className="acc2-panel-head">
+                                <div>
+                                    <h2>Thông tin cá nhân</h2>
+                                    <p>Xem và cập nhật thông tin liên hệ của bạn.</p>
+                                </div>
+                                {!isEditingProfile && (
+                                    <button type="button" onClick={() => { setIsEditingProfile(true); setNotice(null); }}>
+                                        Chỉnh sửa
+                                    </button>
+                                )}
+                            </header>
+                            <div className="acc2-profile-banner">
+                                <span>HỒ SƠ CỦA BẠN</span>
+                                <h2>Xin chào, {currentUser.fullName}!</h2>
+                                <p>Thông tin này được sử dụng để liên hệ và hỗ trợ đơn hàng.</p>
                             </div>
+                            {isEditingProfile ? (
+                                <form className="acc2-profile-form" onSubmit={updateProfile}>
+                                    <label>
+                                        Họ và tên
+                                        <input
+                                            type="text"
+                                            autoComplete="name"
+                                            required
+                                            maxLength={100}
+                                            value={profile.fullName}
+                                            onChange={event => setProfile(previous => ({ ...previous, fullName: event.target.value }))}
+                                        />
+                                    </label>
+                                    <label>
+                                        Email
+                                        <input
+                                            type="email"
+                                            autoComplete="email"
+                                            required
+                                            maxLength={254}
+                                            value={profile.email}
+                                            onChange={event => setProfile(previous => ({ ...previous, email: event.target.value }))}
+                                        />
+                                    </label>
+                                    <label>
+                                        Số điện thoại
+                                        <input
+                                            type="tel"
+                                            autoComplete="tel"
+                                            inputMode="tel"
+                                            required
+                                            maxLength={20}
+                                            placeholder="0912 345 678"
+                                            value={profile.phone}
+                                            onChange={event => setProfile(previous => ({ ...previous, phone: event.target.value }))}
+                                        />
+                                    </label>
+                                    <label>
+                                        Giới tính
+                                        <select
+                                            required
+                                            value={profile.gender}
+                                            onChange={event => setProfile(previous => ({ ...previous, gender: event.target.value }))}
+                                        >
+                                            <option value="" disabled>Chọn giới tính</option>
+                                            {genders.map(gender => <option key={gender} value={gender}>{gender}</option>)}
+                                        </select>
+                                    </label>
+                                    <label>
+                                        Ngày sinh
+                                        <input
+                                            type="date"
+                                            max={new Date().toISOString().slice(0, 10)}
+                                            value={profile.dateOfBirth}
+                                            onChange={event => setProfile(previous => ({ ...previous, dateOfBirth: event.target.value }))}
+                                        />
+                                    </label>
+                                    {isAdmin && (
+                                        <div className="acc2-profile-readonly">
+                                            <small>Vai trò</small>
+                                            <strong>{roles[currentUser.role] || currentUser.role}</strong>
+                                        </div>
+                                    )}
+                                    <div className="acc2-profile-actions">
+                                        <button type="button" disabled={busy} onClick={() => {
+                                            setProfile({
+                                                fullName: currentUser.fullName || '',
+                                                email: currentUser.email || '',
+                                                phone: currentUser.phone || '',
+                                                gender: currentUser.gender || '',
+                                                dateOfBirth: currentUser.dateOfBirth || ''
+                                            });
+                                            setIsEditingProfile(false);
+                                            setNotice(null);
+                                        }}>
+                                            Hủy
+                                        </button>
+                                        <button className="acc2-password-submit" type="submit" disabled={busy}>
+                                            {busy ? 'Đang cập nhật…' : 'Lưu thay đổi'}
+                                        </button>
+                                    </div>
+                                </form>
+                            ) : (
+                                <div className="acc2-profile-fields">
+                                    {[
+                                        ['Họ và tên', currentUser.fullName],
+                                        ['Email', currentUser.email],
+                                        ['Số điện thoại', currentUser.phone || 'Chưa cập nhật'],
+                                        ['Giới tính', currentUser.gender || 'Chưa cập nhật'],
+                                        ['Ngày sinh', formatDateOfBirth(currentUser.dateOfBirth)],
+                                        ...(isAdmin ? [['Vai trò', roles[currentUser.role] || currentUser.role]] : [])
+                                    ].map(([label, value]) => (
+                                        <div key={label}><small>{label}</small><strong>{value}</strong></div>
+                                    ))}
+                                </div>
+                            )}
                         </section>
                     ) : (
                         <section className="acc2-panel acc2-empty">

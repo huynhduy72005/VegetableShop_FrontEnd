@@ -12,7 +12,7 @@ const isVietnamesePhoneNumber = (phone) => {
 export default function Checkout({ cartItems, currentUser, onOrderSuccess }) {
     const [formData, setFormData] = useState({
         fullName: currentUser ? currentUser.fullName : '',
-        phone: '',
+        phone: currentUser?.phone || '',
         streetAddress: '',
         note: ''
     });

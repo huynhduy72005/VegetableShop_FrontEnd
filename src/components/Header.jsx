@@ -470,8 +470,9 @@ export default function Header({
 
                             <small>
                                 {currentUser
-                                    ? roleNames[currentUser.role] ||
-                                      currentUser.role
+                                    ? currentUser.role === 'Admin'
+                                        ? roleNames[currentUser.role] || currentUser.role
+                                        : 'Tài khoản của bạn'
                                     : 'Tài khoản của bạn'}
                             </small>
                         </span>
