@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../services/api';
+import { isProductVisible } from '../services/productVisibility';
 import './Header.css';
 
 const navItems = [
@@ -220,6 +221,7 @@ export default function Header({
     }
 
     const results = products.filter(product =>
+        isProductVisible(product) &&
         normalize(product.name).includes(normalize(search))
     );
 

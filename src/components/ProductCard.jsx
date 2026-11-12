@@ -2,11 +2,13 @@ import './ProductCard.css';
 
 export default function ProductCard({ product, onViewDetail, onBuyNow, onAddToCart }) {
     const stockQuantity = Number(product.stockQuantity ?? product.quantity) || 0;
+    const isOutOfStock = stockQuantity <= 0;
 
     return (
-        <div className="product-card" onClick={() => onViewDetail(product)}>
+        <div className={`product-card ${isOutOfStock ? 'is-out-of-stock' : ''}`} onClick={() => onViewDetail(product)}>
             <div className="pc-image-box">
                 <img src={product.image || 'https://via.placeholder.com/200'} alt={product.name} />
+                {isOutOfStock && <span className="pc-stock-overlay">HẾT HÀNG</span>}
                 <button
                     type="button"
                     className="pc-quick-add"
@@ -18,9 +20,9 @@ export default function ProductCard({ product, onViewDetail, onBuyNow, onAddToCa
                             quantity: 1
                         });
                     }}
-                    disabled={stockQuantity <= 0}
+                    disabled={isOutOfStock}
                     aria-label={`Thêm ${product.name} vào giỏ hàng`}
-                    title={stockQuantity > 0 ? 'Thêm vào giỏ hàng' : 'Sản phẩm đã hết hàng'}
+                    title={isOutOfStock ? 'Sản phẩm đã hết hàng' : 'Thêm vào giỏ hàng'}
                 >
                     <svg
                         viewBox="0 0 24 24"
@@ -49,6 +51,8 @@ export default function ProductCard({ product, onViewDetail, onBuyNow, onAddToCa
                 <div className="pc-actions" onClick={(e) => e.stopPropagation()}>
                     <button onClick={() => onViewDetail(product)} className="btn-detail">Chi tiết</button>
                     <button
+                        disabled={isOutOfStock}
+                        title={isOutOfStock ? 'Sản phẩm đã hết hàng' : 'Mua ngay'}
                         onClick={() =>
                             onBuyNow({
                                 ...product,

@@ -31,6 +31,32 @@
   position: relative;
 }
 
+.product-card.is-out-of-stock .pc-image-box > img {
+  filter: grayscale(0.75);
+  opacity: 0.58;
+}
+
+.pc-stock-overlay {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  padding: 8px 13px;
+  border: 1px solid #fff;
+  border-radius: 8px;
+  background: rgba(145, 35, 35, 0.92);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.product-card.is-out-of-stock .pc-details {
+  opacity: 0.65;
+}
+
 .pc-quick-add {
   position: absolute;
   top: 12px;
@@ -174,6 +200,13 @@
   background: linear-gradient(135deg, var(--g-800), var(--g-700));
   box-shadow: var(--sh-green);
   transform: translateY(-1px);
+}
+
+.btn-add:disabled {
+  background: #8c938b;
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 @media (hover: none) {

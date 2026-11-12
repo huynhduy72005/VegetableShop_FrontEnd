@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { sendChatMessage } from "../services/chatService";
+import { isProductVisible } from "../services/productVisibility";
 
 export default function ChatWidget({ onAddToCart, onAddMultipleToCart }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -118,6 +119,7 @@ export default function ChatWidget({ onAddToCart, onAddMultipleToCart }) {
           >
             {messages.map((msg, index) => {
               const availableProducts = (msg.products ?? []).filter((p) =>
+                isProductVisible(p) &&
                 Number(p.stockQuantity) > 0 &&
                 Number.isFinite(Number(p.price)) &&
                 Number(p.price) >= 0

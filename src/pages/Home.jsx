@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../services/api';
+import { isProductVisible } from '../services/productVisibility';
 import './Home.css';
 
 const money = value =>
@@ -30,7 +31,7 @@ function HomeProductCard({
     const inStock = Number(product.quantity) > 0;
 
     return (
-        <article className="vn-card">
+        <article className={`vn-card ${inStock ? '' : 'is-out-of-stock'}`}>
             <div className="vn-card-photo">
                 <button
                     type="button"
@@ -48,6 +49,8 @@ function HomeProductCard({
                         <span className="vn-photo-empty">🥬</span>
                     )}
                 </button>
+
+                {!inStock && <span className="vn-stock-overlay">HẾT HÀNG</span>}
 
                 {tag && (
                     <span className="vn-card-tag">{tag}</span>
@@ -93,6 +96,7 @@ function HomeProductCard({
                         type="button"
                         className="vn-add"
                         disabled={!inStock}
+                        title={inStock ? 'Mua ngay' : 'Sản phẩm đã hết hàng'}
                         onClick={() =>
                             onBuyNow({
                                 ...product,
@@ -161,13 +165,15 @@ export default function Home({
     }, [reload]);
 
     // 4 sản phẩm còn hàng có mức giá thấp nhất.
-    const goodPriceProducts = products
+    const publicProducts = products.filter(isProductVisible);
+
+    const goodPriceProducts = publicProducts
         .filter(product => Number(product.quantity) > 0)
         .sort((a, b) => Number(a.price) - Number(b.price))
         .slice(0, 4);
 
     // Hiển thị tối đa 8 sản phẩm theo danh mục đang chọn.
-    const visibleProducts = products
+    const visibleProducts = publicProducts
         .filter(product =>
             activeCategory === null
                 ? true
@@ -365,7 +371,7 @@ export default function Home({
 
                             <small>
                                 {
-                                    products.filter(
+                                    publicProducts.filter(
                                         product =>
                                             product.categoryId ===
                                             category.id

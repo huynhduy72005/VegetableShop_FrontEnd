@@ -4,9 +4,10 @@ import './Admin.css';
 import AdminOrders from './AdminOrders';
 
 const money = value => Number(value || 0).toLocaleString('vi-VN') + ' ₫';
-const emptyProduct = { name: '', price: '', quantity: '', unit: 'kg', image: '', description: '', categoryId: '' };
+const emptyProduct = { name: '', price: '', quantity: '', unit: 'kg', image: '', description: '', categoryId: '', isVisible: true };
 const emptyCategory = { name: '', description: '' }; // State rỗng cho form danh mục
-const stockLabel = quantity => quantity <= 0 ? 'Hết hàng' : quantity <= 10 ? 'Sắp hết' : 'Còn hàng';
+const stockLabel = quantity => quantity <= 0 ? 'Hết hàng' : quantity < 10 ? 'Sắp hết' : 'Còn hàng';
+const stockPriority = quantity => quantity <= 0 ? 0 : quantity < 10 ? 1 : 2;
 
 export default function Admin() {
     const [products, setProducts] = useState([]);
@@ -15,8 +16,12 @@ export default function Admin() {
     const [tab, setTab] = useState('overview');
     const [search, setSearch] = useState('');
     const [category, setCategory] = useState('');
-    const [stock, setStock] = useState('');
     const [sort, setSort] = useState('newest');
+    const [inventorySearch, setInventorySearch] = useState('');
+    const [inventoryCategory, setInventoryCategory] = useState('');
+    const [inventoryStock, setInventoryStock] = useState('');
+    const [inventorySortBy, setInventorySortBy] = useState('quantity');
+    const [inventorySortDirection, setInventorySortDirection] = useState('asc');
     const [page, setPage] = useState(1);
     const [form, setForm] = useState(null);
     const [catForm, setCatForm] = useState(null); // State quản lý Form Danh mục
@@ -42,12 +47,35 @@ export default function Admin() {
         return () => { active = false; };
     }, []);
 
-    const lowStock = products.filter(p => p.quantity <= 10);
+    const lowStock = products.filter(p => p.quantity < 10).sort((a, b) =>
+        stockPriority(a.quantity) - stockPriority(b.quantity) || a.quantity - b.quantity
+    );
     const filtered = products.filter(p =>
         (p.name || '').toLocaleLowerCase('vi').includes(search.toLocaleLowerCase('vi')) &&
-        (!category || String(p.categoryId) === category) &&
-        (!stock || (stock === 'out' ? p.quantity <= 0 : stock === 'low' ? p.quantity > 0 && p.quantity <= 10 : p.quantity > 10))
+        (!category || String(p.categoryId) === category)
     ).sort((a, b) => sort === 'price' ? a.price - b.price : sort === 'stock' ? a.quantity - b.quantity : b.id - a.id);
+    const inventoryProducts = products.filter(p =>
+        (p.name || '').toLocaleLowerCase('vi').includes(inventorySearch.toLocaleLowerCase('vi')) &&
+        (!inventoryCategory || String(p.categoryId) === inventoryCategory) &&
+        (!inventoryStock || (
+            inventoryStock === 'out' ? p.quantity <= 0 :
+                inventoryStock === 'low' ? p.quantity > 0 && p.quantity < 10 :
+                    p.quantity >= 10
+        ))
+    ).sort((a, b) => {
+        const priority = stockPriority(a.quantity) - stockPriority(b.quantity);
+        if (priority) return priority;
+
+        const direction = inventorySortDirection === 'asc' ? 1 : -1;
+        if (inventorySortBy === 'name') {
+            return direction * (a.name || '').localeCompare(b.name || '', 'vi');
+        }
+        if (inventorySortBy === 'price') return direction * (Number(a.price) - Number(b.price));
+        if (inventorySortBy === 'status') {
+            return stockPriority(a.quantity) - stockPriority(b.quantity);
+        }
+        return direction * (Number(a.quantity) - Number(b.quantity));
+    });
     const pageCount = Math.max(1, Math.ceil(filtered.length / 8));
     const currentPage = Math.min(page, pageCount);
     const visible = filtered.slice((currentPage - 1) * 8, currentPage * 8);
@@ -96,6 +124,27 @@ export default function Admin() {
         finally { setSaving(false); }
     }
 
+    async function toggleProductVisibility(product) {
+        if (saving) return;
+        const isVisible = product.isVisible === false;
+        setSaving(true);
+        try {
+            await api.updateProduct(product.id, { ...product, isVisible });
+            const { data: updatedProduct } = await api.getProductById(product.id);
+            if (updatedProduct.isVisible !== isVisible) {
+                throw new Error('The backend did not save the visibility state.');
+            }
+            setProducts(current => current.map(item =>
+                item.id === product.id ? updatedProduct : item
+            ));
+            setNotice({ text: isVisible ? 'Đã hiện sản phẩm trên cửa hàng.' : 'Đã ẩn sản phẩm khỏi cửa hàng.' });
+        } catch {
+            setNotice({ error: true, text: 'Không cập nhật được trạng thái hiển thị. Kiểm tra backend đã cập nhật và chạy migration chưa.' });
+        } finally {
+            setSaving(false);
+        }
+    }
+
     // --- CÁC HÀM XỬ LÝ DANH MỤC (MỚI THÊM) ---
     function startCatForm(cat) {
         setNotice(null);
@@ -137,13 +186,13 @@ export default function Admin() {
         const a = document.createElement('a'); a.href = url; a.download = 'san-pham.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    const productRows = rows => rows.map(p => <tr key={p.id}>
-        <td><div className="adm-product"><span className="adm-thumb">{p.image ? <img src={p.image} alt="" onError={e => { e.currentTarget.style.display = 'none'; }} /> : '✿'}</span><div><strong>{p.name}</strong><small>SP-{p.id} · {categoryName(p.categoryId)}</small></div></div></td>
-        <td>{money(p.price)}<small>/ {p.unit}</small></td><td><strong>{p.quantity}</strong> {p.unit}</td>
-        <td><span className={`adm-badge ${p.quantity <= 0 ? 'red' : p.quantity <= 10 ? 'amber' : ''}`}>{stockLabel(p.quantity)}</span></td>
-        <td><div className="adm-actions"><button disabled={saving} onClick={() => startForm(p)}>Sửa</button><button disabled={saving} className="adm-danger" onClick={() => deleteProduct(p)}>Xóa</button></div></td>
+    const productRows = (rows, showPrice) => rows.map(p => <tr key={p.id}>
+        <td><div className="adm-product"><span className="adm-thumb">{p.image ? <img src={p.image} alt="" onError={e => { e.currentTarget.style.display = 'none'; }} /> : '✿'}</span><div><strong>{p.name}</strong><small>SP-{p.id} · {categoryName(p.categoryId)}{p.isVisible === false ? ' · Đang ẩn' : ''}</small></div></div></td>
+        {showPrice && <td>{money(p.price)}<small>/ {p.unit}</small></td>}<td><strong>{p.quantity}</strong> {p.unit}</td>
+        <td><span className={`adm-badge ${p.quantity <= 0 ? 'red stock-out' : p.quantity < 10 ? 'amber stock-low' : ''}`}>{stockLabel(p.quantity)}</span></td>
+        <td><div className="adm-actions"><button type="button" className="adm-visibility-toggle" disabled={saving} onClick={() => toggleProductVisibility(p)} aria-label={`${p.isVisible === false ? 'Hiện' : 'Ẩn'} ${p.name}`} title={`${p.isVisible === false ? 'Hiện' : 'Ẩn'} sản phẩm trên cửa hàng`}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{p.isVisible === false ? <><path d="M3 3l18 18" /><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" /><path d="M9.9 5.2A10.7 10.7 0 0 1 12 5c5.5 0 9 7 9 7a15.8 15.8 0 0 1-2.2 3.1" /><path d="M6.2 6.2C3.9 7.8 3 12 3 12s3.5 7 9 7a10.7 10.7 0 0 0 4-.8" /></> : <><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></>}</svg></button><button disabled={saving} onClick={() => startForm(p)}>Sửa</button><button disabled={saving} className="adm-danger" onClick={() => deleteProduct(p)}>Xóa</button></div></td>
     </tr>);
-    const table = rows => <div className="adm-table-scroll"><table><thead><tr><th>Sản phẩm</th><th>Giá bán</th><th>Tồn kho</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>{productRows(rows)}</tbody></table>{!rows.length && <p className="adm-empty">{loading ? 'Đang tải dữ liệu…' : 'Không có sản phẩm phù hợp.'}</p>}</div>;
+    const table = (rows, showPrice = true) => <div className="adm-table-scroll"><table><thead><tr><th>Sản phẩm</th>{showPrice && <th>Giá bán</th>}<th>Tồn kho</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>{productRows(rows, showPrice)}</tbody></table>{!rows.length && <p className="adm-empty">{loading ? 'Đang tải dữ liệu…' : 'Không có sản phẩm phù hợp.'}</p>}</div>;
 
     return <div className="adm-shell">
         <aside className="adm-sidebar"><div className="adm-brand"><span>✿</span> Vegetable<span className="adm-brand-light">Shop</span></div><p className="adm-eyebrow">KHÔNG GIAN QUẢN TRỊ</p>
@@ -166,9 +215,15 @@ export default function Admin() {
         </form></section> 
         
         : <>
-        {tab === 'overview' && <><div className="adm-stats">{[['Giá trị tất cả đơn hàng', money(stats.totalRevenue), 'Theo API hiện tại, gồm mọi trạng thái'], ['Tổng đơn hàng', stats.totalOrders ?? '—', 'Đơn hàng trong hệ thống'], ['Chờ xử lý', stats.pendingOrders ?? '—', 'Cần được xác nhận'], ['Sản phẩm', products.length, `${lowStock.length} sản phẩm tồn kho ≤ 10`]].map(([title, value, detail]) => <article key={title}><span>{title}</span><strong>{loading ? '…' : value}</strong><small>{detail}</small></article>)}</div><div className="adm-welcome"><div><p className="adm-eyebrow">CHĂM CHÚT CỬA HÀNG CỦA BẠN</p><h2>Sản phẩm tươi mới.<br />Vận hành gọn gàng.</h2><p>Thêm sản phẩm, cập nhật giá và kiểm tra lượng hàng sẵn có.</p><button className="adm-primary" disabled={loading} onClick={() => startForm()}>+ Thêm sản phẩm</button></div><span aria-hidden="true">✿</span></div><section className="adm-panel"><div className="adm-panel-head"><div><h2>Cần bổ sung hàng</h2><p>Các sản phẩm có tồn kho từ 10 trở xuống.</p></div><button onClick={() => setTab('inventory')}>Xem tất cả →</button></div>{table(lowStock.slice(0, 5))}</section></>}
-        {tab === 'products' && <section className="adm-panel"><div className="adm-panel-head"><div><h2>Danh sách sản phẩm</h2><p>{filtered.length} kết quả</p></div><div className="adm-actions"><button disabled={loading || !filtered.length} onClick={exportCSV}>↓ Xuất CSV</button><button disabled={loading} className="adm-primary" onClick={() => startForm()}>+ Thêm mới</button></div></div><div className="adm-filters"><input aria-label="Tìm sản phẩm" placeholder="Tìm tên sản phẩm…" value={search} onChange={e => updateFilter(setSearch, e.target.value)} /><select aria-label="Danh mục" value={category} onChange={e => updateFilter(setCategory, e.target.value)}><option value="">Tất cả danh mục</option>{categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select><select aria-label="Tồn kho" value={stock} onChange={e => updateFilter(setStock, e.target.value)}><option value="">Mọi tồn kho</option><option value="out">Hết hàng</option><option value="low">Sắp hết (1–10)</option><option value="available">Còn nhiều (&gt;10)</option></select><select aria-label="Sắp xếp" value={sort} onChange={e => updateFilter(setSort, e.target.value)}><option value="newest">Mới nhất</option><option value="price">Giá tăng dần</option><option value="stock">Tồn kho tăng dần</option></select></div>{table(visible)}<div className="adm-pagination"><span>Trang {currentPage} / {pageCount}</span><div className="adm-actions"><button disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>← Trước</button><button disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>Sau →</button></div></div></section>}
-        {tab === 'inventory' && <section className="adm-panel"><div className="adm-panel-head"><div><h2>{lowStock.length} sản phẩm cần chú ý</h2><p>Ngưỡng cảnh báo: tồn kho ≤ 10 đơn vị. Bấm Sửa để cập nhật số lượng.</p></div></div>{table([...lowStock].sort((a, b) => a.quantity - b.quantity))}</section>}
+        {tab === 'overview' && <><div className="adm-stats">{[['Giá trị tất cả đơn hàng', money(stats.totalRevenue), 'Theo API hiện tại, gồm mọi trạng thái'], ['Tổng đơn hàng', stats.totalOrders ?? '—', 'Đơn hàng trong hệ thống'], ['Chờ xử lý', stats.pendingOrders ?? '—', 'Cần được xác nhận'], ['Sản phẩm', products.length, `${lowStock.length} sản phẩm tồn kho < 10`]].map(([title, value, detail]) => <article key={title}><span>{title}</span><strong>{loading ? '…' : value}</strong><small>{detail}</small></article>)}</div><div className="adm-welcome"><div><p className="adm-eyebrow">CHĂM CHÚT CỬA HÀNG CỦA BẠN</p><h2>Sản phẩm tươi mới.<br />Vận hành gọn gàng.</h2><p>Thêm sản phẩm, cập nhật giá và kiểm tra lượng hàng sẵn có.</p><button className="adm-primary" disabled={loading} onClick={() => startForm()}>+ Thêm sản phẩm</button></div><span aria-hidden="true">✿</span></div><section className="adm-panel"><div className="adm-panel-head"><div><h2>Cần bổ sung hàng</h2><p>Các sản phẩm có tồn kho dưới 10 đơn vị.</p></div><button onClick={() => setTab('inventory')}>Xem tất cả →</button></div>{table(lowStock.slice(0, 5))}</section></>}
+        {tab === 'products' && <section className="adm-panel"><div className="adm-panel-head"><div><h2>Danh sách sản phẩm</h2><p>{filtered.length} kết quả</p></div><div className="adm-actions"><button disabled={loading || !filtered.length} onClick={exportCSV}>↓ Xuất CSV</button><button disabled={loading} className="adm-primary" onClick={() => startForm()}>+ Thêm mới</button></div></div><div className="adm-filters"><input aria-label="Tìm sản phẩm" placeholder="Tìm tên sản phẩm…" value={search} onChange={e => updateFilter(setSearch, e.target.value)} /><select aria-label="Danh mục" value={category} onChange={e => updateFilter(setCategory, e.target.value)}><option value="">Tất cả danh mục</option>{categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select><select aria-label="Sắp xếp" value={sort} onChange={e => updateFilter(setSort, e.target.value)}><option value="newest">Mới nhất</option><option value="price">Giá tăng dần</option><option value="stock">Tồn kho tăng dần</option></select></div>{table(visible)}<div className="adm-pagination"><span>Trang {currentPage} / {pageCount}</span><div className="adm-actions"><button disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>← Trước</button><button disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>Sau →</button></div></div></section>}
+        {tab === 'inventory' && <section className="adm-panel"><div className="adm-panel-head"><div><h2>{inventoryProducts.length} sản phẩm trong kho</h2><p>Hiển thị tất cả sản phẩm; nhóm tồn kho thấp (&lt; 10) luôn được ưu tiên lên đầu.</p></div></div><div className="adm-filters adm-inventory-filters">
+            <input aria-label="Tìm sản phẩm trong kho" placeholder="Tìm tên sản phẩm…" value={inventorySearch} onChange={e => updateFilter(setInventorySearch, e.target.value)} />
+            <select aria-label="Lọc danh mục tồn kho" value={inventoryCategory} onChange={e => updateFilter(setInventoryCategory, e.target.value)}><option value="">Tất cả danh mục</option>{categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
+            <select aria-label="Lọc trạng thái tồn kho" value={inventoryStock} onChange={e => updateFilter(setInventoryStock, e.target.value)}><option value="">Mọi trạng thái</option><option value="available">Còn hàng (từ 10)</option><option value="low">Sắp hết (1–9)</option><option value="out">Hết hàng</option></select>
+            <select aria-label="Sắp xếp tồn kho theo" value={inventorySortBy} onChange={e => updateFilter(setInventorySortBy, e.target.value)}><option value="quantity">Số lượng</option><option value="name">Tên sản phẩm</option><option value="price">Giá bán</option><option value="status">Trạng thái</option></select>
+            <select aria-label="Thứ tự sắp xếp tồn kho" value={inventorySortBy === 'status' ? 'asc' : inventorySortDirection} disabled={inventorySortBy === 'status'} onChange={e => updateFilter(setInventorySortDirection, e.target.value)}><option value="asc">{inventorySortBy === 'name' ? 'A → Z' : inventorySortBy === 'status' ? 'Hết hàng → Sắp hết → Còn hàng' : 'Tăng dần'}</option><option value="desc">{inventorySortBy === 'name' ? 'Z → A' : 'Giảm dần'}</option></select>
+        </div>{table(inventoryProducts, false)}</section>}
         {tab === 'orders' && <AdminOrders />}
         
         {/* Tab Danh Mục */}
@@ -205,7 +260,7 @@ export default function Admin() {
                                     <strong>{products.filter(p => p.categoryId === c.id).length} sản phẩm</strong>
                                 </div>
                                 <div className="adm-actions" style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #eaeaea' }}>
-                                    <button onClick={() => { setCategory(String(c.id)); setSearch(''); setStock(''); setPage(1); setTab('products'); }}>Xem SP →</button>
+                                    <button onClick={() => { setCategory(String(c.id)); setSearch(''); setPage(1); setTab('products'); }}>Xem SP →</button>
                                     <button onClick={() => startCatForm(c)}>Sửa</button>
                                     <button className="adm-danger" onClick={() => deleteCategory(c)}>Xóa</button>
                                 </div>

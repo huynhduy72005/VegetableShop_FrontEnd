@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../services/api';
+import { isProductVisible } from '../services/productVisibility';
 import ProductCard from '../components/ProductCard';
 import './Products.css';
 
@@ -61,6 +62,7 @@ export default function Products({ categoryId, onViewDetail, onBuyNow, onAddToCa
     const selectedPriceRange = priceRanges.find(r => r.id === activePriceRange) || priceRanges[0];
 
     const filteredProducts = products.filter(p => {
+        if (!isProductVisible(p)) return false;
         const matchCategory = activeCategory ? p.categoryId === activeCategory : true;
         const matchSearch = p.name.toLowerCase().includes(search.trim().toLowerCase());
         const matchPrice = selectedPriceRange.test(p.price);
@@ -88,7 +90,9 @@ export default function Products({ categoryId, onViewDetail, onBuyNow, onAddToCa
 
     // Đếm số sản phẩm theo từng danh mục (không tính bộ lọc giá/tìm kiếm, để số liệu ổn định)
     const countInCategory = (catId) =>
-        catId ? products.filter(p => p.categoryId === catId).length : products.length;
+        products.filter(p =>
+            isProductVisible(p) && (!catId || p.categoryId === catId)
+        ).length;
 
     return (
         <div className="products-container">

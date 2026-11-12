@@ -106,3 +106,16 @@
 @media(prefers-reduced-motion:reduce){
     .adm-orders-table tbody tr{transition:none}
 }
+
+.adm-inventory-filters input{flex:1 1 220px}
+.adm-inventory-filters select{flex:1 1 165px}
+
+.adm-badge.stock-out{background:#ffe0e0;color:#a00000;border:2px solid #ff2929;box-shadow:0 0 10px 2px rgba(255,35,35,.48);font-weight:800}
+.adm-badge.stock-low{background:#fff0a8;color:#704d00;border:2px solid #f0b900;box-shadow:0 0 9px 2px rgba(255,190,0,.4);font-weight:800;animation:adm-stock-warning 1s ease-in-out infinite}
+.adm-shell .adm-visibility-toggle{display:inline-grid;place-items:center;min-width:38px;padding:8px;color:#52735b}
+.adm-shell .adm-visibility-toggle:hover:not(:disabled){color:#173f32}
+@keyframes adm-stock-warning{
+    0%,100%{opacity:1;box-shadow:0 0 5px 1px rgba(255,190,0,.35)}
+    50%{opacity:.55;box-shadow:0 0 13px 4px rgba(255,190,0,.8)}
+}
+@media(prefers-reduced-motion:reduce){.adm-badge.stock-low{animation:none}}
