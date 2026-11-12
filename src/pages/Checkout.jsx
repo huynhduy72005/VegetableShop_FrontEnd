@@ -11,10 +11,11 @@ const isVietnamesePhoneNumber = (phone) => {
 
 export default function Checkout({ cartItems, currentUser, onOrderSuccess }) {
     const [formData, setFormData] = useState({
-        fullName: currentUser ? currentUser.fullName : '',
+       fullName: currentUser ? currentUser.fullName : '',
+        email: currentUser?.email || '',
         phone: currentUser?.phone || '',
         streetAddress: '',
-        note: ''
+    note: ''
     });
     const [paymentMethod, setPaymentMethod] = useState('COD');
     const [provinces, setProvinces] = useState([]);
@@ -88,10 +89,10 @@ export default function Checkout({ cartItems, currentUser, onOrderSuccess }) {
         let hasInvalidText = false;
 
         requiredTextFields.forEach(field => {
-            const input = form.elements.namedItem(field);
-            const isEmpty = !formData[field].trim();
-            input.setCustomValidity(isEmpty ? 'Vui lòng điền thông tin này.' : '');
-            hasInvalidText ||= isEmpty;
+        const input = form.elements.namedItem(field);
+const isEmpty = !formData[field].trim();
+input?.setCustomValidity(isEmpty ? 'Vui lòng điền thông tin này.' : '');
+hasInvalidText ||= isEmpty;
         });
 
         const normalizedPhone = formData.phone.trim();
@@ -109,6 +110,7 @@ export default function Checkout({ cartItems, currentUser, onOrderSuccess }) {
         const orderData = {
             userId: currentUser ? currentUser.id : 1,
             recipientName: formData.fullName.trim(),
+            email: formData.email.trim(),
             phone: normalizedPhone,
             shippingAddress: [
                 formData.streetAddress.trim(),
@@ -128,9 +130,19 @@ export default function Checkout({ cartItems, currentUser, onOrderSuccess }) {
 
         setIsSubmitting(true);
         try {
-            await api.createOrder(orderData);
-            alert('🎉 Đặt hàng thành công! Đơn hàng đã được ghi nhận.');
-            onOrderSuccess();
+          const response = await api.createOrder(orderData);
+            const result = response?.data ?? response; // chạy được dù api.js trả về response hay response.data
+            const customerEmail = formData.email.trim();
+
+            let emailMessage = '';
+            if (customerEmail) {
+           emailMessage = result?.emailSent
+        ? `\n📧 Email xác nhận đã được gửi đến ${customerEmail}.`
+        : '\n⚠️ Chưa gửi được email xác nhận, bạn vẫn có thể xem đơn trong mục đơn hàng.';
+        }
+
+        alert(`🎉 Đặt hàng thành công!\nMã đơn hàng: #${result?.orderId ?? ''}${emailMessage}`);
+        onOrderSuccess();
         } catch (error) {
             setOrderError(error.response?.data?.message || error.message || 'Không thể đặt hàng. Vui lòng thử lại.');
         } finally {
@@ -164,18 +176,18 @@ export default function Checkout({ cartItems, currentUser, onOrderSuccess }) {
                     </div>
 
                     <div className="checkout-field">
-                        <label htmlFor="checkout-full-name">Họ và tên <span className="checkout-required-mark">*</span></label>
-                        <input
-                            id="checkout-full-name"
-                            name="fullName"
-                            type="text"
-                            autoComplete="name"
-                            required
-                            maxLength={100}
-                            value={formData.fullName}
-                            onChange={event => updateFormField('fullName', event.target.value)}
-                            placeholder="Ví dụ: Nguyễn Minh Anh"
-                        />
+                       <label htmlFor="checkout-full-name">Họ và tên <span className="checkout-required-mark">*</span></label>
+                    <input
+                        id="checkout-full-name"
+                        name="fullName"
+                        type="text"
+                        autoComplete="name"
+                        required
+                        maxLength={100}
+                        value={formData.fullName}
+                        onChange={event => updateFormField('fullName', event.target.value)}
+                        placeholder="Ví dụ: Nguyễn Minh Anh"
+                    />
                     </div>
 
                     <div className="checkout-field">

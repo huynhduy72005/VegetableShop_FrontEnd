@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import './Account.css';
+import Orders from './Orders';
 
 const roles = { Admin: 'Quản trị viên', Staff: 'Nhân viên', Customer: 'Khách hàng' };
 const genders = ['Nam', 'Nữ', 'Khác', 'Không muốn tiết lộ'];
@@ -26,7 +27,8 @@ const profileUpdateErrorMessage = error => {
     return 'Không kết nối được máy chủ. Vui lòng kiểm tra backend và địa chỉ API.';
 };
 
-export default function Account({ currentUser, onLogout, onNavigateToAdmin, onUserUpdated }) {
+
+    export default function Account({ currentUser, onLogout, onNavigateToAdmin, onUserUpdated, onBuyAgain }) {
     const [tab, setTab] = useState('profile');
     const [users, setUsers] = useState([]);
     const [passwordResetRequests, setPasswordResetRequests] = useState([]);
@@ -508,10 +510,8 @@ export default function Account({ currentUser, onLogout, onNavigateToAdmin, onUs
                                 </div>
                             )}
                         </section>
-                    ) : (
-                        <section className="acc2-panel acc2-empty">
-                            <span>▤</span><h2>Đơn hàng của tôi</h2>
-                        </section>
+                  ) : (
+                        <Orders currentUser={currentUser} onBuyAgain={onBuyAgain} embedded={true} />
                     )}
                 </main>
             </div>
