@@ -1,0 +1,547 @@
+
+/* ==========================================
+   VEGETABLESHOP - QUẢN LÝ NHÂN VIÊN
+   ========================================== */
+
+.emp-page {
+    --emp-green: #205c45;
+    --emp-green-dark: #174735;
+    --emp-green-light: #eaf3e8;
+    --emp-border: #dce7dc;
+    --emp-text: #193d31;
+
+    width: 100%;
+    min-width: 0;
+    padding: 28px;
+    background: #f8faf7;
+    border: 1px solid var(--emp-border);
+    border-radius: 20px;
+    color: var(--emp-text);
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.emp-page *,
+.emp-page *::before,
+.emp-page *::after {
+    box-sizing: border-box;
+}
+
+/* Tiêu đề */
+
+.emp-page > h2 {
+    margin: 0 0 24px;
+    font-size: 25px;
+    font-weight: 750;
+    color: var(--emp-green-dark);
+    line-height: 1.3;
+}
+
+/* Thanh điều hướng */
+
+.emp-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--emp-border);
+}
+
+.emp-page button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 10px 18px;
+    border: 1px solid var(--emp-border);
+    border-radius: 10px;
+    background: white;
+    color: var(--emp-green);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    cursor: pointer;
+    transition:
+        background 0.2s,
+        box-shadow 0.2s,
+        transform 0.2s;
+}
+
+.emp-page button:hover:not(:disabled) {
+    background: var(--emp-green-light);
+    border-color: #aecdb5;
+}
+
+.emp-page button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.emp-page button:focus-visible,
+.emp-page input:focus-visible,
+.emp-page select:focus-visible {
+    outline: 3px solid #a1cfae;
+    outline-offset: 2px;
+}
+
+.emp-toolbar button:nth-child(2),
+.emp-form > button[type="submit"] {
+    background: var(--emp-green);
+    color: white;
+    border-color: var(--emp-green);
+}
+
+.emp-toolbar button:nth-child(2):hover,
+.emp-form > button[type="submit"]:hover:not(:disabled) {
+    background: var(--emp-green-dark);
+    color: white;
+}
+
+/* Biểu mẫu nhân viên */
+
+.emp-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+    width: 100%;
+    max-width: 100%;
+    padding: 28px;
+    margin-top: 12px;
+    background: #ffffff;
+    border: 1px solid var(--emp-border);
+    border-radius: 16px;
+    box-shadow: 0 6px 24px rgba(25, 65, 44, 0.04);
+}
+
+.emp-form > h3 {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--emp-border);
+    font-size: 20px;
+    color: var(--emp-green-dark);
+}
+
+/* Nhãn và ô nhập liệu */
+
+.emp-field {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-width: 0;
+    gap: 9px;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #355747;
+}
+
+.emp-field > span {
+    display: block;
+    width: 100%;
+}
+
+.emp-field input,
+.emp-field select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: 48px;
+    padding: 0 14px;
+    margin: 0;
+    border: 1px solid #d3e1d5;
+    border-radius: 10px;
+    background: #fcfdfb;
+    color: #173e2d;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 400;
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+}
+
+.emp-field input:hover,
+.emp-field select:hover {
+    border-color: #9fbea6;
+}
+
+.emp-field input:focus,
+.emp-field select:focus {
+    outline: none;
+    border-color: #39835c;
+    box-shadow: 0 0 0 3px rgba(57, 131, 92, 0.12);
+    background: #fff;
+}
+
+/* Chức vụ của biểu mẫu thêm/sửa nằm trên một hàng riêng */
+
+.emp-form:not(.emp-permissions-form) > .emp-field:has(select) {
+    grid-column: 1 / -1;
+}
+
+/* Nút lưu */
+
+.emp-form > button[type="submit"] {
+    grid-column: 1 / -1;
+    justify-self: end;
+    min-width: 170px;
+    min-height: 46px;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+/* Bảng danh sách và nhật ký */
+
+.emp-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 20px;
+    background: white;
+    border: 1px solid var(--emp-border);
+    border-radius: 14px;
+}
+
+.emp-page table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    font-size: 14px;
+}
+
+.emp-page th {
+    padding: 16px;
+    background: var(--emp-green-light);
+    color: var(--emp-green-dark);
+    text-align: left;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.emp-page td {
+    padding: 14px 16px;
+    border-top: 1px solid #edf1eb;
+    color: #355344;
+    vertical-align: middle;
+}
+
+.emp-page tbody tr:hover {
+    background: #f7faf6;
+}
+
+.emp-page td button {
+    min-height: 35px;
+    padding: 7px 12px;
+    margin: 3px;
+    font-size: 13px;
+}
+
+/* Checkbox phân quyền - giữ cho các form khác nếu còn sử dụng */
+
+.emp-form > label:not(.emp-field) {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding: 12px 14px;
+    border: 1px solid var(--emp-border);
+    border-radius: 10px;
+    background: #f9fbf8;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.emp-form input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    accent-color: var(--emp-green);
+}
+
+/* Thông báo cũ - giữ lại tương thích */
+
+.emp-page > p[role="status"] {
+    padding: 14px 16px;
+    margin: 12px 0;
+    border: 1px solid #cddfca;
+    border-radius: 10px;
+    background: #eff7ed;
+    color: var(--emp-green-dark);
+    font-size: 14px;
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+    .emp-page {
+        padding: 20px;
+    }
+
+    .emp-form {
+        padding: 20px;
+        gap: 16px;
+    }
+}
+
+@media (max-width: 650px) {
+    .emp-page {
+        padding: 16px;
+        border-radius: 14px;
+    }
+
+    .emp-page > h2 {
+        font-size: 22px;
+    }
+
+    .emp-form {
+        grid-template-columns: 1fr;
+        padding: 18px;
+    }
+
+    .emp-form > h3,
+    .emp-form:not(.emp-permissions-form) > .emp-field:has(select),
+    .emp-form > button[type="submit"] {
+        grid-column: 1;
+    }
+
+    .emp-form > button[type="submit"] {
+        justify-self: stretch;
+    }
+
+    .emp-toolbar button {
+        flex: 1 1 auto;
+    }
+
+    .emp-page table {
+        min-width: 620px;
+    }
+}
+
+/* Thông báo khi nhập sai dữ liệu */
+
+.emp-field input[aria-invalid="true"] {
+    border-color: #d64545;
+    background: #fff8f7;
+}
+
+.emp-field input[aria-invalid="true"]:focus {
+    border-color: #c0392b;
+    box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.12);
+}
+
+.emp-error {
+    display: block;
+    margin-top: 2px;
+    color: #c0392b;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+/* ==========================================
+   THÔNG BÁO CÓ NÚT X GÓC TRÊN BÊN PHẢI
+   ========================================== */
+
+.emp-page .emp-alert {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+    min-height: 64px;
+    padding: 18px 58px 18px 20px;
+    margin: 12px 0 20px;
+
+    border: 1px solid #cfe0cf;
+    border-radius: 14px;
+    background: #eef7ec;
+    color: #1f4c38;
+
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+.emp-page .emp-alert > span {
+    display: block;
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* Nút đóng thông báo */
+.emp-page .emp-alert .emp-alert-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
+    padding: 0;
+    margin: 0;
+
+    border: 1px solid #d5e2d4;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #587364;
+
+    font-family: inherit;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.emp-page .emp-alert .emp-alert-close:hover:not(:disabled) {
+    background: #e0ece0;
+    border-color: #b8d3ba;
+    color: #174735;
+}
+
+.emp-page .emp-alert .emp-alert-close:focus-visible {
+    outline: 2px solid #39835c;
+    outline-offset: 2px;
+}
+
+/* ==========================================
+   PHÂN QUYỀN NHÂN VIÊN
+   ========================================== */
+
+/* Chỉ áp dụng cho form phân quyền */
+.emp-page .emp-permissions-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    align-items: start;
+
+    width: 100%;
+    max-width: 100%;
+    margin-top: 16px;
+    padding: 28px;
+
+    background: #ffffff;
+    border: 1px solid #dce7dc;
+    border-radius: 16px;
+    box-shadow: 0 6px 24px rgba(25, 65, 44, 0.04);
+}
+
+/* Tiêu đề */
+.emp-page .emp-permissions-form > h3 {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #dce7dc;
+    font-size: 21px;
+    font-weight: 700;
+    color: #174735;
+}
+
+/* Vai trò nhân viên và trạng thái */
+.emp-page .emp-permissions-form > .emp-field {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    grid-column: auto;
+    width: 100%;
+    min-width: 0;
+    gap: 10px;
+    margin: 0;
+
+    font-size: 14px;
+    font-weight: 600;
+    color: #355747;
+}
+
+/* Ô chọn phân quyền */
+.emp-page .emp-permissions-form .emp-field select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: 48px;
+    margin: 0;
+    padding: 0 14px;
+
+    border: 1px solid #d3e1d5;
+    border-radius: 10px;
+    background: #fcfdfb;
+    color: #173e2d;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.emp-page .emp-permissions-form .emp-field select:focus {
+    outline: none;
+    border-color: #39835c;
+    box-shadow: 0 0 0 3px rgba(57, 131, 92, 0.12);
+}
+
+/* Nút lưu phân quyền */
+.emp-page .emp-permissions-form > button[type="submit"] {
+    grid-column: 1 / -1;
+    justify-self: end;
+
+    min-width: 190px;
+    min-height: 46px;
+    padding: 12px 24px;
+
+    border: 1px solid #205c45;
+    border-radius: 10px;
+    background: #205c45;
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.emp-page .emp-permissions-form > button[type="submit"]:hover:not(:disabled) {
+    background: #174735;
+    border-color: #174735;
+    color: #ffffff;
+}
+
+/* ==========================================
+   RESPONSIVE CHO THÔNG BÁO VÀ PHÂN QUYỀN
+   ========================================== */
+
+@media (max-width: 650px) {
+    .emp-page .emp-alert {
+        padding: 16px 48px 16px 14px;
+        font-size: 14px;
+    }
+
+    .emp-page .emp-alert .emp-alert-close {
+        top: 8px;
+        right: 8px;
+    }
+
+    .emp-page .emp-permissions-form {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        padding: 18px;
+    }
+
+    .emp-page .emp-permissions-form > .emp-field {
+        grid-column: 1;
+    }
+
+    .emp-page .emp-permissions-form > button[type="submit"] {
+        grid-column: 1;
+        justify-self: stretch;
+        width: 100%;
+    }
+}

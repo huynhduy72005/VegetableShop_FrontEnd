@@ -3,6 +3,7 @@ import { api } from '../services/api';
 import './Admin.css';
 import AdminOrders from './AdminOrders';
 
+
 const money = value => Number(value || 0).toLocaleString('vi-VN') + ' ₫';
 const emptyProduct = { name: '', price: '', quantity: '', unit: 'kg', image: '', description: '', categoryId: '', isVisible: true };
 const emptyCategory = { name: '', description: '' }; // State rỗng cho form danh mục
@@ -200,7 +201,7 @@ export default function Admin() {
             <div className="adm-sidebar-note"><strong>Mỗi ngày một chút xanh.</strong><p>Quản lý sản phẩm và theo dõi cửa hàng của bạn tại đây.</p></div>
         </aside>
         
-        <section className="adm-main" aria-busy={loading}><header className="adm-heading"><div><p className="adm-eyebrow">VEGETABLESHOP / QUẢN TRỊ</p><h1>{form ? (form.id ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm') : catForm ? (catForm.id ? 'Chỉnh sửa danh mục' : 'Thêm danh mục') : { overview: 'Tổng quan cửa hàng', products: 'Quản lý sản phẩm', inventory: 'Kiểm tra tồn kho', categories: 'Danh mục sản phẩm', orders: 'Quản lý đơn hàng' }[tab]}</h1><p>Theo dõi rõ ràng, quản lý dễ dàng.</p></div><button disabled={loading || saving} onClick={refresh}>{loading ? 'Đang tải…' : '↻ Tải lại'}</button></header>
+        <section className="adm-main" aria-busy={loading}><header className="adm-heading"><div><p className="adm-eyebrow">VEGETABLESHOP / QUẢN TRỊ</p><h1>{form ? (form.id ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm') : catForm ? (catForm.id ? 'Chỉnh sửa danh mục' : 'Thêm danh mục') : { overview: 'Tổng quan cửa hàng', products: 'Quản lý sản phẩm', inventory: 'Kiểm tra tồn kho', categories: 'Danh mục sản phẩm', orders: 'Quản lý đơn hàng', employees: 'Quản lý nhân viên' }[tab]}</h1><p>Theo dõi rõ ràng, quản lý dễ dàng.</p></div><button disabled={loading || saving} onClick={refresh}>{loading ? 'Đang tải…' : '↻ Tải lại'}</button></header>
         {notice && <div role={notice.error ? 'alert' : 'status'} className={`adm-notice ${notice.error ? 'error' : ''}`}>{notice.text}<button aria-label="Đóng thông báo" onClick={() => setNotice(null)}>×</button></div>}
         
         {/* Form Sản phẩm */}
@@ -225,6 +226,8 @@ export default function Admin() {
             <select aria-label="Thứ tự sắp xếp tồn kho" value={inventorySortBy === 'status' ? 'asc' : inventorySortDirection} disabled={inventorySortBy === 'status'} onChange={e => updateFilter(setInventorySortDirection, e.target.value)}><option value="asc">{inventorySortBy === 'name' ? 'A → Z' : inventorySortBy === 'status' ? 'Hết hàng → Sắp hết → Còn hàng' : 'Tăng dần'}</option><option value="desc">{inventorySortBy === 'name' ? 'Z → A' : 'Giảm dần'}</option></select>
         </div>{table(inventoryProducts, false)}</section>}
         {tab === 'orders' && <AdminOrders />}
+    
+
         
         {/* Tab Danh Mục */}
         {tab === 'categories' && (
