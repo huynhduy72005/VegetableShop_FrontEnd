@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import './Account.css';
 import Orders from './Orders';
+import EmployeeManagement from './EmployeeManagement';
 
 const roles = { Admin: 'Quản trị viên', Staff: 'Nhân viên', Customer: 'Khách hàng' };
 const genders = ['Nam', 'Nữ', 'Khác', 'Không muốn tiết lộ'];
@@ -28,7 +29,7 @@ const profileUpdateErrorMessage = error => {
 };
 
 
-    export default function Account({ currentUser, onLogout, onNavigateToAdmin, onUserUpdated, onBuyAgain }) {
+export default function Account({ currentUser, onLogout, onNavigateToAdmin, onUserUpdated, onBuyAgain }) {
     const [tab, setTab] = useState('profile');
     const [users, setUsers] = useState([]);
     const [passwordResetRequests, setPasswordResetRequests] = useState([]);
@@ -221,8 +222,22 @@ const profileUpdateErrorMessage = error => {
             <div className="acc2-top">
                 <div>
                     <p className="acc2-eyebrow"></p>
-                    <h1>{management ? 'Nhân sự & phân quyền' : 'Không gian tài khoản'}</h1>
-                    <p>{management ? 'Quản lý thành viên và vai trò trong cửa hàng.' : 'Thông tin cá nhân và hoạt động của bạn.'}</p>
+                    <h1>
+                        {management
+                            ? 'Nhân sự & phân quyền'
+                            : isAdmin && tab === 'manage_employees'
+                                ? 'Quản lý nhân viên'
+                                : 'Không gian tài khoản'}
+                    </h1>
+
+                    <p>
+                        {management
+                            ? 'Quản lý thành viên và vai trò trong cửa hàng.'
+                            : isAdmin && tab === 'manage_employees'
+                                ? 'Thêm, chỉnh sửa, phân quyền và xem nhật ký hoạt động nhân viên.'
+                                : 'Thông tin cá nhân và hoạt động của bạn.'}
+                    </p>
+
                 </div>
                 <span className="acc2-top-tag">✿ Cùng cửa hàng phát triển</span>
             </div>
@@ -243,19 +258,30 @@ const profileUpdateErrorMessage = error => {
                         <button className={tab === 'change_password' ? 'active' : ''} onClick={() => { setTab('change_password'); setNotice(null); }}>
                             <span>♙</span>Đổi mật khẩu
                         </button>
-                        
+
                         {isAdmin && (
                             <>
                                 <button className={tab === 'manage_users' ? 'active' : ''} onClick={() => setTab('manage_users')}>
                                     <span>♧</span>Nhân sự & phân quyền
                                 </button>
+
+                                <button
+                                    className={tab === 'manage_employees' ? 'active' : ''}
+                                    onClick={() => {
+                                        setTab('manage_employees');
+                                        setNotice(null);
+                                    }}
+                                >
+                                    <span>👥</span>Quản lý nhân viên
+                                </button>
+                       
                                 {/* KHI BẤM NÚT NÀY SẼ GỌI onNavigateToAdmin ĐỂ CHUYỂN HẲN SANG TRANG QUẢN TRỊ */}
                                 <button onClick={onNavigateToAdmin}>
                                     <span>◫</span>Trang quản trị cửa hàng
                                 </button>
                             </>
                         )}
-                        
+
                         {currentUser.role === 'Customer' && (
                             <button className={tab === 'orders' ? 'active' : ''} onClick={() => setTab('orders')}>
                                 <span>▤</span>Đơn hàng của tôi
@@ -348,7 +374,11 @@ const profileUpdateErrorMessage = error => {
                                 )}
                             </section>
                         </>
+
+                    ) : isAdmin && tab === 'manage_employees' ? (
+                        <EmployeeManagement />
                     ) : tab === 'change_password' ? (
+
                         <section className="acc2-panel">
                             <header className="acc2-panel-head">
                                 <div>
@@ -510,7 +540,7 @@ const profileUpdateErrorMessage = error => {
                                 </div>
                             )}
                         </section>
-                  ) : (
+                    ) : (
                         <Orders currentUser={currentUser} onBuyAgain={onBuyAgain} embedded={true} />
                     )}
                 </main>

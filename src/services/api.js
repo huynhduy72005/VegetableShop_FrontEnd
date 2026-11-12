@@ -59,4 +59,33 @@ export const api = {
     deleteUser: (id) => client.delete(`${API_BASE_URL}/users/${id}`),
 
     updateProfile: (id, data) => client.put(`${API_BASE_URL}/users/profile/${id}`, data),
+    
+    // ========== QUẢN LÝ NHÂN VIÊN ==========
+
+    // Lấy danh sách nhân viên
+    getEmployees: () =>
+        client.get(`${API_BASE_URL}/employees`),
+
+    // Xem chi tiết một nhân viên
+    getEmployeeById: (id) =>
+        client.get(`${API_BASE_URL}/employees/${id}`),
+
+    // Thêm nhân viên
+    createEmployee: (data) =>
+        client.post(`${API_BASE_URL}/employees`, data),
+
+    // Chỉnh sửa thông tin nhân viên
+    updateEmployee: (id, data) =>
+        client.put(`${API_BASE_URL}/employees/${id}`, data),
+
+    // Cập nhật quyền và trạng thái nhân viên
+    updateEmployeePermissions: (id, data) =>
+        client.put(`${API_BASE_URL}/employees/${id}/permissions`, data),
+
+    // Xem nhật ký hoạt động
+    getEmployeeLogs: () =>
+        client.get(`${API_BASE_URL}/employees/logs`),
+
+    // ======================================
+
 };
