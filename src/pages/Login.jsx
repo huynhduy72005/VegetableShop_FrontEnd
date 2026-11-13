@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import './Auth.css';
 
 export default function Login({ onLoginSuccess, onSwitchToRegister }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const emailInputRef = useRef(null);
     const [isRequestingReset, setIsRequestingReset] = useState(false);
     const [verifiedEmail, setVerifiedEmail] = useState('');
     const [isAdminAccount, setIsAdminAccount] = useState(false);
@@ -55,7 +54,7 @@ export default function Login({ onLoginSuccess, onSwitchToRegister }) {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const res = await api.login({ email, password });
+            const res = await api.login({ login: email.trim(), password });
             alert(res.data.message);
             onLoginSuccess(res.data.user, res.data.token);
         } catch (err) {
@@ -64,13 +63,15 @@ export default function Login({ onLoginSuccess, onSwitchToRegister }) {
     };
 
     const handleStartPasswordReset = async () => {
-        const emailInput = emailInputRef.current;
-        if (!emailInput?.reportValidity()) return;
+        const normalizedEmail = email.trim();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+            setEmailCheckError('Vui lòng nhập email hợp lệ để khôi phục mật khẩu.');
+            return;
+        }
 
         setIsCheckingEmail(true);
         setEmailCheckError('');
         try {
-            const normalizedEmail = email.trim();
             const response = await api.checkPasswordResetEligibility(normalizedEmail);
             setVerifiedEmail(normalizedEmail);
             setIsAdminAccount(response.data.requiresAdminRecoveryKey);
@@ -231,19 +232,18 @@ export default function Login({ onLoginSuccess, onSwitchToRegister }) {
                         <h2>Đăng nhập tài khoản</h2>
                         <form onSubmit={handleLogin} className="auth-form">
                             <div className="form-group">
-                                <label htmlFor="login-email">Email</label>
+                                <label htmlFor="login-identifier">Tên đăng nhập hoặc email</label>
                                 <input
-                                    id="login-email"
-                                    type="email"
+                                    id="login-identifier"
+                                    type="text"
                                     required
-                                    autoComplete="email"
-                                    ref={emailInputRef}
+                                    autoComplete="username"
                                     value={email}
                                     onChange={e => {
                                         setEmail(e.target.value);
                                         setEmailCheckError('');
                                     }}
-                                    placeholder="Nhập email..."
+                                    placeholder="Nhập tên đăng nhập hoặc email..."
                                 />
                             </div>
                             <div className="form-group">

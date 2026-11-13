@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { api } from '../services/api';
 import './Admin.css';
 import AdminOrders from './AdminOrders';
@@ -10,11 +10,22 @@ const emptyCategory = { name: '', description: '' }; // State rỗng cho form da
 const stockLabel = quantity => quantity <= 0 ? 'Hết hàng' : quantity < 10 ? 'Sắp hết' : 'Còn hàng';
 const stockPriority = quantity => quantity <= 0 ? 0 : quantity < 10 ? 1 : 2;
 
-export default function Admin() {
+const allTabs = [
+    ['overview', '◫', 'Tổng quan'],
+    ['products', '▦', 'Sản phẩm'],
+    ['inventory', '▤', 'Kiểm tra tồn kho'],
+    ['categories', '◈', 'Danh mục'],
+    ['orders', '▣', 'Đơn hàng']
+];
+
+export default function Admin({ currentUser }) {
+    const isAdmin = currentUser?.role === 'Admin';
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [stats, setStats] = useState({});
     const [tab, setTab] = useState('overview');
+    const [staffPermissions, setStaffPermissions] = useState(null);
+    const [permissionError, setPermissionError] = useState('');
     const [search, setSearch] = useState('');
     const [category, setCategory] = useState('');
     const [sort, setSort] = useState('newest');
@@ -26,27 +37,104 @@ export default function Admin() {
     const [page, setPage] = useState(1);
     const [form, setForm] = useState(null);
     const [catForm, setCatForm] = useState(null); // State quản lý Form Danh mục
+    const [inventoryForm, setInventoryForm] = useState(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [notice, setNotice] = useState(null);
 
+    useEffect(() => {
+        if (isAdmin) {
+            setStaffPermissions(null);
+            setPermissionError('');
+            return undefined;
+        }
+
+        let active = true;
+        setStaffPermissions(null);
+        setPermissionError('');
+        api.getMyEmployeeProfile()
+            .then(({ data }) => {
+                if (!active) return;
+                const employee = data.employee;
+                setStaffPermissions({
+                    canManageProducts: Boolean(employee?.canManageProducts),
+                    canManageOrders: Boolean(employee?.canManageOrders),
+                    canManageInventory: Boolean(employee?.canManageInventory)
+                });
+            })
+            .catch(() => {
+                if (active) setPermissionError('Không tải được quyền nhân viên. Hãy đăng nhập lại hoặc liên hệ Admin.');
+            });
+        return () => { active = false; };
+    }, [isAdmin, currentUser?.id]);
+
+    const permissionLoading = !isAdmin && staffPermissions === null && !permissionError;
+    const canManageProducts = isAdmin || Boolean(staffPermissions?.canManageProducts);
+    const canManageOrders = isAdmin || Boolean(staffPermissions?.canManageOrders);
+    const canManageInventory = isAdmin || Boolean(staffPermissions?.canManageInventory);
+    const canViewProducts = canManageProducts || canManageInventory;
+    const availableTabs = useMemo(() => isAdmin
+        ? allTabs
+        : [
+            ...(canManageProducts ? [allTabs[1], allTabs[3]] : []),
+            ...(canManageInventory ? [allTabs[2]] : []),
+            ...(canManageOrders ? [allTabs[4]] : [])
+        ], [isAdmin, canManageProducts, canManageInventory, canManageOrders]);
+
+    useEffect(() => {
+        if (permissionLoading || permissionError || !availableTabs.length)
+            return;
+        if (!availableTabs.some(([id]) => id === tab))
+            setTab(availableTabs[0][0]);
+    }, [permissionLoading, permissionError, availableTabs, tab]);
+
+    async function loadData() {
+        const [p, c, s] = await Promise.all([
+            canViewProducts ? api.getProducts() : Promise.resolve({ data: [] }),
+            canViewProducts ? api.getCategories() : Promise.resolve({ data: [] }),
+            canManageOrders ? api.getRevenue() : Promise.resolve({ data: {} })
+        ]);
+        setProducts(p.data);
+        setCategories(c.data);
+        setStats(s.data);
+    }
+
     async function refresh() {
+        if (permissionLoading || permissionError)
+            return;
         setLoading(true);
         try {
-            const [p, c, s] = await Promise.all([api.getProducts(), api.getCategories(), api.getRevenue()]);
-            setProducts(p.data); setCategories(c.data); setStats(s.data);
+            await loadData();
         } catch {
             setNotice({ error: true, text: 'Không tải được dữ liệu. Kiểm tra backend đang chạy tại cổng 7179 rồi bấm Tải lại.' });
         } finally { setLoading(false); }
     }
     useEffect(() => {
+        if (permissionLoading)
+            return undefined;
+        if (permissionError) {
+            setLoading(false);
+            return undefined;
+        }
+
         let active = true;
-        Promise.all([api.getProducts(), api.getCategories(), api.getRevenue()])
+        Promise.all([
+            canViewProducts ? api.getProducts() : Promise.resolve({ data: [] }),
+            canViewProducts ? api.getCategories() : Promise.resolve({ data: [] }),
+            canManageOrders ? api.getRevenue() : Promise.resolve({ data: {} })
+        ])
             .then(([p, c, s]) => { if (active) { setProducts(p.data); setCategories(c.data); setStats(s.data); } })
             .catch(() => { if (active) setNotice({ error: true, text: 'Không tải được dữ liệu. Hãy chạy backend và bấm Tải lại.' }); })
             .finally(() => { if (active) setLoading(false); });
         return () => { active = false; };
-    }, []);
+    }, [permissionLoading, permissionError, canViewProducts, canManageOrders]);
+
+    if (permissionLoading)
+        return <div className="adm-shell"><main className="adm-main">Đang tải quyền nhân viên…</main></div>;
+    if (permissionError)
+        return <div className="adm-shell"><main className="adm-main"><div role="alert" className="adm-notice error">{permissionError}</div></main></div>;
+    if (!isAdmin && !availableTabs.length)
+        return <div className="adm-shell"><main className="adm-main"><div role="status" className="adm-notice">Tài khoản chưa được cấp quyền quản lý cửa hàng. Vui lòng liên hệ Admin.</div></main></div>;
 
     const lowStock = products.filter(p => p.quantity < 10).sort((a, b) =>
         stockPriority(a.quantity) - stockPriority(b.quantity) || a.quantity - b.quantity
@@ -115,6 +203,29 @@ export default function Admin() {
             setForm(null); setNotice({ text: 'Đã lưu sản phẩm thành công.' }); await refresh();
         } catch { setNotice({ error: true, text: 'Lưu thất bại. Kiểm tra kết nối và dữ liệu rồi thử lại.' }); }
         finally { setSaving(false); }
+    }
+
+    async function saveInventory(event) {
+        event.preventDefault();
+        if (saving) return;
+
+        const quantity = Number(inventoryForm.quantity);
+        if (!Number.isInteger(quantity) || quantity < 0) {
+            setNotice({ error: true, text: 'Số lượng tồn kho phải là số nguyên không âm.' });
+            return;
+        }
+
+        setSaving(true);
+        try {
+            await api.updateProductInventory(inventoryForm.id, { quantity });
+            setInventoryForm(null);
+            setNotice({ text: 'Đã cập nhật số lượng tồn kho.' });
+            await refresh();
+        } catch {
+            setNotice({ error: true, text: 'Không cập nhật được tồn kho. Hãy thử lại hoặc liên hệ Admin.' });
+        } finally {
+            setSaving(false);
+        }
     }
 
     async function deleteProduct(product) {
@@ -191,17 +302,27 @@ export default function Admin() {
         <td><div className="adm-product"><span className="adm-thumb">{p.image ? <img src={p.image} alt="" onError={e => { e.currentTarget.style.display = 'none'; }} /> : '✿'}</span><div><strong>{p.name}</strong><small>SP-{p.id} · {categoryName(p.categoryId)}{p.isVisible === false ? ' · Đang ẩn' : ''}</small></div></div></td>
         {showPrice && <td>{money(p.price)}<small>/ {p.unit}</small></td>}<td><strong>{p.quantity}</strong> {p.unit}</td>
         <td><span className={`adm-badge ${p.quantity <= 0 ? 'red stock-out' : p.quantity < 10 ? 'amber stock-low' : ''}`}>{stockLabel(p.quantity)}</span></td>
-        <td><div className="adm-actions"><button type="button" className="adm-visibility-toggle" disabled={saving} onClick={() => toggleProductVisibility(p)} aria-label={`${p.isVisible === false ? 'Hiện' : 'Ẩn'} ${p.name}`} title={`${p.isVisible === false ? 'Hiện' : 'Ẩn'} sản phẩm trên cửa hàng`}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{p.isVisible === false ? <><path d="M3 3l18 18" /><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" /><path d="M9.9 5.2A10.7 10.7 0 0 1 12 5c5.5 0 9 7 9 7a15.8 15.8 0 0 1-2.2 3.1" /><path d="M6.2 6.2C3.9 7.8 3 12 3 12s3.5 7 9 7a10.7 10.7 0 0 0 4-.8" /></> : <><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></>}</svg></button><button disabled={saving} onClick={() => startForm(p)}>Sửa</button><button disabled={saving} className="adm-danger" onClick={() => deleteProduct(p)}>Xóa</button></div></td>
+        <td><div className="adm-actions">
+            {canManageProducts ? <>
+                <button type="button" className="adm-visibility-toggle" disabled={saving} onClick={() => toggleProductVisibility(p)} aria-label={`${p.isVisible === false ? 'Hiện' : 'Ẩn'} ${p.name}`} title={`${p.isVisible === false ? 'Hiện' : 'Ẩn'} sản phẩm trên cửa hàng`}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{p.isVisible === false ? <><path d="M3 3l18 18" /><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" /><path d="M9.9 5.2A10.7 10.7 0 0 1 12 5c5.5 0 9 7 9 7a15.8 15.8 0 0 1-2.2 3.1" /><path d="M6.2 6.2C3.9 7.8 3 12 3 12s3.5 7 9 7a10.7 10.7 0 0 0 4-.8" /></> : <><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></>}</svg></button>
+                <button disabled={saving} onClick={() => startForm(p)}>Sửa</button>
+                <button disabled={saving} className="adm-danger" onClick={() => deleteProduct(p)}>Xóa</button>
+            </> : canManageInventory && <button disabled={saving} onClick={() => setInventoryForm({
+                id: p.id,
+                name: p.name,
+                quantity: String(p.quantity)
+            })}>Cập nhật tồn kho</button>}
+        </div></td>
     </tr>);
     const table = (rows, showPrice = true) => <div className="adm-table-scroll"><table><thead><tr><th>Sản phẩm</th>{showPrice && <th>Giá bán</th>}<th>Tồn kho</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>{productRows(rows, showPrice)}</tbody></table>{!rows.length && <p className="adm-empty">{loading ? 'Đang tải dữ liệu…' : 'Không có sản phẩm phù hợp.'}</p>}</div>;
 
     return <div className="adm-shell">
         <aside className="adm-sidebar"><div className="adm-brand"><span>✿</span> Vegetable<span className="adm-brand-light">Shop</span></div><p className="adm-eyebrow">KHÔNG GIAN QUẢN TRỊ</p>
-            <nav aria-label="Quản trị">{[['overview', '◫', 'Tổng quan'], ['products', '▦', 'Sản phẩm'], ['inventory', '▤', 'Kiểm tra tồn kho'], ['categories', '◈', 'Danh mục'],['orders', '▣', 'Đơn hàng'] ].map(([id, icon, label]) => <button key={id} className={tab === id ? 'active' : ''} onClick={() => { setTab(id); setForm(null); setCatForm(null); }}><span>{icon}</span>{label}{id === 'inventory' && <b>{lowStock.length}</b>}</button>)}</nav>
+            <nav aria-label="Quản trị">{availableTabs.map(([id, icon, label]) => <button key={id} className={tab === id ? 'active' : ''} onClick={() => { setTab(id); setForm(null); setCatForm(null); setInventoryForm(null); }}><span>{icon}</span>{label}{id === 'inventory' && <b>{lowStock.length}</b>}</button>)}</nav>
             <div className="adm-sidebar-note"><strong>Mỗi ngày một chút xanh.</strong><p>Quản lý sản phẩm và theo dõi cửa hàng của bạn tại đây.</p></div>
         </aside>
         
-        <section className="adm-main" aria-busy={loading}><header className="adm-heading"><div><p className="adm-eyebrow">VEGETABLESHOP / QUẢN TRỊ</p><h1>{form ? (form.id ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm') : catForm ? (catForm.id ? 'Chỉnh sửa danh mục' : 'Thêm danh mục') : { overview: 'Tổng quan cửa hàng', products: 'Quản lý sản phẩm', inventory: 'Kiểm tra tồn kho', categories: 'Danh mục sản phẩm', orders: 'Quản lý đơn hàng', employees: 'Quản lý nhân viên' }[tab]}</h1><p>Theo dõi rõ ràng, quản lý dễ dàng.</p></div><button disabled={loading || saving} onClick={refresh}>{loading ? 'Đang tải…' : '↻ Tải lại'}</button></header>
+        <section className="adm-main" aria-busy={loading}><header className="adm-heading"><div><p className="adm-eyebrow">VEGETABLESHOP / QUẢN TRỊ</p><h1>{form ? (form.id ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm') : inventoryForm ? 'Cập nhật tồn kho' : catForm ? (catForm.id ? 'Chỉnh sửa danh mục' : 'Thêm danh mục') : { overview: 'Tổng quan cửa hàng', products: 'Quản lý sản phẩm', inventory: 'Kiểm tra tồn kho', categories: 'Danh mục sản phẩm', orders: 'Quản lý đơn hàng', employees: 'Quản lý nhân viên' }[tab]}</h1><p>Theo dõi rõ ràng, quản lý dễ dàng.</p></div><button disabled={loading || saving} onClick={refresh}>{loading ? 'Đang tải…' : '↻ Tải lại'}</button></header>
         {notice && <div role={notice.error ? 'alert' : 'status'} className={`adm-notice ${notice.error ? 'error' : ''}`}>{notice.text}<button aria-label="Đóng thông báo" onClick={() => setNotice(null)}>×</button></div>}
         
         {/* Form Sản phẩm */}
@@ -213,8 +334,11 @@ export default function Admin() {
                 <input type="file" accept="image/*" onChange={handleFileChange} style={{ marginTop: '8px' }} />
             </label>
             <label className="adm-wide">Mô tả<textarea rows="4" value={form.description || ''} onChange={e => setForm({ ...form, description: e.target.value })} /></label><div className="adm-wide adm-actions"><button className="adm-primary" disabled={saving || loading || !categories.length}>{saving ? 'Đang lưu…' : 'Lưu sản phẩm'}</button><button type="button" disabled={saving} onClick={() => setForm(null)}>Hủy</button></div>
-        </form></section> 
-        
+        </form></section>
+        : inventoryForm ? <section className="adm-panel"><div className="adm-panel-head"><h2>{inventoryForm.name}</h2><button disabled={saving} onClick={() => setInventoryForm(null)}>← Quay lại</button></div><form onSubmit={saveInventory} className="adm-form">
+            <label>Số lượng tồn kho<input aria-label="Số lượng tồn kho" required type="number" min="0" step="1" value={inventoryForm.quantity} onChange={event => setInventoryForm({ ...inventoryForm, quantity: event.target.value })} /></label>
+            <div className="adm-wide adm-actions"><button className="adm-primary" disabled={saving || loading}>{saving ? 'Đang lưu…' : 'Lưu tồn kho'}</button><button type="button" disabled={saving} onClick={() => setInventoryForm(null)}>Hủy</button></div>
+        </form></section>
         : <>
         {tab === 'overview' && <><div className="adm-stats">{[['Giá trị tất cả đơn hàng', money(stats.totalRevenue), 'Theo API hiện tại, gồm mọi trạng thái'], ['Tổng đơn hàng', stats.totalOrders ?? '—', 'Đơn hàng trong hệ thống'], ['Chờ xử lý', stats.pendingOrders ?? '—', 'Cần được xác nhận'], ['Sản phẩm', products.length, `${lowStock.length} sản phẩm tồn kho < 10`]].map(([title, value, detail]) => <article key={title}><span>{title}</span><strong>{loading ? '…' : value}</strong><small>{detail}</small></article>)}</div><div className="adm-welcome"><div><p className="adm-eyebrow">CHĂM CHÚT CỬA HÀNG CỦA BẠN</p><h2>Sản phẩm tươi mới.<br />Vận hành gọn gàng.</h2><p>Thêm sản phẩm, cập nhật giá và kiểm tra lượng hàng sẵn có.</p><button className="adm-primary" disabled={loading} onClick={() => startForm()}>+ Thêm sản phẩm</button></div><span aria-hidden="true">✿</span></div><section className="adm-panel"><div className="adm-panel-head"><div><h2>Cần bổ sung hàng</h2><p>Các sản phẩm có tồn kho dưới 10 đơn vị.</p></div><button onClick={() => setTab('inventory')}>Xem tất cả →</button></div>{table(lowStock.slice(0, 5))}</section></>}
         {tab === 'products' && <section className="adm-panel"><div className="adm-panel-head"><div><h2>Danh sách sản phẩm</h2><p>{filtered.length} kết quả</p></div><div className="adm-actions"><button disabled={loading || !filtered.length} onClick={exportCSV}>↓ Xuất CSV</button><button disabled={loading} className="adm-primary" onClick={() => startForm()}>+ Thêm mới</button></div></div><div className="adm-filters"><input aria-label="Tìm sản phẩm" placeholder="Tìm tên sản phẩm…" value={search} onChange={e => updateFilter(setSearch, e.target.value)} /><select aria-label="Danh mục" value={category} onChange={e => updateFilter(setCategory, e.target.value)}><option value="">Tất cả danh mục</option>{categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select><select aria-label="Sắp xếp" value={sort} onChange={e => updateFilter(setSort, e.target.value)}><option value="newest">Mới nhất</option><option value="price">Giá tăng dần</option><option value="stock">Tồn kho tăng dần</option></select></div>{table(visible)}<div className="adm-pagination"><span>Trang {currentPage} / {pageCount}</span><div className="adm-actions"><button disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>← Trước</button><button disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>Sau →</button></div></div></section>}

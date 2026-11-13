@@ -23,13 +23,6 @@ import Orders from './pages/Orders';
 import './App.css';
 
 export default function App() {
-    const [activePage, setActivePage] = useState('home');
-    const [selectedProduct, setSelectedProduct] = useState(null);
-    const [selectedCategoryId, setSelectedCategoryId] = useState(null);
-    const [cartItems, setCartItems] = useState([]);
-    const [checkoutItems, setCheckoutItems] = useState(null);
-    const [checkoutCartItemIds, setCheckoutCartItemIds] = useState(null);
-    const [wishlistItems, setWishlistItems] = useState([]);
     const [currentUser, setCurrentUser] = useState(() => {
         try {
             const storedUser = sessionStorage.getItem('currentUser');
@@ -38,7 +31,19 @@ export default function App() {
             return null;
         }
     });
+    const [activePage, setActivePage] = useState(() =>
+        currentUser?.mustChangePassword
+            ? 'account'
+            : currentUser?.role === 'Staff' ? 'admin' : 'home'
+    );
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+    const [cartItems, setCartItems] = useState([]);
+    const [checkoutItems, setCheckoutItems] = useState(null);
+    const [checkoutCartItemIds, setCheckoutCartItemIds] = useState(null);
+    const [wishlistItems, setWishlistItems] = useState([]);
     const detailPreviousPage = useRef('home');
+    const mustChangePassword = Boolean(currentUser?.mustChangePassword);
 
     const handleViewDetail = (product) => {
         if (activePage !== 'detail') {
@@ -186,7 +191,7 @@ export default function App() {
 
     return (
         <div className="app-container">
-          <Header
+          {!mustChangePassword && <Header
             setActivePage={setActivePage}
             activePage={activePage}
             cartCount={cartItems.reduce(
@@ -197,7 +202,7 @@ export default function App() {
             currentUser={currentUser}
             onSelectCategory={setSelectedCategoryId}
             onViewProduct={handleViewDetail}
-/>
+/>}
 
             <main className="main-content">
                 {activePage === 'home' && (
@@ -276,9 +281,15 @@ export default function App() {
            {activePage === 'account' && (
                     <Account
                         currentUser={currentUser}
-                        onUserUpdated={user => {
+                        onUserUpdated={(user, token) => {
+                            if (token) sessionStorage.setItem('token', token);
                             sessionStorage.setItem('currentUser', JSON.stringify(user));
                             setCurrentUser(user);
+                            if (currentUser?.mustChangePassword && !user.mustChangePassword) {
+                                setActivePage(
+                                    user.role === 'Staff' ? 'admin' : 'home'
+                                );
+                            }
                         }}
                         onLogout={() => {
                             sessionStorage.removeItem('token');
@@ -294,14 +305,21 @@ export default function App() {
                         }}
                     />
                 )}
-                {activePage === 'admin' && <Admin />}
+                {activePage === 'admin' &&
+                    ['Admin', 'Staff'].includes(currentUser?.role) && (
+                        <Admin currentUser={currentUser} />
+                    )}
                 {activePage === 'login' && (
                     <Login
                         onLoginSuccess={(user, token) => {
                             sessionStorage.setItem('token', token);
                             sessionStorage.setItem('currentUser', JSON.stringify(user));
                             setCurrentUser(user);
-                            setActivePage('home');
+                            setActivePage(
+                                user.mustChangePassword
+                                    ? 'account'
+                                    : user.role === 'Staff' ? 'admin' : 'home'
+                            );
                         }}
                         onSwitchToRegister={() => setActivePage('register')}
                     />
@@ -311,13 +329,13 @@ export default function App() {
                 )}
             </main>
 
-            <Footer />
+            {!mustChangePassword && <Footer />}
 
             {/* Gemini AI Chatbot */}
-            <ChatWidget
+            {!mustChangePassword && <ChatWidget
                 onAddToCart={handleAddToCart}
                 onAddMultipleToCart={handleAddMultipleToCart}
-            />
+            />}
         </div>
 
         

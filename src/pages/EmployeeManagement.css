@@ -448,6 +448,14 @@
     color: #174735;
 }
 
+.emp-page .emp-permission-hint {
+    grid-column: 1 / -1;
+    margin: -12px 0 0;
+    color: #587364;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
 /* Vai trò nhân viên và trạng thái */
 .emp-page .emp-permissions-form > .emp-field {
     display: flex;
@@ -514,6 +522,79 @@
     color: #ffffff;
 }
 
+.emp-credential-backdrop {
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: rgba(15, 35, 25, 0.58);
+}
+
+.emp-credential-dialog {
+    width: min(100%, 520px);
+    max-height: calc(100vh - 40px);
+    overflow: auto;
+    padding: 28px;
+    border: 1px solid var(--emp-border);
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.emp-credential-dialog h3 {
+    margin: 0 0 12px;
+    color: var(--emp-green-dark);
+    font-size: 22px;
+}
+
+.emp-credential-dialog p {
+    margin: 0 0 20px;
+    color: #587364;
+    line-height: 1.55;
+}
+
+.emp-credential-dialog dl {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr);
+    gap: 12px;
+    margin: 0;
+}
+
+.emp-credential-dialog dt {
+    color: #587364;
+    font-weight: 600;
+}
+
+.emp-credential-dialog dd {
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.emp-credential-dialog code {
+    padding: 3px 7px;
+    border-radius: 5px;
+    background: var(--emp-green-light);
+    color: var(--emp-green-dark);
+    font-size: 14px;
+}
+
+.emp-credential-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.emp-credential-actions button:first-child {
+    border-color: var(--emp-green);
+    background: var(--emp-green);
+    color: #ffffff;
+}
+
 /* ==========================================
    RESPONSIVE CHO THÔNG BÁO VÀ PHÂN QUYỀN
    ========================================== */
@@ -543,5 +624,22 @@
         grid-column: 1;
         justify-self: stretch;
         width: 100%;
+    }
+
+    .emp-credential-dialog {
+        padding: 22px;
+    }
+
+    .emp-credential-dialog dl {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+
+    .emp-credential-dialog dt:not(:first-child) {
+        margin-top: 8px;
+    }
+
+    .emp-credential-actions button {
+        flex: 1 1 100%;
     }
 }

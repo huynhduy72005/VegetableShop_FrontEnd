@@ -18,6 +18,8 @@ export const api = {
     getProductById: (id) => client.get(`${API_BASE_URL}/products/${id}`),
     createProduct: (productData) => client.post(`${API_BASE_URL}/products`, productData),
     updateProduct: (id, productData) => client.put(`${API_BASE_URL}/products/${id}`, productData),
+    updateProductInventory: (id, data) =>
+        client.put(`${API_BASE_URL}/products/${id}/inventory`, data),
     deleteProduct: (id) => client.delete(`${API_BASE_URL}/products/${id}`),
 
     getCategories: () => client.get(`${API_BASE_URL}/categories`),
@@ -85,6 +87,9 @@ export const api = {
     // Xem nhật ký hoạt động
     getEmployeeLogs: () =>
         client.get(`${API_BASE_URL}/employees/logs`),
+
+    getMyEmployeeProfile: () =>
+        client.get(`${API_BASE_URL}/employee-profile`),
 
     // ======================================
 

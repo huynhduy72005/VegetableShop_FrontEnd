@@ -30,7 +30,9 @@ const profileUpdateErrorMessage = error => {
 
 
 export default function Account({ currentUser, onLogout, onNavigateToAdmin, onUserUpdated, onBuyAgain }) {
-    const [tab, setTab] = useState('profile');
+    const [tab, setTab] = useState(
+        currentUser?.mustChangePassword ? 'change_password' : 'profile'
+    );
     const [users, setUsers] = useState([]);
     const [passwordResetRequests, setPasswordResetRequests] = useState([]);
     const [profile, setProfile] = useState({
@@ -53,6 +55,7 @@ export default function Account({ currentUser, onLogout, onNavigateToAdmin, onUs
         confirmPassword: ''
     });
     const isAdmin = currentUser?.role === 'Admin';
+    const forcePasswordChange = Boolean(currentUser?.mustChangePassword);
 
     useEffect(() => {
         let active = true;
@@ -115,19 +118,32 @@ export default function Account({ currentUser, onLogout, onNavigateToAdmin, onUs
         try {
             await api.updateUserRole(user.id, { role: newRole });
             setUsers(previous => previous.map(item => item.id === user.id ? { ...item, role: newRole } : item));
-            setNotice({ text: 'Đã cập nhật quyền.' });
+            setNotice({
+                text: newRole === 'Staff'
+                    ? 'Đã chuyển tài khoản sang Nhân viên. Người dùng cần đăng nhập lại; lần đăng nhập tiếp theo sẽ mở trang nhân viên.'
+                    : 'Đã cập nhật quyền.'
+            });
         } catch { setNotice({ error: true, text: 'Cập nhật thất bại.' }); }
         finally { setBusy(false); }
     }
 
     async function deleteUser(user) {
         if (!isAdmin || busy || String(user.id) === String(currentUser.id)) return;
-        if (!window.confirm(`Xóa tài khoản “${user.fullName}”?`)) return;
+        if (!user.isActive) return;
+        if (!window.confirm(`Vô hiệu hóa tài khoản “${user.fullName}”? Tài khoản không thể đăng nhập, nhưng lịch sử đơn hàng sẽ được giữ lại.`)) return;
         setBusy(true); setNotice(null);
         try {
-            await api.deleteUser(user.id); setUsers(previous => previous.filter(item => item.id !== user.id));
-            setNotice({ text: 'Đã xóa tài khoản.' });
-        } catch { setNotice({ error: true, text: 'Không xóa được tài khoản.' }); }
+            const response = await api.deleteUser(user.id);
+            setUsers(previous => previous.map(item =>
+                item.id === user.id ? { ...item, isActive: false } : item
+            ));
+            setNotice({ text: response.data.message || 'Đã vô hiệu hóa tài khoản.' });
+        } catch (error) {
+            setNotice({
+                error: true,
+                text: error.response?.data?.message || 'Không vô hiệu hóa được tài khoản.'
+            });
+        }
         finally { setBusy(false); }
     }
 
@@ -197,6 +213,10 @@ export default function Account({ currentUser, onLogout, onNavigateToAdmin, onUs
                 currentPassword: passwords.currentPassword,
                 newPassword: passwords.newPassword
             });
+            onUserUpdated(
+                response.data?.user || { ...currentUser, mustChangePassword: false },
+                response.data?.token
+            );
             setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
             setNotice({ text: response.data?.message || 'Đổi mật khẩu thành công.' });
         } catch (error) {
@@ -218,12 +238,14 @@ export default function Account({ currentUser, onLogout, onNavigateToAdmin, onUs
     const management = isAdmin && tab === 'manage_users';
 
     return (
-        <div className="acc2-page">
+        <div className={`acc2-page${forcePasswordChange ? ' acc2-password-required' : ''}`}>
             <div className="acc2-top">
                 <div>
                     <p className="acc2-eyebrow"></p>
                     <h1>
-                        {management
+                        {forcePasswordChange
+                            ? 'Đổi mật khẩu bắt buộc'
+                            : management
                             ? 'Nhân sự & phân quyền'
                             : isAdmin && tab === 'manage_employees'
                                 ? 'Quản lý nhân viên'
@@ -231,7 +253,9 @@ export default function Account({ currentUser, onLogout, onNavigateToAdmin, onUs
                     </h1>
 
                     <p>
-                        {management
+                        {forcePasswordChange
+                            ? 'Bạn cần tạo mật khẩu mới trước khi tiếp tục sử dụng hệ thống.'
+                            : management
                             ? 'Quản lý thành viên và vai trò trong cửa hàng.'
                             : isAdmin && tab === 'manage_employees'
                                 ? 'Thêm, chỉnh sửa, phân quyền và xem nhật ký hoạt động nhân viên.'
@@ -242,7 +266,7 @@ export default function Account({ currentUser, onLogout, onNavigateToAdmin, onUs
                 <span className="acc2-top-tag">✿ Cùng cửa hàng phát triển</span>
             </div>
 
-            <div className="acc2-layout">
+            <div className={`acc2-layout${forcePasswordChange ? ' acc2-password-required' : ''}`}>
                 <aside className="acc2-sidebar">
                     <div className="acc2-person">
                         <div className="acc2-avatar large">{initials(currentUser.fullName)}</div>
@@ -251,7 +275,7 @@ export default function Account({ currentUser, onLogout, onNavigateToAdmin, onUs
                         {isAdmin && <span className="acc2-badge Admin">{roles[currentUser.role]}</span>}
                     </div>
 
-                    <nav aria-label="Tài khoản">
+                    {!forcePasswordChange && <nav aria-label="Tài khoản">
                         <button className={tab === 'profile' ? 'active' : ''} onClick={() => setTab('profile')}>
                             <span>◉</span>Thông tin cá nhân
                         </button>
@@ -282,12 +306,18 @@ export default function Account({ currentUser, onLogout, onNavigateToAdmin, onUs
                             </>
                         )}
 
+                        {currentUser.role === 'Staff' && (
+                            <button onClick={onNavigateToAdmin}>
+                                <span>◫</span>Quản trị cửa hàng
+                            </button>
+                        )}
+
                         {currentUser.role === 'Customer' && (
                             <button className={tab === 'orders' ? 'active' : ''} onClick={() => setTab('orders')}>
                                 <span>▤</span>Đơn hàng của tôi
                             </button>
                         )}
-                    </nav>
+                    </nav>}
 
                     <button className="acc2-logout" onClick={onLogout}>↪ Đăng xuất</button>
                 </aside>
@@ -317,7 +347,14 @@ export default function Account({ currentUser, onLogout, onNavigateToAdmin, onUs
                                                         <td>
                                                             <div className="acc2-member">
                                                                 <span className="acc2-avatar">{initials(user.fullName)}</span>
-                                                                <div><strong>{user.fullName} {self && <em>Bạn</em>}</strong><small>{user.email}</small></div>
+                                                                <div>
+                                                                    <strong>{user.fullName} {self && <em>Bạn</em>}</strong>
+                                                                    <small>{user.email}</small>
+                                                                    <small>
+                                                                        {user.username} · {user.isActive ? 'Đang hoạt động' : 'Đã khóa'}
+                                                                        {user.mustChangePassword ? ' · Cần đổi mật khẩu' : ''}
+                                                                    </small>
+                                                                </div>
                                                             </div>
                                                         </td>
                                                         <td><span className={`acc2-badge ${user.role}`}>{roles[user.role] || user.role}</span></td>
@@ -327,7 +364,7 @@ export default function Account({ currentUser, onLogout, onNavigateToAdmin, onUs
                                                             </select>
                                                         </td>
                                                         <td>
-                                                            <button className="acc2-delete" disabled={self || busy || loading} onClick={() => deleteUser(user)}>Xóa</button>
+                                                            <button className="acc2-delete" disabled={self || busy || loading || !user.isActive} onClick={() => deleteUser(user)}>{user.isActive ? 'Vô hiệu hóa' : 'Đã khóa'}</button>
                                                         </td>
                                                     </tr>
                                                 );
@@ -383,7 +420,9 @@ export default function Account({ currentUser, onLogout, onNavigateToAdmin, onUs
                             <header className="acc2-panel-head">
                                 <div>
                                     <h2>Đổi mật khẩu</h2>
-                                    <p>Nhập mật khẩu hiện tại để xác nhận thay đổi bảo mật tài khoản.</p>
+                                    <p>{forcePasswordChange
+                                        ? 'Đổi mật khẩu ban đầu trước khi tiếp tục sử dụng hệ thống.'
+                                        : 'Nhập mật khẩu hiện tại để xác nhận thay đổi bảo mật tài khoản.'}</p>
                                 </div>
                             </header>
                             <form className="acc2-password-form" onSubmit={changePassword}>
