@@ -69,8 +69,10 @@ const userRoles = {
     Customer: 'Khách hàng'
 };
 
+
 export default function EmployeeManagement() {
     const [employees, setEmployees] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [logs, setLogs] = useState([]);
     const [tab, setTab] = useState('list');
     const [form, setForm] = useState(emptyForm);
@@ -84,18 +86,41 @@ export default function EmployeeManagement() {
     const [initialCredentials, setInitialCredentials] = useState(null);
     const [copiedCredentials, setCopiedCredentials] = useState(false);
 
+    // Chuẩn hóa tiếng Việt để tìm kiếm không dấu
+    const normalizeText = (value = '') =>
+        String(value)
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/g, 'd')
+            .replace(/Đ/g, 'D')
+            .toLowerCase();
+
+    // Tìm kiếm nhân viên theo họ tên hoặc mã nhân viên
+    const filteredEmployees = employees.filter((employee) => {
+        const keyword = normalizeText(searchTerm.trim());
+
+        return (
+            normalizeText(employee.fullName).includes(keyword) ||
+            normalizeText(employee.employeeCode).includes(keyword)
+        );
+    });
+
+    // Tải danh sách nhân viên
     async function loadEmployees() {
         try {
             const res = await api.getEmployees();
             setEmployees(res.data);
             return true;
         } catch (err) {
-            setMessage(err.response?.data?.message
-                || 'Không tải được nhân viên.');
+            setMessage(
+                err.response?.data?.message ||
+                'Không tải được nhân viên.'
+            );
             return false;
         }
     }
 
+    // Tải nhật ký hoạt động
     async function loadLogs() {
         try {
             const res = await api.getEmployeeLogs();
@@ -107,14 +132,17 @@ export default function EmployeeManagement() {
 
     useEffect(() => {
         let active = true;
+
         api.getEmployees()
             .then(res => {
                 if (active) setEmployees(res.data);
             })
             .catch(err => {
                 if (active) {
-                    setMessage(err.response?.data?.message
-                        || 'Không tải được nhân viên.');
+                    setMessage(
+                        err.response?.data?.message ||
+                        'Không tải được nhân viên.'
+                    );
                 }
             });
 
@@ -122,6 +150,7 @@ export default function EmployeeManagement() {
             active = false;
         };
     }, []);
+
 
     function startAdd() {
         setForm(emptyForm);
@@ -404,72 +433,140 @@ export default function EmployeeManagement() {
             )}
 
 
+
             {tab === 'list' && (
-                <div className="emp-table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Mã NV</th>
-                                <th>Họ tên</th>
-                                <th>Email</th>
-                                <th>Số điện thoại</th>
-                                <th>Chức vụ</th>
-                                <th>Tài khoản</th>
-                                <th>Trạng thái</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {employees.length === 0 ? (
+                <div className="emp-list-section">
+
+                    {/* Thanh tìm kiếm nhân viên */}
+                    <div className="emp-search">
+                        <span className="emp-search-icon" aria-hidden="true">
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="m21 21-4.35-4.35" />
+                            </svg>
+                        </span>
+
+                        <input
+                            type="search"
+                            placeholder="Tìm theo tên hoặc mã nhân viên..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            aria-label="Tìm kiếm nhân viên"
+                        />
+
+                        {searchTerm && (
+                            <button
+                                type="button"
+                                className="emp-search-clear"
+                                onClick={() => setSearchTerm('')}
+                                aria-label="Xóa tìm kiếm"
+                                title="Xóa tìm kiếm"
+                            >
+                                ×
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Bảng danh sách nhân viên */}
+                    <div className="emp-table-wrap">
+                        <table>
+                            <thead>
                                 <tr>
-                                    <td colSpan="8">Chưa có hồ sơ nhân viên.</td>
+                                    <th>Mã NV</th>
+                                    <th>Họ tên</th>
+                                    <th>Email</th>
+                                    <th>Số điện thoại</th>
+                                    <th>Chức vụ</th>
+                                    <th>Tài khoản</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
                                 </tr>
-                            ) : employees.map(emp => (
-                                <tr key={emp.id}>
-                                    <td>{emp.employeeCode || 'Chưa cấp'}</td>
-                                    <td>{emp.fullName}</td>
-                                    <td>{emp.email}</td>
-                                    <td>{emp.phone}</td>
-                                    <td>{emp.position || 'Chưa cập nhật'}</td>
-                                    <td>{emp.userId ? (
-                                        <>
-                                            <strong>{emp.username}</strong>
-                                            <small>
-                                                {userRoles[emp.userRole] || emp.userRole}
-                                                {' · '}
-                                                {emp.accountIsActive ? 'Đang hoạt động' : 'Đã khóa'}
-                                                {emp.mustChangePassword
-                                                    ? ' · Cần đổi mật khẩu'
-                                                    : ''}
-                                            </small>
-                                        </>
-                                    ) : 'Chưa có tài khoản'}</td>
-                                    <td>{emp.profilePending ? 'Chưa có hồ sơ' : emp.status}</td>
-                                    <td>
-                                        {emp.profilePending ? (
-                                            <button onClick={() => startLinkEmployee(emp)}>
-                                                Tạo hồ sơ
-                                            </button>
-                                        ) : (
-                                            <>
-                                                <button onClick={() => startEdit(emp)}>
-                                                    Sửa
+                            </thead>
+
+                            <tbody>
+                                {filteredEmployees.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="8" style={{ textAlign: 'center' }}>
+                                            {searchTerm.trim()
+                                                ? 'Không tìm thấy nhân viên phù hợp.'
+                                                : 'Chưa có hồ sơ nhân viên.'}
+                                        </td>
+                                    </tr>
+                                ) : filteredEmployees.map(emp => (
+                                    <tr key={emp.id}>
+                                        <td>{emp.employeeCode || 'Chưa cấp'}</td>
+                                        <td>{emp.fullName}</td>
+                                        <td>{emp.email}</td>
+                                        <td>{emp.phone}</td>
+                                        <td>{emp.position || 'Chưa cập nhật'}</td>
+
+                                        <td>
+                                            {emp.userId ? (
+                                                <>
+                                                    <strong>{emp.username}</strong>
+                                                    <small>
+                                                        {userRoles[emp.userRole] || emp.userRole}
+                                                        {' · '}
+                                                        {emp.accountIsActive
+                                                            ? 'Đang hoạt động'
+                                                            : 'Đã khóa'}
+                                                        {emp.mustChangePassword
+                                                            ? ' · Cần đổi mật khẩu'
+                                                            : ''}
+                                                    </small>
+                                                </>
+                                            ) : 'Chưa có tài khoản'}
+                                        </td>
+
+                                        <td>
+                                            {emp.profilePending
+                                                ? 'Chưa có hồ sơ'
+                                                : emp.status}
+                                        </td>
+
+                                        <td>
+                                            {emp.profilePending ? (
+                                                <button
+                                                    onClick={() => startLinkEmployee(emp)}
+                                                >
+                                                    Tạo hồ sơ
                                                 </button>
-                                                <button onClick={() => {
-                                                    setSelected({ ...emp });
-                                                    setTab('permissions');
-                                                }}>
-                                                    Phân quyền
-                                                </button>
-                                            </>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                                            ) : (
+                                                <>
+                                                    <button
+                                                        onClick={() => startEdit(emp)}
+                                                    >
+                                                        Sửa
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelected({ ...emp });
+                                                            setTab('permissions');
+                                                        }}
+                                                    >
+                                                        Phân quyền
+                                                    </button>
+                                                </>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
+
 
             {tab === 'form' && (
                 <form className="emp-form" onSubmit={saveEmployee}>
