@@ -575,3 +575,161 @@
   }
 }
 
+/* Khung Voucher trong Checkout */
+.checkout-voucher-box {
+    margin: 14px 0;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #f5f9f2;
+    border: 1px solid #dce8d3;
+}
+
+.checkout-voucher-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #163a2d;
+}
+
+.checkout-wallet-toggle {
+    border: none;
+    background: transparent;
+    color: #1b4d3e;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.checkout-voucher-input-row {
+    display: flex;
+    gap: 8px;
+}
+
+.checkout-voucher-input-row input {
+    flex: 1;
+    height: 36px;
+    padding: 0 10px;
+    border-radius: 8px;
+    border: 1px solid #cddac9;
+    background: #ffffff;
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+
+.checkout-voucher-input-row button {
+    height: 36px;
+    padding: 0 14px;
+    border: none;
+    border-radius: 8px;
+    background: #1b4d3e;
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.checkout-voucher-input-row button:disabled {
+    background: #b5c4bc;
+    cursor: not-allowed;
+}
+
+.checkout-applied-voucher {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: #ffffff;
+    border: 1px solid #86b898;
+}
+
+.checkout-applied-voucher strong {
+    display: block;
+    font-size: 0.85rem;
+    color: #1b4d3e;
+}
+
+.checkout-applied-voucher small {
+    font-size: 0.76rem;
+    color: #4c6358;
+}
+
+.checkout-applied-voucher button {
+    border: none;
+    background: transparent;
+    font-size: 1.1rem;
+    color: #6b7f75;
+    cursor: pointer;
+}
+
+.checkout-wallet-dropdown {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.checkout-wallet-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #ffffff;
+    border: 1px solid #e2eae0;
+}
+
+.checkout-wallet-item.is-ineligible {
+    opacity: 0.6;
+}
+
+.checkout-wallet-item strong {
+    display: block;
+    font-size: 0.8rem;
+    color: #1b4d3e;
+}
+
+.checkout-wallet-item small {
+    font-size: 0.74rem;
+    color: #5c6f66;
+}
+
+.checkout-wallet-item button {
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid #1b4d3e;
+    background: #1b4d3e;
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.checkout-wallet-item button:disabled {
+    background: #cbd5cf;
+    border-color: #cbd5cf;
+    cursor: not-allowed;
+}
+
+.checkout-voucher-msg {
+    margin: 6px 0 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #1b4d3e;
+}
+
+.checkout-voucher-msg.is-error {
+    color: #dc2626;
+}
+
+.checkout-cost-discount strong {
+    color: #15803d;
+}

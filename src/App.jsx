@@ -42,6 +42,7 @@ export default function App() {
     const [checkoutItems, setCheckoutItems] = useState(null);
     const [checkoutCartItemIds, setCheckoutCartItemIds] = useState(null);
     const [wishlistItems, setWishlistItems] = useState([]);
+    const [selectedVoucher, setSelectedVoucher] = useState(null);
     const detailPreviousPage = useRef('home');
     const mustChangePassword = Boolean(currentUser?.mustChangePassword);
 
@@ -89,6 +90,7 @@ export default function App() {
         }
         setCheckoutItems(null);
         setCheckoutCartItemIds(null);
+        setSelectedVoucher(null);
         setActivePage('home');
     };
 
@@ -191,37 +193,37 @@ export default function App() {
 
     return (
         <div className="app-container">
-          {!mustChangePassword && <Header
-            setActivePage={setActivePage}
-            activePage={activePage}
-            cartCount={cartItems.reduce(
-                (sum, item) => sum + item.quantity,
-                0
-            )}
-            wishlistCount={wishlistItems.length}
-            currentUser={currentUser}
-            onSelectCategory={setSelectedCategoryId}
-            onViewProduct={handleViewDetail}
-/>}
+            {!mustChangePassword && <Header
+                setActivePage={setActivePage}
+                activePage={activePage}
+                cartCount={cartItems.reduce(
+                    (sum, item) => sum + item.quantity,
+                    0
+                )}
+                wishlistCount={wishlistItems.length}
+                currentUser={currentUser}
+                onSelectCategory={setSelectedCategoryId}
+                onViewProduct={handleViewDetail}
+            />}
 
             <main className="main-content">
                 {activePage === 'home' && (
-    <Home
-        onViewDetail={handleViewDetail}
-        onBuyNow={handleBuyNow}
-        onToggleWishlist={handleToggleWishlist}
-        wishlistItems={wishlistItems}
-        onBrowseProducts={(categoryId = null) => {
-            setSelectedCategoryId(categoryId);
-            setActivePage('products');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-        onNavigate={(page) => {
-            setActivePage(page);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-    />
-)}
+                    <Home
+                        onViewDetail={handleViewDetail}
+                        onBuyNow={handleBuyNow}
+                        onToggleWishlist={handleToggleWishlist}
+                        wishlistItems={wishlistItems}
+                        onBrowseProducts={(categoryId = null) => {
+                            setSelectedCategoryId(categoryId);
+                            setActivePage('products');
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        onNavigate={(page) => {
+                            setActivePage(page);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                    />
+                )}
                 {activePage === 'products' && (
                     <Products
                         categoryId={selectedCategoryId}
@@ -265,6 +267,7 @@ export default function App() {
                     <Checkout
                         cartItems={checkoutItems ?? cartItems}
                         currentUser={currentUser}
+                        selectedVoucher={selectedVoucher}
                         onOrderSuccess={handleOrderSuccess}
                     />
                 )}
@@ -278,7 +281,7 @@ export default function App() {
                         )}
                     />
                 )}
-           {activePage === 'account' && (
+                {activePage === 'account' && (
                     <Account
                         currentUser={currentUser}
                         onUserUpdated={(user, token) => {
@@ -295,13 +298,38 @@ export default function App() {
                             sessionStorage.removeItem('token');
                             sessionStorage.removeItem('currentUser');
                             setCurrentUser(null);
+                            setSelectedVoucher(null);
                             setActivePage('home');
                         }}
                         onViewOrders={() => setActivePage('orders')}
-                        // THÊM DÒNG NÀY ĐỂ CHUYỂN SANG TRANG QUẢN TRỊ TOÀN MÀN HÌNH
-                        onNavigateToAdmin={() => { 
-                            setActivePage('admin'); 
-                            window.scrollTo({ top: 0, behavior: 'smooth' }); 
+                        onBuyAgain={handleBuyAgain}
+                        onNavigateToAdmin={() => {
+                            setActivePage('admin');
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        wishlistItems={wishlistItems}
+                        onViewDetail={handleViewDetail}
+                        onBuyNow={handleBuyNow}
+                        onRemoveWishlist={(id) =>
+                            setWishlistItems(prev => prev.filter(i => i.id !== id))
+                        }
+                        onBrowseProducts={() => {
+                            setSelectedCategoryId(null);
+                            setActivePage('products');
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        onUseVoucher={(voucher) => {
+                            setSelectedVoucher(voucher);
+                            if (cartItems.length > 0) {
+                                setCheckoutItems(null);
+                                setCheckoutCartItemIds(null);
+                                setActivePage('checkout');
+                            } else {
+                                alert(`Đã chọn mã ${voucher.code}! Hãy thêm sản phẩm vào giỏ hàng để áp dụng.`);
+                                setSelectedCategoryId(null);
+                                setActivePage('products');
+                            }
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
                         }}
                     />
                 )}
@@ -337,8 +365,5 @@ export default function App() {
                 onAddMultipleToCart={handleAddMultipleToCart}
             />}
         </div>
-
-        
     );
-    
 }

@@ -1,0 +1,347 @@
+/* =========================================================
+   VÍ VOUCHER - VƯỜN NHÀ
+   ========================================================= */
+.vc-page {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 32px 20px 64px;
+    color: #182b23;
+}
+
+.vc-page.vc-embedded {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.vc-page button {
+    font-family: inherit;
+    box-shadow: none;
+    transition: all 0.2s ease;
+}
+
+/* Banner & Form nhập mã */
+.vc-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #eaf3e3 0%, #f5f9f2 100%);
+    border: 1px solid #dce8d3;
+}
+
+.vc-eyebrow {
+    display: inline-block;
+    margin-bottom: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #3b6e52;
+}
+
+.vc-banner h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 6px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #163a2d;
+}
+
+.vc-banner h1 span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: #1b4d3e;
+    color: #ffffff;
+    font-size: 0.82rem;
+}
+
+.vc-banner p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: #4c6358;
+}
+
+.vc-claim-form {
+    display: flex;
+    gap: 8px;
+    background: #ffffff;
+    padding: 6px;
+    border-radius: 12px;
+    border: 1px solid #d5e2d2;
+}
+
+.vc-claim-form input {
+    width: 220px;
+    border: none;
+    outline: none;
+    padding: 0 12px;
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: #182b23;
+    background: transparent;
+}
+
+.vc-claim-form button {
+    height: 36px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 9px;
+    background: #1b4d3e;
+    color: #ffffff;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.vc-claim-form button:disabled {
+    background: #b7c7be;
+    cursor: not-allowed;
+}
+
+/* Thông báo */
+.vc-notice {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    margin-bottom: 16px;
+    border-radius: 12px;
+    background: #e8f5e9;
+    border: 1px solid #b7dfba;
+    color: #1b4d3e;
+    font-size: 0.86rem;
+    font-weight: 500;
+}
+
+.vc-notice.is-error {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #b91c1c;
+}
+
+.vc-notice button {
+    border: none;
+    background: transparent;
+    font-size: 1.1rem;
+    color: inherit;
+    cursor: pointer;
+}
+
+/* Tabs lọc */
+.vc-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.vc-tabs button {
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid #dce5da;
+    background: #ffffff;
+    color: #4c6358;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.vc-tabs button.active {
+    background: #1b4d3e;
+    border-color: #1b4d3e;
+    color: #ffffff;
+}
+
+/* Lưới thẻ Voucher */
+.vc-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.vc-ticket {
+    position: relative;
+    display: flex;
+    background: #ffffff;
+    border: 1px solid #dce6d9;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vc-ticket:hover:not(.is-disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(27, 77, 62, 0.08);
+    border-color: #b5cbb6;
+}
+
+.vc-ticket.is-disabled {
+    opacity: 0.65;
+    background: #f8faf8;
+}
+
+.vc-ticket-left {
+    width: 132px;
+    flex-shrink: 0;
+    padding: 16px 12px;
+    background: linear-gradient(160deg, #1b4d3e 0%, #2b6b56 100%);
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 6px;
+}
+
+.vc-ticket.is-disabled .vc-ticket-left {
+    background: #8a9b92;
+}
+
+.vc-ticket-badge {
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+}
+
+.vc-ticket-code {
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px dashed rgba(255, 255, 255, 0.5);
+    font-size: 0.74rem;
+    letter-spacing: 0.05em;
+}
+
+.vc-personal-tag {
+    font-size: 0.66rem;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: #fef3c7;
+    color: #92400e;
+    font-weight: 700;
+}
+
+.vc-ticket-divider {
+    width: 0;
+    border-left: 2px dashed #dce6d9;
+}
+
+.vc-ticket-right {
+    flex: 1;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.vc-ticket-right h3 {
+    margin: 0 0 4px;
+    font-size: 0.96rem;
+    font-weight: 700;
+    color: #182b23;
+    line-height: 1.35;
+}
+
+.vc-desc {
+    margin: 0 0 10px;
+    font-size: 0.8rem;
+    color: #5c6f66;
+    line-height: 1.4;
+}
+
+.vc-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #4c6358;
+}
+
+.vc-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid #edf2ec;
+}
+
+.vc-copy-btn {
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid #d3dfd1;
+    background: #ffffff;
+    color: #1f3b30;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.vc-copy-btn:hover {
+    background: #f2f7f1;
+}
+
+.vc-primary-btn {
+    height: 32px;
+    padding: 0 14px;
+    border-radius: 8px;
+    border: 1px solid #1b4d3e;
+    background: #1b4d3e;
+    color: #ffffff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.vc-primary-btn:hover:not(:disabled) {
+    background: #143b2f;
+}
+
+.vc-status-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #8a9b92;
+}
+
+/* Trạng thái trống */
+.vc-empty {
+    text-align: center;
+    padding: 44px 20px;
+    border-radius: 16px;
+    background: #ffffff;
+    border: 1px dashed #cddac9;
+}
+
+.vc-empty h3 {
+    margin: 0 0 8px;
+    font-size: 1.1rem;
+    color: #182b23;
+}
+
+.vc-empty p {
+    margin: 0 0 16px;
+    font-size: 0.88rem;
+    color: #5c6f66;
+}
+
+@media (max-width: 900px) {
+    .vc-grid {
+        grid-template-columns: 1fr;
+    }
+}
