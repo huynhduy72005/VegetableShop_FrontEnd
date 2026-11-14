@@ -18,7 +18,7 @@ const allTabs = [
     ['orders', '▣', 'Đơn hàng']
 ];
 
-export default function Admin({ currentUser }) {
+export default function Admin({ currentUser, onBackToAccount }) {
     const isAdmin = currentUser?.role === 'Admin';
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -129,12 +129,18 @@ export default function Admin({ currentUser }) {
         return () => { active = false; };
     }, [permissionLoading, permissionError, canViewProducts, canManageOrders]);
 
+    const backButton = (
+        <button type="button" className="adm-back-button" onClick={onBackToAccount}>
+            ← Quay lại tài khoản
+        </button>
+    );
+
     if (permissionLoading)
-        return <div className="adm-shell"><main className="adm-main">Đang tải quyền nhân viên…</main></div>;
+        return <div className="adm-shell"><main className="adm-main">{backButton}<p>Đang tải quyền nhân viên…</p></main></div>;
     if (permissionError)
-        return <div className="adm-shell"><main className="adm-main"><div role="alert" className="adm-notice error">{permissionError}</div></main></div>;
+        return <div className="adm-shell"><main className="adm-main">{backButton}<div role="alert" className="adm-notice error">{permissionError}</div></main></div>;
     if (!isAdmin && !availableTabs.length)
-        return <div className="adm-shell"><main className="adm-main"><div role="status" className="adm-notice">Tài khoản chưa được cấp quyền quản lý cửa hàng. Vui lòng liên hệ Admin.</div></main></div>;
+        return <div className="adm-shell"><main className="adm-main">{backButton}<div role="status" className="adm-notice">Tài khoản chưa được cấp quyền quản lý cửa hàng. Vui lòng liên hệ Admin.</div></main></div>;
 
     const lowStock = products.filter(p => p.quantity < 10).sort((a, b) =>
         stockPriority(a.quantity) - stockPriority(b.quantity) || a.quantity - b.quantity
@@ -322,7 +328,7 @@ export default function Admin({ currentUser }) {
             <div className="adm-sidebar-note"><strong>Mỗi ngày một chút xanh.</strong><p>Quản lý sản phẩm và theo dõi cửa hàng của bạn tại đây.</p></div>
         </aside>
         
-        <section className="adm-main" aria-busy={loading}><header className="adm-heading"><div><p className="adm-eyebrow">VEGETABLESHOP / QUẢN TRỊ</p><h1>{form ? (form.id ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm') : inventoryForm ? 'Cập nhật tồn kho' : catForm ? (catForm.id ? 'Chỉnh sửa danh mục' : 'Thêm danh mục') : { overview: 'Tổng quan cửa hàng', products: 'Quản lý sản phẩm', inventory: 'Kiểm tra tồn kho', categories: 'Danh mục sản phẩm', orders: 'Quản lý đơn hàng', employees: 'Quản lý nhân viên' }[tab]}</h1><p>Theo dõi rõ ràng, quản lý dễ dàng.</p></div><button disabled={loading || saving} onClick={refresh}>{loading ? 'Đang tải…' : '↻ Tải lại'}</button></header>
+        <section className="adm-main" aria-busy={loading}><header className="adm-heading"><div><p className="adm-eyebrow">VEGETABLESHOP / QUẢN TRỊ</p><h1>{form ? (form.id ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm') : inventoryForm ? 'Cập nhật tồn kho' : catForm ? (catForm.id ? 'Chỉnh sửa danh mục' : 'Thêm danh mục') : { overview: 'Tổng quan cửa hàng', products: 'Quản lý sản phẩm', inventory: 'Kiểm tra tồn kho', categories: 'Danh mục sản phẩm', orders: 'Quản lý đơn hàng', employees: 'Quản lý nhân viên' }[tab]}</h1><p>Theo dõi rõ ràng, quản lý dễ dàng.</p></div><div className="adm-heading-actions">{backButton}<button disabled={loading || saving} onClick={refresh}>{loading ? 'Đang tải…' : '↻ Tải lại'}</button></div></header>
         {notice && <div role={notice.error ? 'alert' : 'status'} className={`adm-notice ${notice.error ? 'error' : ''}`}>{notice.text}<button aria-label="Đóng thông báo" onClick={() => setNotice(null)}>×</button></div>}
         
         {/* Form Sản phẩm */}
