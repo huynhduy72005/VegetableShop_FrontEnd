@@ -599,6 +599,26 @@ import EmployeeManagement from './EmployeeManagement';
 const roles = { Admin: 'Quản trị viên', Staff: 'Nhân viên', Customer: 'Khách hàng' };
 const genders = ['Nam', 'Nữ', 'Khác', 'Không muốn tiết lộ'];
 const initials = name => (name || '?').trim().split(/\s+/).slice(-2).map(word => word[0]).join('').toUpperCase();
+const orderStatuses = {
+    Pending: 'Chờ xác nhận',
+    Processing: 'Đang xử lý',
+    Shipping: 'Đang giao hàng',
+    Completed: 'Hoàn thành',
+    Cancelled: 'Đã hủy'
+};
+const normalizeOrderStatus = status => {
+    const value = String(status ?? '');
+    const matchingStatus = Object.keys(orderStatuses).find(
+        option => option.toLowerCase() === value.toLowerCase()
+    );
+    return matchingStatus || ({ '0': 'Pending', '1': 'Processing', '2': 'Shipping', '3': 'Completed', '4': 'Cancelled' })[value] || value;
+};
+const formatAccountDate = value => {
+    if (!value) return 'Chưa cập nhật';
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? 'Chưa cập nhật' : date.toLocaleString('vi-VN');
+};
+const formatMoney = value => `${Number(value || 0).toLocaleString('vi-VN')} ₫`;
 const formatDateOfBirth = date => {
     if (!date) return 'Chưa cập nhật';
     const [year, month, day] = date.split('-');
@@ -646,9 +666,17 @@ export default function Account({
         dateOfBirth: currentUser?.dateOfBirth || ''
     });
     const [isEditingProfile, setIsEditingProfile] = useState(false);
-    const search = '';
-    const role = '';
-    const page = 1;
+    const [search, setSearch] = useState('');
+    const [role, setRole] = useState('');
+    const [page, setPage] = useState(1);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [userOrders, setUserOrders] = useState([]);
+    const [userOrdersLoading, setUserOrdersLoading] = useState(false);
+    const [userOrdersError, setUserOrdersError] = useState('');
+    const [selectedOrderId, setSelectedOrderId] = useState(null);
+    const [selectedOrderDetail, setSelectedOrderDetail] = useState(null);
+    const [orderDetailLoading, setOrderDetailLoading] = useState(false);
+    const [orderDetailError, setOrderDetailError] = useState('');
     const [loading, setLoading] = useState(currentUser?.role === 'Admin');
     const [busy, setBusy] = useState(false);
     const [notice, setNotice] = useState(null);
@@ -659,6 +687,80 @@ export default function Account({
     });
     const isAdmin = currentUser?.role === 'Admin';
     const forcePasswordChange = Boolean(currentUser?.mustChangePassword);
+
+    function openUserDetails(user) {
+        setSelectedOrderId(null);
+        setSelectedOrderDetail(null);
+        setOrderDetailLoading(false);
+        setOrderDetailError('');
+        setSelectedUser(user);
+        setUserOrders([]);
+        setUserOrdersError('');
+        setUserOrdersLoading(user.role === 'Customer');
+    }
+
+    function closeUserDetails() {
+        setSelectedUser(null);
+        setUserOrdersLoading(false);
+        setSelectedOrderId(null);
+        setSelectedOrderDetail(null);
+        setOrderDetailLoading(false);
+        setOrderDetailError('');
+    }
+
+    function openOrderDetails(orderId) {
+        setSelectedOrderId(orderId);
+        setSelectedOrderDetail(null);
+        setOrderDetailError('');
+        setOrderDetailLoading(true);
+    }
+
+    function closeOrderDetails() {
+        setSelectedOrderId(null);
+        setSelectedOrderDetail(null);
+        setOrderDetailLoading(false);
+        setOrderDetailError('');
+    }
+
+    useEffect(() => {
+        if (selectedUser?.role !== 'Customer') return undefined;
+        let active = true;
+        api.getOrders({ userId: selectedUser.id })
+            .then(response => {
+                if (!active) return;
+                if (!Array.isArray(response.data)) {
+                    setUserOrdersError('Dữ liệu lịch sử đơn hàng không hợp lệ.');
+                    return;
+                }
+                setUserOrders(response.data);
+            })
+            .catch(() => {
+                if (active) setUserOrdersError('Không tải được lịch sử đơn hàng của khách hàng.');
+            })
+            .finally(() => {
+                if (active) setUserOrdersLoading(false);
+            });
+        return () => { active = false; };
+    }, [selectedUser]);
+
+    useEffect(() => {
+        if (selectedOrderId === null) return undefined;
+        let active = true;
+        api.getOrderById(selectedOrderId)
+            .then(response => {
+                if (active) setSelectedOrderDetail(response.data);
+            })
+            .catch(error => {
+                if (!active) return;
+                setOrderDetailError(error.response?.status === 404
+                    ? 'Không tìm thấy đơn hàng này.'
+                    : 'Không tải được chi tiết đơn hàng.');
+            })
+            .finally(() => {
+                if (active) setOrderDetailLoading(false);
+            });
+        return () => { active = false; };
+    }, [selectedOrderId]);
 
     useEffect(() => {
         let active = true;
@@ -834,7 +936,13 @@ export default function Account({
 
     if (!currentUser) return <div className="acc2-login"><span>◈</span><h2>Không gian tài khoản</h2><p>Vui lòng đăng nhập.</p></div>;
 
-    const filtered = users.filter(user => (!role || user.role === role) && `${user.fullName} ${user.email} ${user.id}`.toLocaleLowerCase('vi').includes(search.trim().toLocaleLowerCase('vi')));
+    const keyword = search.trim().toLocaleLowerCase('vi');
+    const filtered = users.filter(user =>
+        (!role || user.role === role) &&
+        `${user.fullName || ''} ${user.email || ''} ${user.username || ''} ${user.id}`
+            .toLocaleLowerCase('vi')
+            .includes(keyword)
+    );
     const pages = Math.max(1, Math.ceil(filtered.length / 8));
     const currentPage = Math.min(page, pages);
     const visible = filtered.slice((currentPage - 1) * 8, currentPage * 8);
@@ -943,13 +1051,174 @@ export default function Account({
                             <button aria-label="Đóng thông báo" onClick={() => setNotice(null)}>×</button>
                         </div>
                     )}
-                    {management ? (
+                    {management ? selectedUser ? (
+                        <section className="acc2-panel acc2-account-detail" aria-busy={userOrdersLoading}>
+                            <header className="acc2-panel-head">
+                                <div>
+                                    <h2>Chi tiết tài khoản</h2>
+                                    <p>Thông tin hồ sơ và trạng thái tài khoản.</p>
+                                </div>
+                                <button type="button" onClick={closeUserDetails}>← Quay lại danh sách</button>
+                            </header>
+                            <div className="acc2-account-summary">
+                                <span className="acc2-avatar large">{initials(selectedUser.fullName)}</span>
+                                <div>
+                                    <h3>{selectedUser.fullName || 'Chưa cập nhật'}</h3>
+                                    <span className={`acc2-badge ${selectedUser.role}`}>
+                                        {roles[selectedUser.role] || selectedUser.role}
+                                    </span>
+                                </div>
+                            </div>
+                            <dl className="acc2-account-fields">
+                                {[
+                                    ['Mã tài khoản', selectedUser.id],
+                                    ['Tên đăng nhập', selectedUser.username || 'Chưa cập nhật'],
+                                    ['Email', selectedUser.email || 'Chưa cập nhật'],
+                                    ['Số điện thoại', selectedUser.phone || 'Chưa cập nhật'],
+                                    ['Giới tính', selectedUser.gender || 'Chưa cập nhật'],
+                                    ['Ngày sinh', formatDateOfBirth(selectedUser.dateOfBirth)],
+                                    ['Trạng thái', selectedUser.isActive ? 'Đang hoạt động' : 'Đã khóa'],
+                                    ['Ngày tạo', formatAccountDate(selectedUser.createdAtUtc || selectedUser.createdAt)],
+                                    ['Đổi mật khẩu', selectedUser.mustChangePassword ? 'Cần đổi mật khẩu' : 'Không yêu cầu']
+                                ].map(([label, value]) => (
+                                    <div key={label}><dt>{label}</dt><dd>{value}</dd></div>
+                                ))}
+                            </dl>
+                            {selectedUser.role === 'Customer' && (
+                                <section className="acc2-customer-orders">
+                                    <header className="acc2-panel-head">
+                                        <div>
+                                            <h3>Lịch sử đơn hàng</h3>
+                                            {!userOrdersLoading && !userOrdersError && <p>{userOrders.length} đơn hàng</p>}
+                                        </div>
+                                    </header>
+                                    {userOrdersLoading ? (
+                                        <p className="acc2-empty" role="status">Đang tải lịch sử đơn hàng…</p>
+                                    ) : userOrdersError ? (
+                                        <p className="acc2-empty" role="alert">{userOrdersError}</p>
+                                    ) : userOrders.length ? (
+                                        <div className="acc2-table-scroll">
+                                            <table>
+                                                <thead><tr><th>MÃ ĐƠN</th><th>NGÀY ĐẶT</th><th>SỐ MÓN</th><th>TỔNG TIỀN</th><th>TRẠNG THÁI</th><th>THAO TÁC</th></tr></thead>
+                                                <tbody>
+                                                    {userOrders.map(order => {
+                                                        const normalizedStatus = normalizeOrderStatus(order.status);
+                                                        return <tr key={order.id}>
+                                                            <td><strong>#{order.id}</strong></td>
+                                                            <td>{formatAccountDate(order.orderDate)}</td>
+                                                            <td>{order.itemCount ?? order.items?.length ?? '—'}</td>
+                                                            <td><strong>{formatMoney(order.totalPrice)}</strong></td>
+                                                            <td>{orderStatuses[normalizedStatus] || normalizedStatus || 'Chưa xác định'}</td>
+                                                            <td>
+                                                                <button
+                                                                    type="button"
+                                                                    className="acc2-order-view"
+                                                                    disabled={orderDetailLoading}
+                                                                    onClick={() => openOrderDetails(order.id)}
+                                                                >
+                                                                    {orderDetailLoading && selectedOrderId === order.id ? 'Đang tải…' : 'Xem chi tiết'}
+                                                                </button>
+                                                            </td>
+                                                        </tr>;
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    ) : (
+                                        <p className="acc2-empty">Khách hàng chưa có đơn hàng nào.</p>
+                                    )}
+                                    {selectedOrderId !== null && (
+                                        <section className="acc2-order-detail" aria-busy={orderDetailLoading}>
+                                            <header className="acc2-panel-head">
+                                                <div>
+                                                    <h3>Chi tiết đơn hàng #{selectedOrderId}</h3>
+                                                    {selectedOrderDetail && <p>Đặt lúc {formatAccountDate(selectedOrderDetail.orderDate)}</p>}
+                                                </div>
+                                                <button type="button" onClick={closeOrderDetails}>Đóng chi tiết</button>
+                                            </header>
+                                            {orderDetailLoading ? (
+                                                <p className="acc2-empty" role="status">Đang tải chi tiết đơn hàng…</p>
+                                            ) : orderDetailError ? (
+                                                <p className="acc2-empty" role="alert">{orderDetailError}</p>
+                                            ) : selectedOrderDetail && (() => {
+                                                const items = Array.isArray(selectedOrderDetail.items)
+                                                    ? selectedOrderDetail.items
+                                                    : [];
+                                                const subtotal = items.reduce((sum, item) =>
+                                                    sum + Number(item.lineTotal ?? Number(item.price || 0) * Number(item.quantity || 0)), 0
+                                                );
+                                                const extra = Number(selectedOrderDetail.totalPrice || 0) - subtotal;
+                                                const shippingFee = selectedOrderDetail.shippingFee ?? Math.max(0, extra);
+                                                const normalizedStatus = normalizeOrderStatus(selectedOrderDetail.status);
+
+                                                return <>
+                                                    <div className="acc2-order-info">
+                                                        <div><small>Khách hàng</small><strong>{selectedOrderDetail.customerName || selectedUser.fullName}</strong><p>{selectedOrderDetail.customerEmail || selectedUser.email}</p></div>
+                                                        <div><small>Trạng thái</small><strong>{orderStatuses[normalizedStatus] || normalizedStatus || 'Chưa xác định'}</strong></div>
+                                                        <div><small>Tổng tiền</small><strong>{formatMoney(selectedOrderDetail.totalPrice)}</strong></div>
+                                                        <div className="acc2-order-shipping">
+                                                            <small>Thông tin giao hàng</small>
+                                                            <p><span>Địa chỉ</span><strong>{selectedOrderDetail.shippingAddress || '—'}</strong></p>
+                                                            <p><span>Người nhận</span><strong>{selectedOrderDetail.recipientName || selectedOrderDetail.customerName || selectedUser.fullName}</strong></p>
+                                                            <p><span>Số điện thoại</span><strong>{selectedOrderDetail.phone || '—'}</strong></p>
+                                                            <p><span>Ghi chú</span><strong>{selectedOrderDetail.note || '—'}</strong></p>
+                                                            <p><span>Phí vận chuyển</span><strong>{formatMoney(shippingFee)}</strong></p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="acc2-table-scroll acc2-order-items">
+                                                        <table>
+                                                            <thead><tr><th>SẢN PHẨM</th><th>ĐƠN GIÁ</th><th>SỐ LƯỢNG</th><th>THÀNH TIỀN</th></tr></thead>
+                                                            <tbody>
+                                                                {items.map(item => (
+                                                                    <tr key={item.id}>
+                                                                        <td><strong>{item.productName || `Sản phẩm #${item.productId}`}</strong></td>
+                                                                        <td>{formatMoney(item.price)}{item.unit && ` / ${item.unit}`}</td>
+                                                                        <td>{item.quantity}</td>
+                                                                        <td><strong>{formatMoney(item.lineTotal ?? Number(item.price || 0) * Number(item.quantity || 0))}</strong></td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                            <tfoot>
+                                                                <tr><td colSpan="3">Tạm tính</td><td>{formatMoney(subtotal)}</td></tr>
+                                                                <tr><td colSpan="3">Phí vận chuyển</td><td>{formatMoney(shippingFee)}</td></tr>
+                                                                <tr><td colSpan="3"><strong>Tổng cộng</strong></td><td><strong>{formatMoney(selectedOrderDetail.totalPrice)}</strong></td></tr>
+                                                            </tfoot>
+                                                        </table>
+                                                        {!items.length && <p className="acc2-empty">Đơn hàng này chưa có sản phẩm nào.</p>}
+                                                    </div>
+                                                </>;
+                                            })()}
+                                        </section>
+                                    )}
+                                </section>
+                            )}
+                        </section>
+                    ) : (
                         <>
                             <section className="acc2-panel" aria-busy={loading || busy}>
                                 <header className="acc2-panel-head">
-                                    <div><h2>Danh sách tài khoản <span>{users.length}</span></h2></div>
+                                    <div><h2>Danh sách tài khoản <span>{filtered.length}</span></h2></div>
                                     <button disabled={loading || busy} onClick={reload}>{loading ? 'Đang tải…' : '↻ Tải lại'}</button>
                                 </header>
+                                <div className="acc2-toolbar">
+                                    <input
+                                        type="search"
+                                        aria-label="Tìm tài khoản"
+                                        placeholder="Tìm theo tên, email, tên đăng nhập hoặc mã tài khoản…"
+                                        value={search}
+                                        onChange={event => { setSearch(event.target.value); setPage(1); }}
+                                    />
+                                    <select
+                                        aria-label="Lọc theo vai trò"
+                                        value={role}
+                                        onChange={event => { setRole(event.target.value); setPage(1); }}
+                                    >
+                                        <option value="">Tất cả vai trò</option>
+                                        {Object.entries(roles).map(([key, label]) => (
+                                            <option key={key} value={key}>{label}</option>
+                                        ))}
+                                    </select>
+                                </div>
                                 <div className="acc2-table-scroll">
                                     <table>
                                         <thead><tr><th>THÀNH VIÊN</th><th>VAI TRÒ</th><th>PHÂN QUYỀN</th><th>THAO TÁC</th></tr></thead>
@@ -978,13 +1247,24 @@ export default function Account({
                                                             </select>
                                                         </td>
                                                         <td>
-                                                            <button className="acc2-delete" disabled={self || busy || loading || !user.isActive} onClick={() => deleteUser(user)}>{user.isActive ? 'Vô hiệu hóa' : 'Đã khóa'}</button>
+                                                            <div className="acc2-account-actions">
+                                                                <button type="button" onClick={() => openUserDetails(user)}>Xem chi tiết</button>
+                                                                <button className="acc2-delete" disabled={self || busy || loading || !user.isActive} onClick={() => deleteUser(user)}>{user.isActive ? 'Vô hiệu hóa' : 'Đã khóa'}</button>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 );
                                             })}
                                         </tbody>
                                     </table>
+                                    {!visible.length && <p className="acc2-empty">{loading ? 'Đang tải tài khoản…' : 'Không tìm thấy tài khoản phù hợp.'}</p>}
+                                </div>
+                                <div className="acc2-pagination">
+                                    <span>Trang {currentPage} / {pages}</span>
+                                    <div>
+                                        <button type="button" disabled={currentPage <= 1} onClick={() => setPage(currentPage - 1)}>← Trước</button>
+                                        <button type="button" disabled={currentPage >= pages} onClick={() => setPage(currentPage + 1)}>Sau →</button>
+                                    </div>
                                 </div>
                             </section>
                             <section className="acc2-panel acc2-reset-requests">

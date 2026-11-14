@@ -461,7 +461,7 @@ const allTabs = [
     ['vouchers', '🎟', 'Voucher']
 ];
 
-export default function Admin({ currentUser }) {
+export default function Admin({ currentUser, onBackToAccount }) {
     const isAdmin = currentUser?.role === 'Admin';
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -909,348 +909,572 @@ export default function Admin({ currentUser }) {
     const table = (rows, showPrice = true) => <div className="adm-table-scroll"><table><thead><tr><th>Sản phẩm</th>{showPrice && <th>Giá bán</th>}<th>Tồn kho</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>{productRows(rows, showPrice)}</tbody></table>{!rows.length && <p className="adm-empty">{loading ? 'Đang tải dữ liệu…' : 'Không có sản phẩm phù hợp.'}</p>}</div>;
 
     return <div className="adm-shell">
-        <aside className="adm-sidebar"><div className="adm-brand"><span>✿</span> Vegetable<span className="adm-brand-light">Shop</span></div><p className="adm-eyebrow">KHÔNG GIAN QUẢN TRỊ</p>
-            <nav aria-label="Quản trị">{availableTabs.map(([id, icon, label]) => <button key={id} className={tab === id ? 'active' : ''} onClick={() => { setTab(id); setForm(null); setCatForm(null); setVoucherForm(null); setInventoryForm(null); }}><span>{icon}</span>{label}{id === 'inventory' && <b>{lowStock.length}</b>}</button>)}</nav>
-            <div className="adm-sidebar-note"><strong>Mỗi ngày một chút xanh.</strong><p>Quản lý sản phẩm và theo dõi cửa hàng của bạn tại đây.</p></div>
+        <aside className="adm-sidebar">
+            <div className="adm-brand"><span>✿</span> Vegetable<span className="adm-brand-light">Shop</span></div>
+            <p className="adm-eyebrow">KHÔNG GIAN QUẢN TRỊ</p>
+            <nav aria-label="Quản trị">
+                {availableTabs.map(([id, icon, label]) => (
+                    <button
+                        key={id}
+                        className={tab === id ? 'active' : ''}
+                        onClick={() => {
+                            setTab(id);
+                            setForm(null);
+                            setCatForm(null);
+                            setVoucherForm(null);
+                            setInventoryForm(null);
+                        }}
+                    >
+                        <span>{icon}</span>{label}
+                        {id === 'inventory' && <b>{lowStock.length}</b>}
+                    </button>
+                ))}
+            </nav>
+            <div className="adm-sidebar-note">
+                <strong>Mỗi ngày một chút xanh.</strong>
+                <p>Quản lý sản phẩm và theo dõi cửa hàng của bạn tại đây.</p>
+            </div>
         </aside>
 
-        <section className="adm-main" aria-busy={loading}><header className="adm-heading"><div><p className="adm-eyebrow">VEGETABLESHOP / QUẢN TRỊ</p><h1>{form ? (form.id ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm') : inventoryForm ? 'Cập nhật tồn kho' : catForm ? (catForm.id ? 'Chỉnh sửa danh mục' : 'Thêm danh mục') : voucherForm ? (voucherForm.id ? 'Chỉnh sửa voucher' : 'Thêm voucher mới') : { overview: 'Tổng quan cửa hàng', products: 'Quản lý sản phẩm', inventory: 'Kiểm tra tồn kho', categories: 'Danh mục sản phẩm', orders: 'Quản lý đơn hàng', vouchers: 'Quản lý Voucher' }[tab]}</h1><p>Theo dõi rõ ràng, quản lý dễ dàng.</p></div><button disabled={loading || saving} onClick={refresh}>{loading ? 'Đang tải…' : '↻ Tải lại'}</button></header>
-        {notice && <div role={notice.error ? 'alert' : 'status'} className={`adm-notice ${notice.error ? 'error' : ''}`}>{notice.text}<button aria-label="Đóng thông báo" onClick={() => setNotice(null)}>×</button></div>}
-
-        {/* Form Sản phẩm */}
-        {form ? <section className="adm-panel"><div className="adm-panel-head"><h2>Thông tin sản phẩm</h2><button disabled={saving} onClick={() => setForm(null)}>← Quay lại</button></div><form onSubmit={saveProduct} className="adm-form">
-            {[['name', 'Tên sản phẩm', 'text'], ['price', 'Giá bán (VNĐ)', 'number'], ['quantity', 'Số lượng tồn kho', 'number'], ['unit', 'Đơn vị', 'text']].map(([key, label, type]) => <label key={key}>{label}<input required type={type} min={type === 'number' ? 0 : undefined} step={key === 'price' ? '0.01' : key === 'quantity' ? '1' : undefined} value={form[key]} onChange={e => setForm({ ...form, [key]: e.target.value })} /></label>)}
-            <label>Danh mục<select required value={form.categoryId} onChange={e => setForm({ ...form, categoryId: e.target.value })}><option value="">Chọn danh mục</option>{categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
-            <label>Hình ảnh sản phẩm
-                <input value={form.image || ''} onChange={e => setForm({ ...form, image: e.target.value })} placeholder="https://… hoặc /images/…" />
-                <input type="file" accept="image/*" onChange={handleFileChange} style={{ marginTop: '8px' }} />
-            </label>
-            <label className="adm-wide">Mô tả<textarea rows="4" value={form.description || ''} onChange={e => setForm({ ...form, description: e.target.value })} /></label><div className="adm-wide adm-actions"><button className="adm-primary" disabled={saving || loading || !categories.length}>{saving ? 'Đang lưu…' : 'Lưu sản phẩm'}</button><button type="button" disabled={saving} onClick={() => setForm(null)}>Hủy</button></div>
-        </form></section>
-        : inventoryForm ? <section className="adm-panel"><div className="adm-panel-head"><h2>{inventoryForm.name}</h2><button disabled={saving} onClick={() => setInventoryForm(null)}>← Quay lại</button></div><form onSubmit={saveInventory} className="adm-form">
-            <label>Số lượng tồn kho<input aria-label="Số lượng tồn kho" required type="number" min="0" step="1" value={inventoryForm.quantity} onChange={event => setInventoryForm({ ...inventoryForm, quantity: event.target.value })} /></label>
-            <div className="adm-wide adm-actions"><button className="adm-primary" disabled={saving || loading}>{saving ? 'Đang lưu…' : 'Lưu tồn kho'}</button><button type="button" disabled={saving} onClick={() => setInventoryForm(null)}>Hủy</button></div>
-        </form></section>
-        : voucherForm ? <section className="adm-panel">
-            <div className="adm-panel-head">
-                <h2>{voucherForm.id ? `Chỉnh sửa mã ${voucherForm.code}` : 'Tạo mã giảm giá mới'}</h2>
-                <button disabled={saving} onClick={() => setVoucherForm(null)}>← Quay lại</button>
-            </div>
-            <form onSubmit={saveVoucher} className="adm-form">
-                <label>
-                    Mã voucher (Code)
-                    <input
-                        required
-                        type="text"
-                        maxLength={30}
-                        placeholder="Ví dụ: VUONNHA20"
-                        value={voucherForm.code}
-                        onChange={e => setVoucherForm({ ...voucherForm, code: e.target.value.toUpperCase() })}
-                    />
-                </label>
-                <label>
-                    Tên chương trình ưu đãi
-                    <input
-                        required
-                        type="text"
-                        maxLength={150}
-                        placeholder="Ví dụ: Giảm 20.000đ cho đơn từ 120.000đ"
-                        value={voucherForm.title}
-                        onChange={e => setVoucherForm({ ...voucherForm, title: e.target.value })}
-                    />
-                </label>
-                <label>
-                    Loại giảm giá
-                    <select
-                        value={voucherForm.discountType}
-                        onChange={e => setVoucherForm({ ...voucherForm, discountType: e.target.value })}
-                    >
-                        <option value="Fixed">Giảm tiền trực tiếp (VNĐ)</option>
-                        <option value="Percent">Giảm theo phần trăm (%)</option>
-                    </select>
-                </label>
-                <label>
-                    {voucherForm.discountType === 'Percent' ? 'Phần trăm giảm (%)' : 'Số tiền giảm (VNĐ)'}
-                    <input
-                        required
-                        type="number"
-                        min="1"
-                        max={voucherForm.discountType === 'Percent' ? 100 : undefined}
-                        step="1"
-                        value={voucherForm.discountValue}
-                        onChange={e => setVoucherForm({ ...voucherForm, discountValue: e.target.value })}
-                    />
-                </label>
-                {voucherForm.discountType === 'Percent' && (
-                    <label>
-                        Giảm tối đa (VNĐ — bỏ trống nếu không giới hạn)
-                        <input
-                            type="number"
-                            min="0"
-                            step="1000"
-                            placeholder="Ví dụ: 35000"
-                            value={voucherForm.maxDiscountAmount}
-                            onChange={e => setVoucherForm({ ...voucherForm, maxDiscountAmount: e.target.value })}
-                        />
-                    </label>
-                )}
-                <label>
-                    Giá trị đơn tối thiểu (VNĐ)
-                    <input
-                        required
-                        type="number"
-                        min="0"
-                        step="1000"
-                        value={voucherForm.minOrderValue}
-                        onChange={e => setVoucherForm({ ...voucherForm, minOrderValue: e.target.value })}
-                    />
-                </label>
-                <label>
-                    Tổng lượt sử dụng tối đa
-                    <input
-                        required
-                        type="number"
-                        min="1"
-                        step="1"
-                        value={voucherForm.usageLimit}
-                        onChange={e => setVoucherForm({ ...voucherForm, usageLimit: e.target.value })}
-                    />
-                </label>
-                <label>
-                    Ngày bắt đầu
-                    <input
-                        required
-                        type="date"
-                        value={voucherForm.startDate}
-                        onChange={e => setVoucherForm({ ...voucherForm, startDate: e.target.value })}
-                    />
-                </label>
-                <label>
-                    Ngày kết thúc (HSD)
-                    <input
-                        required
-                        type="date"
-                        value={voucherForm.endDate}
-                        onChange={e => setVoucherForm({ ...voucherForm, endDate: e.target.value })}
-                    />
-                </label>
-                <label>
-                    Trạng thái áp dụng
-                    <select
-                        value={voucherForm.isActive ? 'true' : 'false'}
-                        onChange={e => setVoucherForm({ ...voucherForm, isActive: e.target.value === 'true' })}
-                    >
-                        <option value="true">Đang kích hoạt</option>
-                        <option value="false">Tạm tắt</option>
-                    </select>
-                </label>
-                <label>
-                    Phạm vi hiển thị
-                    <select
-                        value={voucherForm.isPersonal ? 'true' : 'false'}
-                        onChange={e => setVoucherForm({ ...voucherForm, isPersonal: e.target.value === 'true' })}
-                    >
-                        <option value="false">Công khai (Khách tự lưu ở Ví Voucher)</option>
-                        <option value="true">Riêng tư (Chỉ khách có mã mới nhập được)</option>
-                    </select>
-                </label>
-                <label className="adm-wide">
-                    Mô tả chi tiết điều kiện
-                    <textarea
-                        rows="3"
-                        maxLength={300}
-                        placeholder="Ghi chú thêm về điều kiện áp dụng..."
-                        value={voucherForm.description || ''}
-                        onChange={e => setVoucherForm({ ...voucherForm, description: e.target.value })}
-                    />
-                </label>
-                <div className="adm-wide adm-actions">
-                    <button className="adm-primary" disabled={saving || loading}>
-                        {saving ? 'Đang lưu…' : 'Lưu voucher'}
-                    </button>
-                    <button type="button" disabled={saving} onClick={() => setVoucherForm(null)}>Hủy</button>
+        <section className="adm-main" aria-busy={loading}>
+            <header className="adm-heading">
+                <div>
+                    <p className="adm-eyebrow">VEGETABLESHOP / QUẢN TRỊ</p>
+                    <h1>
+                        {form ? (form.id ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm')
+                            : inventoryForm ? 'Cập nhật tồn kho'
+                            : catForm ? (catForm.id ? 'Chỉnh sửa danh mục' : 'Thêm danh mục')
+                            : voucherForm ? (voucherForm.id ? 'Chỉnh sửa voucher' : 'Thêm voucher mới')
+                            : {
+                                overview: 'Tổng quan cửa hàng',
+                                products: 'Quản lý sản phẩm',
+                                inventory: 'Kiểm tra tồn kho',
+                                categories: 'Danh mục sản phẩm',
+                                orders: 'Quản lý đơn hàng',
+                                vouchers: 'Quản lý Voucher'
+                            }[tab]}
+                    </h1>
+                    <p>Theo dõi rõ ràng, quản lý dễ dàng.</p>
                 </div>
-            </form>
-        </section>
-        : <>
-        {tab === 'overview' && <><div className="adm-stats">{[['Giá trị tất cả đơn hàng', money(stats.totalRevenue), 'Theo API hiện tại, gồm mọi trạng thái'], ['Tổng đơn hàng', stats.totalOrders ?? '—', 'Đơn hàng trong hệ thống'], ['Chờ xử lý', stats.pendingOrders ?? '—', 'Cần được xác nhận'], ['Sản phẩm', products.length, `${lowStock.length} sản phẩm tồn kho < 10`]].map(([title, value, detail]) => <article key={title}><span>{title}</span><strong>{loading ? '…' : value}</strong><small>{detail}</small></article>)}</div><div className="adm-welcome"><div><p className="adm-eyebrow">CHĂM CHÚT CỬA HÀNG CỦA BẠN</p><h2>Sản phẩm tươi mới.<br />Vận hành gọn gàng.</h2><p>Thêm sản phẩm, cập nhật giá và kiểm tra lượng hàng sẵn có.</p><button className="adm-primary" disabled={loading} onClick={() => startForm()}>+ Thêm sản phẩm</button></div><span aria-hidden="true">✿</span></div><section className="adm-panel"><div className="adm-panel-head"><div><h2>Cần bổ sung hàng</h2><p>Các sản phẩm có tồn kho dưới 10 đơn vị.</p></div><button onClick={() => setTab('inventory')}>Xem tất cả →</button></div>{table(lowStock.slice(0, 5))}</section></>}
-        {tab === 'products' && <section className="adm-panel"><div className="adm-panel-head"><div><h2>Danh sách sản phẩm</h2><p>{filtered.length} kết quả</p></div><div className="adm-actions"><button disabled={loading || !filtered.length} onClick={exportCSV}>↓ Xuất CSV</button><button disabled={loading} className="adm-primary" onClick={() => startForm()}>+ Thêm mới</button></div></div><div className="adm-filters"><input aria-label="Tìm sản phẩm" placeholder="Tìm tên sản phẩm…" value={search} onChange={e => updateFilter(setSearch, e.target.value)} /><select aria-label="Danh mục" value={category} onChange={e => updateFilter(setCategory, e.target.value)}><option value="">Tất cả danh mục</option>{categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select><select aria-label="Sắp xếp" value={sort} onChange={e => updateFilter(setSort, e.target.value)}><option value="newest">Mới nhất</option><option value="price">Giá tăng dần</option><option value="stock">Tồn kho tăng dần</option></select></div>{table(visible)}<div className="adm-pagination"><span>Trang {currentPage} / {pageCount}</span><div className="adm-actions"><button disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>← Trước</button><button disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>Sau →</button></div></div></section>}
-        {tab === 'inventory' && <section className="adm-panel"><div className="adm-panel-head"><div><h2>{inventoryProducts.length} sản phẩm trong kho</h2><p>Hiển thị tất cả sản phẩm; nhóm tồn kho thấp (&lt; 10) luôn được ưu tiên lên đầu.</p></div></div><div className="adm-filters adm-inventory-filters">
-            <input aria-label="Tìm sản phẩm trong kho" placeholder="Tìm tên sản phẩm…" value={inventorySearch} onChange={e => updateFilter(setInventorySearch, e.target.value)} />
-            <select aria-label="Lọc danh mục tồn kho" value={inventoryCategory} onChange={e => updateFilter(setInventoryCategory, e.target.value)}><option value="">Tất cả danh mục</option>{categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
-            <select aria-label="Lọc trạng thái tồn kho" value={inventoryStock} onChange={e => updateFilter(setInventoryStock, e.target.value)}><option value="">Mọi trạng thái</option><option value="available">Còn hàng (từ 10)</option><option value="low">Sắp hết (1–9)</option><option value="out">Hết hàng</option></select>
-            <select aria-label="Sắp xếp tồn kho theo" value={inventorySortBy} onChange={e => updateFilter(setInventorySortBy, e.target.value)}><option value="quantity">Số lượng</option><option value="name">Tên sản phẩm</option><option value="price">Giá bán</option><option value="status">Trạng thái</option></select>
-            <select aria-label="Thứ tự sắp xếp tồn kho" value={inventorySortBy === 'status' ? 'asc' : inventorySortDirection} disabled={inventorySortBy === 'status'} onChange={e => updateFilter(setInventorySortDirection, e.target.value)}><option value="asc">{inventorySortBy === 'name' ? 'A → Z' : inventorySortBy === 'status' ? 'Hết hàng → Sắp hết → Còn hàng' : 'Tăng dần'}</option><option value="desc">{inventorySortBy === 'name' ? 'Z → A' : 'Giảm dần'}</option></select>
-        </div>{table(inventoryProducts, false)}</section>}
-        {tab === 'orders' && <AdminOrders />}
-
-        {/* Tab Quản lý Voucher */}
-        {tab === 'vouchers' && (
-            <section className="adm-panel">
-                <div className="adm-panel-head">
-                    <div>
-                        <h2>Danh sách mã giảm giá</h2>
-                        <p>{filteredVouchers.length} voucher trong hệ thống</p>
-                    </div>
-                    <div className="adm-actions">
-                        <button disabled={loading} className="adm-primary" onClick={() => startVoucherForm()}>
-                            + Thêm voucher
-                        </button>
-                    </div>
-                </div>
-
-                <div className="adm-filters">
-                    <input
-                        aria-label="Tìm voucher"
-                        placeholder="Tìm theo mã code hoặc tên chương trình…"
-                        value={voucherSearch}
-                        onChange={e => setVoucherSearch(e.target.value)}
-                    />
-                    <select
-                        aria-label="Lọc trạng thái voucher"
-                        value={voucherStatusFilter}
-                        onChange={e => setVoucherStatusFilter(e.target.value)}
-                    >
-                        <option value="">Tất cả trạng thái</option>
-                        <option value="active">Đang chạy</option>
-                        <option value="inactive">Đã tắt</option>
-                        <option value="expired">Hết hạn</option>
-                        <option value="exhausted">Hết lượt</option>
-                    </select>
-                </div>
-
-                <div className="adm-table-scroll">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Mã & Chương trình</th>
-                                <th>Mức giảm</th>
-                                <th>Lượt dùng</th>
-                                <th>Thời hạn</th>
-                                <th>Trạng thái</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredVouchers.map(v => {
-                                const status = getVoucherStatus(v);
-                                return (
-                                    <tr key={v.id}>
-                                        <td>
-                                            <div className="adm-product">
-                                                <span className="adm-thumb">🎟</span>
-                                                <div>
-                                                    <strong>{v.code} — {v.title}</strong>
-                                                    <small>
-                                                        {v.isPersonal ? 'Mã riêng tư' : 'Mã công khai'}
-                                                        {v.description ? ` · ${v.description}` : ''}
-                                                    </small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <strong>
-                                                {v.discountType === 'Percent'
-                                                    ? `Giảm ${v.discountValue}%${v.maxDiscountAmount ? ` (tối đa ${money(v.maxDiscountAmount)})` : ''}`
-                                                    : `Giảm ${money(v.discountValue)}`}
-                                            </strong>
-                                            <small>Đơn tối thiểu: {money(v.minOrderValue)}</small>
-                                        </td>
-                                        <td>
-                                            <strong>{v.usedCount}</strong> / {v.usageLimit}
-                                        </td>
-                                        <td>
-                                            <small>{formatDate(v.startDate)} → {formatDate(v.endDate)}</small>
-                                        </td>
-                                        <td>
-                                            <span className={`adm-badge ${status.badge}`}>{status.label}</span>
-                                        </td>
-                                        <td>
-                                            <div className="adm-actions">
-                                                <button
-                                                    type="button"
-                                                    className="adm-visibility-toggle"
-                                                    disabled={saving}
-                                                    onClick={() => toggleVoucherActive(v)}
-                                                    aria-label={`${v.isActive ? 'Tắt' : 'Bật'} voucher ${v.code}`}
-                                                    title={v.isActive ? 'Tạm tắt voucher' : 'Kích hoạt voucher'}
-                                                >
-                                                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                                                        {!v.isActive ? (
-                                                            <>
-                                                                <path d="M3 3l18 18" />
-                                                                <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
-                                                                <path d="M9.9 5.2A10.7 10.7 0 0 1 12 5c5.5 0 9 7 9 7a15.8 15.8 0 0 1-2.2 3.1" />
-                                                                <path d="M6.2 6.2C3.9 7.8 3 12 3 12s3.5 7 9 7a10.7 10.7 0 0 0 4-.8" />
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
-                                                                <circle cx="12" cy="12" r="3" />
-                                                            </>
-                                                        )}
-                                                    </svg>
-                                                </button>
-                                                <button disabled={saving} onClick={() => startVoucherForm(v)}>Sửa</button>
-                                                <button disabled={saving} className="adm-danger" onClick={() => deleteVoucher(v)}>Xóa</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                    {!filteredVouchers.length && (
-                        <p className="adm-empty">{loading ? 'Đang tải dữ liệu…' : 'Chưa có voucher nào phù hợp.'}</p>
+                <div className="adm-actions">
+                    {onBackToAccount && (
+                        <button type="button" onClick={onBackToAccount}>← Tài khoản</button>
                     )}
+                    <button disabled={loading || saving} onClick={refresh}>
+                        {loading ? 'Đang tải…' : '↻ Tải lại'}
+                    </button>
                 </div>
-            </section>
-        )}
+            </header>
 
-        {/* Tab Danh Mục */}
-        {tab === 'categories' && (
-            catForm ? (
+            {notice && (
+                <div role={notice.error ? 'alert' : 'status'} className={`adm-notice ${notice.error ? 'error' : ''}`}>
+                    {notice.text}
+                    <button aria-label="Đóng thông báo" onClick={() => setNotice(null)}>×</button>
+                </div>
+            )}
+
+            {/* Form Sản phẩm */}
+            {form ? (
                 <section className="adm-panel">
                     <div className="adm-panel-head">
-                        <h2>Thông tin danh mục</h2>
-                        <button disabled={saving} onClick={() => setCatForm(null)}>← Quay lại</button>
+                        <h2>Thông tin sản phẩm</h2>
+                        <button disabled={saving} onClick={() => setForm(null)}>← Quay lại</button>
                     </div>
-                    <form onSubmit={saveCategory} className="adm-form">
-                        <label>Tên danh mục <input required type="text" value={catForm.name} onChange={e => setCatForm({ ...catForm, name: e.target.value })} /></label>
-                        <label className="adm-wide">Mô tả danh mục <textarea rows="4" value={catForm.description || ''} onChange={e => setCatForm({ ...catForm, description: e.target.value })} /></label>
+                    <form onSubmit={saveProduct} className="adm-form">
+                        {[['name', 'Tên sản phẩm', 'text'], ['price', 'Giá bán (VNĐ)', 'number'], ['quantity', 'Số lượng tồn kho', 'number'], ['unit', 'Đơn vị', 'text']].map(([key, label, type]) => (
+                            <label key={key}>
+                                {label}
+                                <input
+                                    required
+                                    type={type}
+                                    min={type === 'number' ? 0 : undefined}
+                                    step={key === 'price' ? '0.01' : key === 'quantity' ? '1' : undefined}
+                                    value={form[key]}
+                                    onChange={e => setForm({ ...form, [key]: e.target.value })}
+                                />
+                            </label>
+                        ))}
+                        <label>
+                            Danh mục
+                            <select required value={form.categoryId} onChange={e => setForm({ ...form, categoryId: e.target.value })}>
+                                <option value="">Chọn danh mục</option>
+                                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                            </select>
+                        </label>
+                        <label>
+                            Hình ảnh sản phẩm
+                            <input value={form.image || ''} onChange={e => setForm({ ...form, image: e.target.value })} placeholder="https://… hoặc /images/…" />
+                            <input type="file" accept="image/*" onChange={handleFileChange} style={{ marginTop: '8px' }} />
+                        </label>
+                        <label className="adm-wide">
+                            Mô tả
+                            <textarea rows="4" value={form.description || ''} onChange={e => setForm({ ...form, description: e.target.value })} />
+                        </label>
                         <div className="adm-wide adm-actions">
-                            <button className="adm-primary" disabled={saving || loading}>{saving ? 'Đang lưu…' : 'Lưu danh mục'}</button>
-                            <button type="button" disabled={saving} onClick={() => setCatForm(null)}>Hủy</button>
+                            <button className="adm-primary" disabled={saving || loading || !categories.length}>
+                                {saving ? 'Đang lưu…' : 'Lưu sản phẩm'}
+                            </button>
+                            <button type="button" disabled={saving} onClick={() => setForm(null)}>Hủy</button>
+                        </div>
+                    </form>
+                </section>
+            ) : inventoryForm ? (
+                <section className="adm-panel">
+                    <div className="adm-panel-head">
+                        <h2>{inventoryForm.name}</h2>
+                        <button disabled={saving} onClick={() => setInventoryForm(null)}>← Quay lại</button>
+                    </div>
+                    <form onSubmit={saveInventory} className="adm-form">
+                        <label>
+                            Số lượng tồn kho
+                            <input
+                                aria-label="Số lượng tồn kho"
+                                required
+                                type="number"
+                                min="0"
+                                step="1"
+                                value={inventoryForm.quantity}
+                                onChange={event => setInventoryForm({ ...inventoryForm, quantity: event.target.value })}
+                            />
+                        </label>
+                        <div className="adm-wide adm-actions">
+                            <button className="adm-primary" disabled={saving || loading}>
+                                {saving ? 'Đang lưu…' : 'Lưu tồn kho'}
+                            </button>
+                            <button type="button" disabled={saving} onClick={() => setInventoryForm(null)}>Hủy</button>
+                        </div>
+                    </form>
+                </section>
+            ) : voucherForm ? (
+                <section className="adm-panel">
+                    <div className="adm-panel-head">
+                        <h2>{voucherForm.id ? `Chỉnh sửa mã ${voucherForm.code}` : 'Tạo mã giảm giá mới'}</h2>
+                        <button disabled={saving} onClick={() => setVoucherForm(null)}>← Quay lại</button>
+                    </div>
+                    <form onSubmit={saveVoucher} className="adm-form">
+                        <label>
+                            Mã voucher (Code)
+                            <input
+                                required
+                                type="text"
+                                maxLength={30}
+                                placeholder="Ví dụ: VUONNHA20"
+                                value={voucherForm.code}
+                                onChange={e => setVoucherForm({ ...voucherForm, code: e.target.value.toUpperCase() })}
+                            />
+                        </label>
+                        <label>
+                            Tên chương trình ưu đãi
+                            <input
+                                required
+                                type="text"
+                                maxLength={150}
+                                placeholder="Ví dụ: Giảm 20.000đ cho đơn từ 120.000đ"
+                                value={voucherForm.title}
+                                onChange={e => setVoucherForm({ ...voucherForm, title: e.target.value })}
+                            />
+                        </label>
+                        <label>
+                            Loại giảm giá
+                            <select
+                                value={voucherForm.discountType}
+                                onChange={e => setVoucherForm({ ...voucherForm, discountType: e.target.value })}
+                            >
+                                <option value="Fixed">Giảm tiền trực tiếp (VNĐ)</option>
+                                <option value="Percent">Giảm theo phần trăm (%)</option>
+                            </select>
+                        </label>
+                        <label>
+                            {voucherForm.discountType === 'Percent' ? 'Phần trăm giảm (%)' : 'Số tiền giảm (VNĐ)'}
+                            <input
+                                required
+                                type="number"
+                                min="1"
+                                max={voucherForm.discountType === 'Percent' ? 100 : undefined}
+                                step="1"
+                                value={voucherForm.discountValue}
+                                onChange={e => setVoucherForm({ ...voucherForm, discountValue: e.target.value })}
+                            />
+                        </label>
+                        {voucherForm.discountType === 'Percent' && (
+                            <label>
+                                Giảm tối đa (VNĐ — bỏ trống nếu không giới hạn)
+                                <input
+                                    type="number"
+                                    min="0"
+                                    step="1000"
+                                    placeholder="Ví dụ: 35000"
+                                    value={voucherForm.maxDiscountAmount}
+                                    onChange={e => setVoucherForm({ ...voucherForm, maxDiscountAmount: e.target.value })}
+                                />
+                            </label>
+                        )}
+                        <label>
+                            Giá trị đơn tối thiểu (VNĐ)
+                            <input
+                                required
+                                type="number"
+                                min="0"
+                                step="1000"
+                                value={voucherForm.minOrderValue}
+                                onChange={e => setVoucherForm({ ...voucherForm, minOrderValue: e.target.value })}
+                            />
+                        </label>
+                        <label>
+                            Tổng lượt sử dụng tối đa
+                            <input
+                                required
+                                type="number"
+                                min="1"
+                                step="1"
+                                value={voucherForm.usageLimit}
+                                onChange={e => setVoucherForm({ ...voucherForm, usageLimit: e.target.value })}
+                            />
+                        </label>
+                        <label>
+                            Ngày bắt đầu
+                            <input
+                                required
+                                type="date"
+                                value={voucherForm.startDate}
+                                onChange={e => setVoucherForm({ ...voucherForm, startDate: e.target.value })}
+                            />
+                        </label>
+                        <label>
+                            Ngày kết thúc (HSD)
+                            <input
+                                required
+                                type="date"
+                                value={voucherForm.endDate}
+                                onChange={e => setVoucherForm({ ...voucherForm, endDate: e.target.value })}
+                            />
+                        </label>
+                        <label>
+                            Trạng thái áp dụng
+                            <select
+                                value={voucherForm.isActive ? 'true' : 'false'}
+                                onChange={e => setVoucherForm({ ...voucherForm, isActive: e.target.value === 'true' })}
+                            >
+                                <option value="true">Đang kích hoạt</option>
+                                <option value="false">Tạm tắt</option>
+                            </select>
+                        </label>
+                        <label>
+                            Phạm vi hiển thị
+                            <select
+                                value={voucherForm.isPersonal ? 'true' : 'false'}
+                                onChange={e => setVoucherForm({ ...voucherForm, isPersonal: e.target.value === 'true' })}
+                            >
+                                <option value="false">Công khai (Khách tự lưu ở Ví Voucher)</option>
+                                <option value="true">Riêng tư (Chỉ khách có mã mới nhập được)</option>
+                            </select>
+                        </label>
+                        <label className="adm-wide">
+                            Mô tả chi tiết điều kiện
+                            <textarea
+                                rows="3"
+                                maxLength={300}
+                                placeholder="Ghi chú thêm về điều kiện áp dụng..."
+                                value={voucherForm.description || ''}
+                                onChange={e => setVoucherForm({ ...voucherForm, description: e.target.value })}
+                            />
+                        </label>
+                        <div className="adm-wide adm-actions">
+                            <button className="adm-primary" disabled={saving || loading}>
+                                {saving ? 'Đang lưu…' : 'Lưu voucher'}
+                            </button>
+                            <button type="button" disabled={saving} onClick={() => setVoucherForm(null)}>Hủy</button>
                         </div>
                     </form>
                 </section>
             ) : (
-                <section>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-                        <button disabled={loading} className="adm-primary" onClick={() => startCatForm()}>+ Thêm danh mục</button>
-                    </div>
-                    <div className="adm-category-grid">
-                        {categories.map(c => (
-                            <article className="adm-panel" key={c.id} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <>
+                    {tab === 'overview' && (
+                        <>
+                            <div className="adm-stats">
+                                {[
+                                    ['Giá trị tất cả đơn hàng', money(stats.totalRevenue), 'Theo API hiện tại, gồm mọi trạng thái'],
+                                    ['Tổng đơn hàng', stats.totalOrders ?? '—', 'Đơn hàng trong hệ thống'],
+                                    ['Chờ xử lý', stats.pendingOrders ?? '—', 'Cần được xác nhận'],
+                                    ['Sản phẩm', products.length, `${lowStock.length} sản phẩm tồn kho < 10`]
+                                ].map(([title, value, detail]) => (
+                                    <article key={title}>
+                                        <span>{title}</span>
+                                        <strong>{loading ? '…' : value}</strong>
+                                        <small>{detail}</small>
+                                    </article>
+                                ))}
+                            </div>
+                            <div className="adm-welcome">
                                 <div>
-                                    <span className="adm-category-icon">◈</span>
-                                    <h2>{c.name}</h2>
-                                    <p>{c.description || 'Chưa có mô tả.'}</p>
-                                    <strong>{products.filter(p => p.categoryId === c.id).length} sản phẩm</strong>
+                                    <p className="adm-eyebrow">CHĂM CHÚT CỬA HÀNG CỦA BẠN</p>
+                                    <h2>Sản phẩm tươi mới.<br />Vận hành gọn gàng.</h2>
+                                    <p>Thêm sản phẩm, cập nhật giá và kiểm tra lượng hàng sẵn có.</p>
+                                    <button className="adm-primary" disabled={loading} onClick={() => startForm()}>+ Thêm sản phẩm</button>
                                 </div>
-                                <div className="adm-actions" style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #eaeaea' }}>
-                                    <button onClick={() => { setCategory(String(c.id)); setSearch(''); setPage(1); setTab('products'); }}>Xem SP →</button>
-                                    <button onClick={() => startCatForm(c)}>Sửa</button>
-                                    <button className="adm-danger" onClick={() => deleteCategory(c)}>Xóa</button>
+                                <span aria-hidden="true">✿</span>
+                            </div>
+                            <section className="adm-panel">
+                                <div className="adm-panel-head">
+                                    <div>
+                                        <h2>Cần bổ sung hàng</h2>
+                                        <p>Các sản phẩm có tồn kho dưới 10 đơn vị.</p>
+                                    </div>
+                                    <button onClick={() => setTab('inventory')}>Xem tất cả →</button>
                                 </div>
-                            </article>
-                        ))}
-                        {!categories.length && <p>Chưa có dữ liệu danh mục.</p>}
-                    </div>
-                </section>
-            )
-        )}
-        </>}
-        <footer className="adm-footer">VegetableShop · Trang quản trị cửa hàng</footer></section>
+                                {table(lowStock.slice(0, 5))}
+                            </section>
+                        </>
+                    )}
+
+                    {tab === 'products' && (
+                        <section className="adm-panel">
+                            <div className="adm-panel-head">
+                                <div>
+                                    <h2>Danh sách sản phẩm</h2>
+                                    <p>{filtered.length} kết quả</p>
+                                </div>
+                                <div className="adm-actions">
+                                    <button disabled={loading || !filtered.length} onClick={exportCSV}>↓ Xuất CSV</button>
+                                    <button disabled={loading} className="adm-primary" onClick={() => startForm()}>+ Thêm mới</button>
+                                </div>
+                            </div>
+                            <div className="adm-filters">
+                                <input aria-label="Tìm sản phẩm" placeholder="Tìm tên sản phẩm…" value={search} onChange={e => updateFilter(setSearch, e.target.value)} />
+                                <select aria-label="Danh mục" value={category} onChange={e => updateFilter(setCategory, e.target.value)}>
+                                    <option value="">Tất cả danh mục</option>
+                                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                </select>
+                                <select aria-label="Sắp xếp" value={sort} onChange={e => updateFilter(setSort, e.target.value)}>
+                                    <option value="newest">Mới nhất</option>
+                                    <option value="price">Giá tăng dần</option>
+                                    <option value="stock">Tồn kho tăng dần</option>
+                                </select>
+                            </div>
+                            {table(visible)}
+                            <div className="adm-pagination">
+                                <span>Trang {currentPage} / {pageCount}</span>
+                                <div className="adm-actions">
+                                    <button disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>← Trước</button>
+                                    <button disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>Sau →</button>
+                                </div>
+                            </div>
+                        </section>
+                    )}
+
+                    {tab === 'inventory' && (
+                        <section className="adm-panel">
+                            <div className="adm-panel-head">
+                                <div>
+                                    <h2>{inventoryProducts.length} sản phẩm trong kho</h2>
+                                    <p>Hiển thị tất cả sản phẩm; nhóm tồn kho thấp (&lt; 10) luôn được ưu tiên lên đầu.</p>
+                                </div>
+                            </div>
+                            <div className="adm-filters adm-inventory-filters">
+                                <input aria-label="Tìm sản phẩm trong kho" placeholder="Tìm tên sản phẩm…" value={inventorySearch} onChange={e => updateFilter(setInventorySearch, e.target.value)} />
+                                <select aria-label="Lọc danh mục tồn kho" value={inventoryCategory} onChange={e => updateFilter(setInventoryCategory, e.target.value)}>
+                                    <option value="">Tất cả danh mục</option>
+                                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                </select>
+                                <select aria-label="Lọc trạng thái tồn kho" value={inventoryStock} onChange={e => updateFilter(setInventoryStock, e.target.value)}>
+                                    <option value="">Mọi trạng thái</option>
+                                    <option value="available">Còn hàng (từ 10)</option>
+                                    <option value="low">Sắp hết (1–9)</option>
+                                    <option value="out">Hết hàng</option>
+                                </select>
+                                <select aria-label="Sắp xếp tồn kho theo" value={inventorySortBy} onChange={e => updateFilter(setInventorySortBy, e.target.value)}>
+                                    <option value="quantity">Số lượng</option>
+                                    <option value="name">Tên sản phẩm</option>
+                                    <option value="price">Giá bán</option>
+                                    <option value="status">Trạng thái</option>
+                                </select>
+                                <select aria-label="Thứ tự sắp xếp tồn kho" value={inventorySortBy === 'status' ? 'asc' : inventorySortDirection} disabled={inventorySortBy === 'status'} onChange={e => updateFilter(setInventorySortDirection, e.target.value)}>
+                                    <option value="asc">{inventorySortBy === 'name' ? 'A → Z' : inventorySortBy === 'status' ? 'Hết hàng → Sắp hết → Còn hàng' : 'Tăng dần'}</option>
+                                    <option value="desc">{inventorySortBy === 'name' ? 'Z → A' : 'Giảm dần'}</option>
+                                </select>
+                            </div>
+                            {table(inventoryProducts, false)}
+                        </section>
+                    )}
+
+                    {tab === 'orders' && <AdminOrders />}
+
+                    {/* Tab Quản lý Voucher */}
+                    {tab === 'vouchers' && (
+                        <section className="adm-panel">
+                            <div className="adm-panel-head">
+                                <div>
+                                    <h2>Danh sách mã giảm giá</h2>
+                                    <p>{filteredVouchers.length} voucher trong hệ thống</p>
+                                </div>
+                                <div className="adm-actions">
+                                    <button disabled={loading} className="adm-primary" onClick={() => startVoucherForm()}>
+                                        + Thêm voucher
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="adm-filters">
+                                <input
+                                    aria-label="Tìm voucher"
+                                    placeholder="Tìm theo mã code hoặc tên chương trình…"
+                                    value={voucherSearch}
+                                    onChange={e => setVoucherSearch(e.target.value)}
+                                />
+                                <select
+                                    aria-label="Lọc trạng thái voucher"
+                                    value={voucherStatusFilter}
+                                    onChange={e => setVoucherStatusFilter(e.target.value)}
+                                >
+                                    <option value="">Tất cả trạng thái</option>
+                                    <option value="active">Đang chạy</option>
+                                    <option value="inactive">Đã tắt</option>
+                                    <option value="expired">Hết hạn</option>
+                                    <option value="exhausted">Hết lượt</option>
+                                </select>
+                            </div>
+
+                            <div className="adm-table-scroll">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Mã & Chương trình</th>
+                                            <th>Mức giảm</th>
+                                            <th>Lượt dùng</th>
+                                            <th>Thời hạn</th>
+                                            <th>Trạng thái</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filteredVouchers.map(v => {
+                                            const status = getVoucherStatus(v);
+                                            return (
+                                                <tr key={v.id}>
+                                                    <td>
+                                                        <div className="adm-product">
+                                                            <span className="adm-thumb">🎟</span>
+                                                            <div>
+                                                                <strong>{v.code} — {v.title}</strong>
+                                                                <small>
+                                                                    {v.isPersonal ? 'Mã riêng tư' : 'Mã công khai'}
+                                                                    {v.description ? ` · ${v.description}` : ''}
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <strong>
+                                                            {v.discountType === 'Percent'
+                                                                ? `Giảm ${v.discountValue}%${v.maxDiscountAmount ? ` (tối đa ${money(v.maxDiscountAmount)})` : ''}`
+                                                                : `Giảm ${money(v.discountValue)}`}
+                                                        </strong>
+                                                        <small>Đơn tối thiểu: {money(v.minOrderValue)}</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>{v.usedCount}</strong> / {v.usageLimit}
+                                                    </td>
+                                                    <td>
+                                                        <small>{formatDate(v.startDate)} → {formatDate(v.endDate)}</small>
+                                                    </td>
+                                                    <td>
+                                                        <span className={`adm-badge ${status.badge}`}>{status.label}</span>
+                                                    </td>
+                                                    <td>
+                                                        <div className="adm-actions">
+                                                            <button
+                                                                type="button"
+                                                                className="adm-visibility-toggle"
+                                                                disabled={saving}
+                                                                onClick={() => toggleVoucherActive(v)}
+                                                                aria-label={`${v.isActive ? 'Tắt' : 'Bật'} voucher ${v.code}`}
+                                                                title={v.isActive ? 'Tạm tắt voucher' : 'Kích hoạt voucher'}
+                                                            >
+                                                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                                                    {!v.isActive ? (
+                                                                        <>
+                                                                            <path d="M3 3l18 18" />
+                                                                            <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
+                                                                            <path d="M9.9 5.2A10.7 10.7 0 0 1 12 5c5.5 0 9 7 9 7a15.8 15.8 0 0 1-2.2 3.1" />
+                                                                            <path d="M6.2 6.2C3.9 7.8 3 12 3 12s3.5 7 9 7a10.7 10.7 0 0 0 4-.8" />
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                                                                            <circle cx="12" cy="12" r="3" />
+                                                                        </>
+                                                                    )}
+                                                                </svg>
+                                                            </button>
+                                                            <button disabled={saving} onClick={() => startVoucherForm(v)}>Sửa</button>
+                                                            <button disabled={saving} className="adm-danger" onClick={() => deleteVoucher(v)}>Xóa</button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                                {!filteredVouchers.length && (
+                                    <p className="adm-empty">{loading ? 'Đang tải dữ liệu…' : 'Chưa có voucher nào phù hợp.'}</p>
+                                )}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Tab Danh Mục */}
+                    {tab === 'categories' && (
+                        catForm ? (
+                            <section className="adm-panel">
+                                <div className="adm-panel-head">
+                                    <h2>Thông tin danh mục</h2>
+                                    <button disabled={saving} onClick={() => setCatForm(null)}>← Quay lại</button>
+                                </div>
+                                <form onSubmit={saveCategory} className="adm-form">
+                                    <label>
+                                        Tên danh mục
+                                        <input required type="text" value={catForm.name} onChange={e => setCatForm({ ...catForm, name: e.target.value })} />
+                                    </label>
+                                    <label className="adm-wide">
+                                        Mô tả danh mục
+                                        <textarea rows="4" value={catForm.description || ''} onChange={e => setCatForm({ ...catForm, description: e.target.value })} />
+                                    </label>
+                                    <div className="adm-wide adm-actions">
+                                        <button className="adm-primary" disabled={saving || loading}>{saving ? 'Đang lưu…' : 'Lưu danh mục'}</button>
+                                        <button type="button" disabled={saving} onClick={() => setCatForm(null)}>Hủy</button>
+                                    </div>
+                                </form>
+                            </section>
+                        ) : (
+                            <section>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+                                    <button disabled={loading} className="adm-primary" onClick={() => startCatForm()}>+ Thêm danh mục</button>
+                                </div>
+                                <div className="adm-category-grid">
+                                    {categories.map(c => (
+                                        <article className="adm-panel" key={c.id} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                                            <div>
+                                                <span className="adm-category-icon">◈</span>
+                                                <h2>{c.name}</h2>
+                                                <p>{c.description || 'Chưa có mô tả.'}</p>
+                                                <strong>{products.filter(p => p.categoryId === c.id).length} sản phẩm</strong>
+                                            </div>
+                                            <div className="adm-actions" style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #eaeaea' }}>
+                                                <button onClick={() => { setCategory(String(c.id)); setSearch(''); setPage(1); setTab('products'); }}>Xem SP →</button>
+                                                <button onClick={() => startCatForm(c)}>Sửa</button>
+                                                <button className="adm-danger" onClick={() => deleteCategory(c)}>Xóa</button>
+                                            </div>
+                                        </article>
+                                    ))}
+                                    {!categories.length && <p>Chưa có dữ liệu danh mục.</p>}
+                                </div>
+                            </section>
+                        )
+                    )}
+                </>
+            )}
+
+            <footer className="adm-footer">VegetableShop · Trang quản trị cửa hàng</footer>
+        </section>
     </div>;
 }

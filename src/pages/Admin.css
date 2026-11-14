@@ -118,4 +118,11 @@
     0%,100%{opacity:1;box-shadow:0 0 5px 1px rgba(255,190,0,.35)}
     50%{opacity:.55;box-shadow:0 0 13px 4px rgba(255,190,0,.8)}
 }
+.adm-heading-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.adm-shell .adm-heading-actions .adm-back-button{background:#fff;border-color:#dce5dc;color:#31553e}
+.adm-main>.adm-back-button{margin-bottom:20px}
+@media(max-width:700px){
+    .adm-heading-actions{flex-wrap:wrap;justify-content:flex-end}
+    .adm-heading-actions button{white-space:nowrap}
+}
 @media(prefers-reduced-motion:reduce){.adm-badge.stock-low{animation:none}}

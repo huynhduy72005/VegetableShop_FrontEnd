@@ -23,6 +23,7 @@
 .acc2-reset-requests{margin-top:20px}.acc2-reset-pending{display:inline-block;background:#fff3d6;color:#8a6414;border-radius:20px;padding:5px 10px;font-size:11px}.acc2-reset-actions{display:flex;gap:8px}.acc2-reset-actions button{white-space:nowrap}
 .acc2-profile-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;padding:30px 32px}.acc2-profile-form label{display:grid;gap:9px;font-size:12px;font-weight:600;color:#52634e}.acc2-profile-form input{width:100%;font-size:14px}.acc2-profile-readonly{display:grid;gap:9px;align-content:start}.acc2-profile-readonly small{font-size:12px;color:#919c85}.acc2-profile-readonly strong{font-size:14px}.acc2-profile-actions{grid-column:1/-1;display:flex;justify-content:flex-end;gap:10px;padding-top:4px}.acc2-page .acc2-profile-actions .acc2-password-submit{justify-self:auto}@media(max-width:700px){.acc2-profile-form{grid-template-columns:1fr;padding:24px}.acc2-profile-actions{grid-column:auto}}
 
+
 /* Badge đếm số lượng sản phẩm yêu thích trên sidebar Account */
 .acc2-nav-badge {
     margin-left: auto;
@@ -33,3 +34,51 @@
     background: #e8f1e4;
     color: #1f4e3d;
 }
+
+.acc2-account-actions{display:flex;align-items:center;gap:8px}
+.acc2-account-actions button{white-space:nowrap}
+.acc2-toolbar input[type="search"]{flex:1 1 280px}
+.acc2-toolbar select{flex:0 1 210px}
+.acc2-account-detail>.acc2-panel-head{border-bottom:1px solid #eef1e9}
+.acc2-account-summary{display:flex;align-items:center;gap:16px;padding:24px 28px 8px}
+.acc2-account-summary .acc2-avatar.large{margin:0;width:54px;height:54px;font-size:18px}
+.acc2-account-summary h3{margin:0 0 8px;color:#294b35;font-size:17px}
+.acc2-account-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 28px;margin:0;padding:24px 28px 30px}
+.acc2-account-fields>div{min-width:0}
+.acc2-account-fields dt{margin-bottom:6px;color:#819079;font-size:11px}
+.acc2-account-fields dd{margin:0;color:#294b35;font-size:13px;font-weight:600;overflow-wrap:anywhere}
+.acc2-customer-orders{border-top:1px solid #eef1e9}
+.acc2-customer-orders .acc2-panel-head{padding-bottom:16px}
+.acc2-customer-orders .acc2-panel-head h3{margin:0;color:#294b35;font-size:16px}
+.acc2-customer-orders .acc2-table-scroll table{min-width:620px}
+.acc2-customer-orders .acc2-empty{padding:24px 20px}
+.acc2-page .acc2-order-view{padding:7px 10px;white-space:nowrap}
+.acc2-order-detail{margin:20px;padding:0 0 18px;border:1px solid #e6ecdf;border-radius:12px;background:#fcfdfb}
+.acc2-order-detail>.acc2-panel-head{border-bottom:1px solid #e9eee7}
+.acc2-order-detail .acc2-panel-head h3{margin:0;color:#294b35;font-size:15px}
+.acc2-order-info{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:18px 20px}
+.acc2-order-info>div{min-width:0;padding:13px;border:1px solid #e8eee5;border-radius:10px;background:#fff}
+.acc2-order-info small{display:block;margin-bottom:7px;color:#819079;font-size:10px;text-transform:uppercase;letter-spacing:.04em}
+.acc2-order-info>div>strong{font-size:13px;color:#294b35;overflow-wrap:anywhere}
+.acc2-order-info p{margin:5px 0 0;color:#758278;font-size:11px;overflow-wrap:anywhere}
+.acc2-order-info .acc2-order-shipping{grid-column:1/-1}
+.acc2-order-shipping p{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-top:1px solid #eef1e9}
+.acc2-order-shipping p span{flex:none;color:#819079}
+.acc2-order-shipping p strong{color:#294b35;text-align:right;white-space:pre-line;overflow-wrap:anywhere}
+.acc2-order-items{padding:0 20px}
+.acc2-order-items table{min-width:580px;border:1px solid #e8eee5}
+.acc2-order-items tfoot td{background:#f8faf6}
+.acc2-order-items tfoot td:not(:first-child){text-align:right}
+.acc2-order-items tfoot tr:last-child td{color:#294b35}
+.acc2-order-items .acc2-empty{padding:18px}
+@media(max-width:700px){
+    .acc2-account-actions{align-items:flex-start;flex-direction:column}
+    .acc2-toolbar select{flex:1 1 100%}
+    .acc2-account-fields{grid-template-columns:1fr;padding:20px}
+    .acc2-account-summary{padding:20px 20px 4px}
+    .acc2-order-detail{margin:14px 10px;padding-bottom:14px}
+    .acc2-order-info{grid-template-columns:1fr;padding:14px}
+    .acc2-order-info .acc2-order-shipping{grid-column:1}
+    .acc2-order-items{padding:0 14px}
+}
+

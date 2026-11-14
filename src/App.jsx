@@ -335,7 +335,13 @@ export default function App() {
                 )}
                 {activePage === 'admin' &&
                     ['Admin', 'Staff'].includes(currentUser?.role) && (
-                        <Admin currentUser={currentUser} />
+                        <Admin
+                            currentUser={currentUser}
+                            onBackToAccount={() => {
+                                setActivePage('account');
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                        />
                     )}
                 {activePage === 'login' && (
                     <Login
