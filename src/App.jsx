@@ -31,6 +31,7 @@ export default function App() {
             return null;
         }
     });
+    const [pageAfterLogin, setPageAfterLogin] = useState(null);
     const [activePage, setActivePage] = useState(() =>
         currentUser?.mustChangePassword
             ? 'account'
@@ -235,7 +236,14 @@ export default function App() {
                 {activePage === 'about' && <AboutUs />}
                 {activePage === 'tips' && <KitchenTips />}
                 {activePage === 'promotions' && (
-                    <Promotions onBrowseProducts={() => setActivePage('home')} />
+                    <Promotions
+                        currentUser={currentUser}
+                        onNavigateToLogin={() => {
+                            setPageAfterLogin('promotions');
+                            setActivePage('login');
+                        }}
+                        onBrowseProducts={() => setActivePage('home')}
+                    />
                 )}
                 {activePage === 'reviews' && <Reviews />}
                 {activePage === 'contact' && <Contact />}
@@ -298,6 +306,7 @@ export default function App() {
                             sessionStorage.removeItem('token');
                             sessionStorage.removeItem('currentUser');
                             setCurrentUser(null);
+                            setPageAfterLogin(null);
                             setSelectedVoucher(null);
                             setActivePage('home');
                         }}
@@ -349,10 +358,14 @@ export default function App() {
                             sessionStorage.setItem('token', token);
                             sessionStorage.setItem('currentUser', JSON.stringify(user));
                             setCurrentUser(user);
+                            const destination = pageAfterLogin || (
+                                user.role === 'Staff' ? 'admin' : 'home'
+                            );
+                            setPageAfterLogin(null);
                             setActivePage(
                                 user.mustChangePassword
                                     ? 'account'
-                                    : user.role === 'Staff' ? 'admin' : 'home'
+                                    : destination
                             );
                         }}
                         onSwitchToRegister={() => setActivePage('register')}

@@ -1,48 +1,111 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { api } from '../services/api';
 import './Promotions.css';
 
-const Promotions = ({ onBrowseProducts }) => {
-  const [copyFeedback, setCopyFeedback] = useState('');
+const Promotions = ({ currentUser, onNavigateToLogin, onBrowseProducts }) => {
+  const [actionFeedback, setActionFeedback] = useState(null);
+  const [vouchers, setVouchers] = useState([]);
+  const [vouchersLoading, setVouchersLoading] = useState(true);
+  const [vouchersError, setVouchersError] = useState('');
+  const [voucherRequestId, setVoucherRequestId] = useState(0);
+  const [savedCodes, setSavedCodes] = useState(() => new Set());
+  const [savingCode, setSavingCode] = useState('');
+  const currentUserId = currentUser?.id;
+
+  useEffect(() => {
+    let isCurrentRequest = true;
+
+    const loadVouchers = async () => {
+      setVouchersLoading(true);
+      setVouchersError('');
+
+      try {
+        const response = await api.getPublicVouchers();
+        if (isCurrentRequest) {
+          setVouchers(Array.isArray(response.data) ? response.data : []);
+        }
+      } catch (error) {
+        console.error('Không thể tải danh sách voucher công khai:', error);
+        if (isCurrentRequest) {
+          setVouchersError('Không tải được ưu đãi. Vui lòng thử lại.');
+        }
+      } finally {
+        if (isCurrentRequest) {
+          setVouchersLoading(false);
+        }
+      }
+    };
+
+    loadVouchers();
+
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [voucherRequestId]);
+
+  useEffect(() => {
+    if (!currentUserId) return undefined;
+
+    let isCurrentRequest = true;
+    const loadWallet = async () => {
+      try {
+        const response = await api.getMyVouchers();
+        if (isCurrentRequest) {
+          const codes = (response.data?.myWallet || [])
+            .map((voucher) => voucher.code?.toUpperCase())
+            .filter(Boolean);
+          setSavedCodes(new Set(codes));
+        }
+      } catch (error) {
+        console.error('Không thể tải Ví Voucher:', error);
+      }
+    };
+
+    loadWallet();
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [currentUserId]);
+
+  const showActionFeedback = (text, isError = false) => {
+    setActionFeedback({ text, isError });
+    window.setTimeout(() => setActionFeedback(null), 3000);
+  };
 
   const handleCopyCode = async (code) => {
     try {
       await navigator.clipboard.writeText(code);
-      setCopyFeedback(`Đã sao chép mã ${code}`);
+      showActionFeedback(`Đã sao chép mã ${code}`);
     } catch (error) {
       console.error('Không thể sao chép mã khuyến mãi:', error);
-      setCopyFeedback(`Không thể sao chép. Vui lòng ghi lại mã ${code}`);
+      showActionFeedback(`Không thể sao chép. Vui lòng ghi lại mã ${code}`, true);
     }
-
-    window.setTimeout(() => setCopyFeedback(''), 3000);
   };
 
-  // Dữ liệu mã giảm giá (Vouchers)
-  const vouchers = [
-    {
-      id: 1,
-      code: 'VUONNHA10',
-      discount: 'GIẢM 10%',
-      condition: 'Đơn hàng tối thiểu từ 150.000đ',
-      expiry: 'Hạn dùng: 30/10/2026',
-      colorTheme: 'green'
-    },
-    {
-      id: 2,
-      code: 'FREESHIP',
-      discount: 'MIỄN PHÍ SHIP',
-      condition: 'Áp dụng cho mọi đơn hàng nội thành',
-      expiry: 'Hạn dùng: 31/10/2026',
-      colorTheme: 'orange'
-    },
-    {
-      id: 3,
-      code: 'RAUSACH20',
-      discount: 'GIẢM 20K',
-      condition: 'Đơn hàng mua rau củ quả từ 300.000đ',
-      expiry: 'Hạn dùng: 15/11/2026',
-      colorTheme: 'green'
+  const handleSaveVoucher = async (voucher) => {
+    if (!currentUser) {
+      onNavigateToLogin?.();
+      return;
     }
-  ];
+
+    const code = voucher.code.toUpperCase();
+    if (savingCode || savedCodes.has(code)) return;
+
+    setSavingCode(code);
+    try {
+      const response = await api.claimVoucher(voucher.code);
+      setSavedCodes((currentCodes) => new Set([...currentCodes, code]));
+      showActionFeedback(response.data?.message || `Đã lưu mã ${voucher.code} vào Ví Voucher!`);
+    } catch (error) {
+      const message = error.response?.data?.message || 'Không thể lưu mã vào Ví Voucher. Vui lòng thử lại.';
+      if (message.includes('đã có trong Ví Voucher')) {
+        setSavedCodes((currentCodes) => new Set([...currentCodes, code]));
+      }
+      showActionFeedback(message, true);
+    } finally {
+      setSavingCode('');
+    }
+  };
 
   // Dữ liệu Combo siêu tiết kiệm
   const comboDeals = [
@@ -95,9 +158,13 @@ const Promotions = ({ onBrowseProducts }) => {
       </section>
 
       <div className="promo-container">
-        {copyFeedback && (
-          <div className="copy-toast" role="status" aria-live="polite">
-            <span aria-hidden="true">✓</span> {copyFeedback}
+        {actionFeedback && (
+          <div
+            className={`copy-toast${actionFeedback.isError ? ' is-error' : ''}`}
+            role={actionFeedback.isError ? 'alert' : 'status'}
+            aria-live="polite"
+          >
+            <span aria-hidden="true">{actionFeedback.isError ? '!' : '✓'}</span> {actionFeedback.text}
           </div>
         )}
 
@@ -108,32 +175,88 @@ const Promotions = ({ onBrowseProducts }) => {
             <p>Chọn mã phù hợp và nhập tại bước thanh toán để nhận ưu đãi.</p>
           </div>
 
-          <div className="voucher-grid">
-            {vouchers.map((v) => (
-              <article className={`voucher-card ${v.colorTheme}`} key={v.id}>
-                <div className="voucher-left">
-                  <span className="voucher-discount-text">{v.discount}</span>
-                  <span className="voucher-brand">VƯỜN NHÀ</span>
-                </div>
-                <div className="voucher-right">
-                  <div className="voucher-info">
-                    <span className="voucher-code-label">MÃ ƯU ĐÃI</span>
-                    <h3><code>{v.code}</code></h3>
-                    <p>{v.condition}</p>
-                    <span className="voucher-expiry">{v.expiry}</span>
-                  </div>
-                  <button
-                    className="copy-btn"
-                    type="button"
-                    onClick={() => handleCopyCode(v.code)}
-                    aria-label={`Sao chép mã ${v.code}`}
+          {vouchersLoading ? (
+            <p className="voucher-state" role="status">Đang tải ưu đãi...</p>
+          ) : vouchersError ? (
+            <div className="voucher-state" role="alert">
+              <p>{vouchersError}</p>
+              <button
+                className="voucher-retry-btn"
+                type="button"
+                onClick={() => setVoucherRequestId((requestId) => requestId + 1)}
+              >
+                Thử lại
+              </button>
+            </div>
+          ) : vouchers.length === 0 ? (
+            <p className="voucher-state">Hiện chưa có mã ưu đãi nào đang áp dụng.</p>
+          ) : (
+            <div className="voucher-grid">
+              {vouchers.map((voucher) => {
+                const isPercent = voucher.discountType?.toLowerCase() === 'percent';
+                const discount = isPercent
+                  ? `GIẢM ${voucher.discountValue}%`
+                  : `GIẢM ${Number(voucher.discountValue || 0).toLocaleString('vi-VN')}đ`;
+                const condition = [
+                  voucher.description,
+                  Number(voucher.minOrderValue) > 0
+                    ? `Đơn tối thiểu ${Number(voucher.minOrderValue).toLocaleString('vi-VN')}đ`
+                    : '',
+                  Number(voucher.maxDiscountAmount) > 0
+                    ? `Giảm tối đa ${Number(voucher.maxDiscountAmount).toLocaleString('vi-VN')}đ`
+                    : ''
+                ].filter(Boolean).join(' · ');
+                const expiry = voucher.endDate
+                  ? new Date(voucher.endDate).toLocaleDateString('vi-VN')
+                  : '';
+
+                return (
+                  <article
+                    className={`voucher-card ${isPercent ? 'green' : 'orange'}`}
+                    key={voucher.id}
                   >
-                    Sao chép mã
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
+                    <div className="voucher-left">
+                      <span className="voucher-discount-text">{discount}</span>
+                      <span className="voucher-brand">VƯỜN NHÀ</span>
+                    </div>
+                    <div className="voucher-right">
+                      <div className="voucher-info">
+                        <span className="voucher-code-label">MÃ ƯU ĐÃI</span>
+                        <h3><code>{voucher.code}</code></h3>
+                        {voucher.title && <p className="voucher-title">{voucher.title}</p>}
+                        {condition && <p className="voucher-condition">{condition}</p>}
+                        {expiry && <span className="voucher-expiry">Hạn dùng: {expiry}</span>}
+                      </div>
+                      <div className="voucher-actions">
+                        <button
+                          className="copy-btn"
+                          type="button"
+                          onClick={() => handleCopyCode(voucher.code)}
+                          aria-label={`Sao chép mã ${voucher.code}`}
+                        >
+                          Sao chép mã
+                        </button>
+                        <button
+                          className="save-voucher-btn"
+                          type="button"
+                          onClick={() => handleSaveVoucher(voucher)}
+                          disabled={Boolean(savingCode) || savedCodes.has(voucher.code.toUpperCase())}
+                        >
+                          {!currentUser
+                            ? 'Đăng nhập để lưu'
+                            : savedCodes.has(voucher.code.toUpperCase())
+                              ? '✓ Đã lưu vào ví'
+                              : savingCode === voucher.code.toUpperCase()
+                                ? 'Đang lưu...'
+                                : 'Lưu vào ví'}
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </section>
 
         <section className="promo-section" aria-labelledby="combo-title">

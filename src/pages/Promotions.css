@@ -128,6 +128,7 @@
 .promo-hero-button:focus-visible,
 .promo-footer-button:focus-visible,
 .copy-btn:focus-visible,
+.save-voucher-btn:focus-visible,
 .buy-combo-btn:focus-visible {
   outline: 3px solid var(--g-300);
   outline-offset: 3px;
@@ -224,6 +225,14 @@
   background: var(--g-500);
 }
 
+.copy-toast.is-error {
+  background: #8f3528;
+}
+
+.copy-toast.is-error span {
+  background: #c96050;
+}
+
 @keyframes promoToastIn {
   from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -257,6 +266,30 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
+}
+
+.voucher-state {
+  grid-column: 1 / -1;
+  padding: 28px 16px;
+  color: var(--n-500);
+  text-align: center;
+}
+
+.voucher-retry-btn {
+  margin-top: 10px;
+  padding: 9px 15px;
+  border: 1px solid var(--g-200);
+  border-radius: var(--r-sm);
+  background: var(--g-50);
+  color: var(--g-700);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.voucher-retry-btn:hover {
+  border-color: var(--g-600);
+  background: var(--g-700);
+  color: var(--white);
 }
 
 .voucher-card {
@@ -363,6 +396,16 @@
   line-height: 1.55;
 }
 
+.voucher-info .voucher-title {
+  margin-bottom: 4px;
+  color: var(--n-700);
+  font-weight: 700;
+}
+
+.voucher-info .voucher-condition {
+  color: var(--n-500);
+}
+
 .voucher-expiry {
   display: block;
   margin-top: 5px;
@@ -372,7 +415,7 @@
 
 .copy-btn {
   align-self: flex-start;
-  margin-top: 12px;
+  margin-top: 0;
   padding: 8px 13px;
   border: 1px solid var(--g-200);
   border-radius: var(--r-sm);
@@ -381,6 +424,33 @@
   font-size: 11px;
   font-weight: 800;
   transition: var(--ease);
+}
+
+.voucher-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.save-voucher-btn {
+  padding: 8px 13px;
+  border: 1px solid var(--g-700);
+  border-radius: var(--r-sm);
+  background: var(--g-700);
+  color: var(--white);
+  font-size: 11px;
+  font-weight: 800;
+  transition: var(--ease);
+}
+
+.save-voucher-btn:hover:not(:disabled) {
+  background: var(--g-800);
+}
+
+.save-voucher-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
 }
 
 .copy-btn:hover {

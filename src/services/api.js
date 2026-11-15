@@ -196,6 +196,7 @@ export const api = {
     // ======================================
     // Voucher
     getMyVouchers: () => client.get(`${API_BASE_URL}/vouchers/my`),
+    getPublicVouchers: () => client.get(`${API_BASE_URL}/vouchers/public`),
     claimVoucher: (code) => client.post(`${API_BASE_URL}/vouchers/claim`, { code }),
     validateVoucher: (code, subtotal) => client.post(`${API_BASE_URL}/vouchers/validate`, { code, subtotal }),
     markVoucherUsed: (code, orderId) => client.post(`${API_BASE_URL}/vouchers/mark-used`, { code, orderId }),
