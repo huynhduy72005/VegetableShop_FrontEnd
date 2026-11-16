@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import './EmployeeManagement.css';
 
-const validateEmployee = (form) => {
+const validateEmployee = (form, isVipAdmin) => {
     const errors = {};
 
     const name = form.fullName?.trim() || '';
@@ -34,7 +34,7 @@ const validateEmployee = (form) => {
         errors.position = 'Vui lòng nhập chức vụ.';
     }
 
-    if (!['Admin', 'Staff'].includes(form.userRole)) {
+    if (!['Staff', ...(isVipAdmin ? ['Admin'] : [])].includes(form.userRole)) {
         errors.userRole = 'Vui lòng chọn vai trò hợp lệ.';
     }
 
@@ -65,12 +65,13 @@ const emptyForm = {
 };
 const userRoles = {
     Admin: 'Quản trị viên',
+    AdminVIP: 'Quản trị viên VIP',
     Staff: 'Nhân viên',
     Customer: 'Khách hàng'
 };
 
 
-export default function EmployeeManagement() {
+export default function EmployeeManagement({ currentUser }) {
     const [employees, setEmployees] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [logs, setLogs] = useState([]);
@@ -85,6 +86,7 @@ export default function EmployeeManagement() {
     const [usernameEdited, setUsernameEdited] = useState(false);
     const [initialCredentials, setInitialCredentials] = useState(null);
     const [copiedCredentials, setCopiedCredentials] = useState(false);
+    const isVipAdmin = Boolean(currentUser?.isVipAdmin);
 
     // Chuẩn hóa tiếng Việt để tìm kiếm không dấu
     const normalizeText = (value = '') =>
@@ -104,6 +106,11 @@ export default function EmployeeManagement() {
             normalizeText(employee.employeeCode).includes(keyword)
         );
     });
+    const canManageEmployee = employee =>
+        !employee.isVipAdmin &&
+        String(employee.userId) !== String(currentUser?.id) &&
+        (isVipAdmin ||
+            (employee.userRole !== 'Admin' && employee.userRole !== 'AdminVIP'));
 
     // Tải danh sách nhân viên
     async function loadEmployees() {
@@ -212,7 +219,7 @@ export default function EmployeeManagement() {
         setErrors({});
         setMessage('');
 
-        const validationErrors = validateEmployee(form);
+        const validationErrors = validateEmployee(form, isVipAdmin);
 
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
@@ -534,13 +541,13 @@ export default function EmployeeManagement() {
                                         </td>
 
                                         <td>
-                                            {emp.profilePending ? (
+                                            {emp.profilePending && canManageEmployee(emp) ? (
                                                 <button
                                                     onClick={() => startLinkEmployee(emp)}
                                                 >
                                                     Tạo hồ sơ
                                                 </button>
-                                            ) : (
+                                            ) : canManageEmployee(emp) ? (
                                                 <>
                                                     <button
                                                         onClick={() => startEdit(emp)}
@@ -557,6 +564,12 @@ export default function EmployeeManagement() {
                                                         Phân quyền
                                                     </button>
                                                 </>
+                                            ) : (
+                                                <small>
+                                                    {emp.isVipAdmin || String(emp.userId) === String(currentUser?.id)
+                                                        ? 'Tài khoản được bảo vệ'
+                                                        : 'Admin thường không thể sửa tài khoản Admin'}
+                                                </small>
                                             )}
                                         </td>
                                     </tr>
@@ -606,7 +619,7 @@ export default function EmployeeManagement() {
                                             })}
                                         >
                                             <option value="Staff">Nhân viên (NV)</option>
-                                            <option value="Admin">Quản trị viên (AD)</option>
+                                            {isVipAdmin && <option value="Admin">Quản trị viên (AD)</option>}
                                         </select>
                                         {errors.userRole && (
                                             <small className="emp-error">{errors.userRole}</small>
@@ -644,7 +657,12 @@ export default function EmployeeManagement() {
                                                 accountIsActive: e.target.value === 'active'
                                             })}
                                         >
-                                            <option value="active">Đang hoạt động</option>
+                                            <option
+                                                value="active"
+                                                disabled={!isVipAdmin && !selected.accountIsActive}
+                                            >
+                                                Đang hoạt động
+                                            </option>
                                             <option value="inactive">Đã khóa</option>
                                         </select>
                                     </label>
@@ -696,7 +714,7 @@ export default function EmployeeManagement() {
                             <option value="">Chưa liên kết tài khoản</option>
                             <option value="Customer">Khách hàng</option>
                             <option value="Staff">Nhân viên</option>
-                            <option value="Admin">Quản trị viên</option>
+                            {isVipAdmin && <option value="Admin">Quản trị viên</option>}
                         </select>
                     </label>
                     <label className="emp-field">
@@ -730,7 +748,12 @@ export default function EmployeeManagement() {
                                 status: e.target.value
                             })}
                         >
-                            <option value="Active">Đang làm việc</option>
+                            <option
+                                value="Active"
+                                disabled={!isVipAdmin && selected.status !== 'Active'}
+                            >
+                                Đang làm việc
+                            </option>
                             <option value="Inactive">Ngừng hoạt động</option>
                         </select>
                     </label>

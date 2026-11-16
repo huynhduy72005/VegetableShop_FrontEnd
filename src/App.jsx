@@ -423,7 +423,7 @@ export default function App() {
     const [activePage, setActivePage] = useState(() =>
         currentUser?.mustChangePassword
             ? 'account'
-            : currentUser?.role === 'Staff' ? 'admin' : 'home'
+            : ['Staff', 'AdminVIP'].includes(currentUser?.role) ? 'admin' : 'home'
     );
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [selectedCategoryId, setSelectedCategoryId] = useState(null);
@@ -700,7 +700,9 @@ export default function App() {
                             setCurrentUser(user);
                             if (currentUser?.mustChangePassword && !user.mustChangePassword) {
                                 setActivePage(
-                                    user.role === 'Staff' ? 'admin' : 'home'
+                                    ['Staff', 'AdminVIP'].includes(user.role)
+                                        ? 'admin'
+                                        : 'home'
                                 );
                             }
                         }}
@@ -730,7 +732,7 @@ export default function App() {
                     />
                 )}
                 {activePage === 'admin' &&
-                    ['Admin', 'Staff'].includes(currentUser?.role) && (
+                    ['Admin', 'AdminVIP', 'Staff'].includes(currentUser?.role) && (
                         <Admin currentUser={currentUser} />
                     )}
                 {activePage === 'login' && (
@@ -742,7 +744,9 @@ export default function App() {
                             setActivePage(
                                 user.mustChangePassword
                                     ? 'account'
-                                    : user.role === 'Staff' ? 'admin' : 'home'
+                                    : ['Staff', 'AdminVIP'].includes(user.role)
+                                        ? 'admin'
+                                        : 'home'
                             );
                         }}
                         onSwitchToRegister={() => setActivePage('register')}

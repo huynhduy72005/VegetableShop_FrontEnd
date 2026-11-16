@@ -161,6 +161,7 @@ export const api = {
     getUsers: () => client.get(`${API_BASE_URL}/users`),
     updateUserRole: (id, roleData) => client.put(`${API_BASE_URL}/users/${id}/role`, roleData),
     deleteUser: (id) => client.delete(`${API_BASE_URL}/users/${id}`),
+    restoreUser: (id) => client.put(`${API_BASE_URL}/users/${id}/restore`),
 
     updateProfile: (id, data) => client.put(`${API_BASE_URL}/users/profile/${id}`, data),
     

@@ -76,7 +76,6 @@ body:has(.adm-shell),
 .adm-category-grid strong{display:block;font-size:13px;margin:20px 0}
 .adm-category-icon{font-size:30px;color:#719450;display:block;margin-bottom:20px}
 .adm-footer{font-size:11px;color:#8d9788;margin-top:26px;text-align:center}
-
 @media(max-width:1100px){
     .adm-shell{grid-template-columns:190px minmax(0,1fr)}
     .adm-main{padding:22px}
@@ -108,6 +107,9 @@ body:has(.adm-shell),
     .adm-filters select{flex:1}
     .adm-shell td,.adm-shell th{padding:12px}
     .adm-actions{flex-wrap:wrap}
+    .adm-account-filters{padding:0 18px 18px}
+    .adm-user-fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .adm-detail-head{align-items:flex-start;flex-wrap:wrap}
 }
 
 @media(prefers-reduced-motion:reduce){
@@ -122,6 +124,36 @@ body:has(.adm-shell),
 .adm-shell .adm-right{text-align:right}
 .adm-shell tfoot td{border-bottom:0;background:#fbfcf9}
 .adm-badge.blue{background:#e7f1ff;color:#3169a8}.adm-badge.purple{background:#f0eaff;color:#6b4caf}
+.adm-vip-account td{background:#f3f1f1;color:#888}
+.adm-vip-account .adm-product strong{color:#777}
+.adm-vip-account .adm-product small,.adm-vip-locked{color:#a1a1a1!important}
+.adm-vip-account .adm-badge:not(.blue){background:#e8e6e6;color:#929292}
+.adm-vip-crown{display:inline-block;margin-left:7px;font-size:17px;filter:drop-shadow(0 0 4px rgba(255,176,0,.8))}
+.adm-vip-role{display:inline-block;padding:6px 11px;border:1px solid #ff8994;border-radius:20px;background:#fff0f1;color:#b00020;font-weight:800;letter-spacing:.03em;text-shadow:0 0 7px rgba(224,0,35,.48);box-shadow:0 0 10px rgba(224,0,35,.35),inset 0 0 5px rgba(224,0,35,.12)}
+.adm-account-filters{padding:18px 24px;align-items:center}
+.adm-account-filters input{min-width:260px;min-height:42px}
+.adm-account-detail{padding:0 24px 24px}
+.adm-detail-head{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:20px 0;border-bottom:1px solid #edf1eb}
+.adm-detail-head h3{margin:0 0 5px;font-size:17px}
+.adm-detail-head p{margin:0;color:#768278;font-size:12px}
+.adm-user-summary{display:flex;align-items:center;gap:15px;padding:22px 0}
+.adm-user-summary h3{margin:0 0 8px;font-size:18px}
+.adm-user-avatar{width:54px;height:54px;display:grid;place-items:center;flex:none;border-radius:50%;background:#e8f0e2;color:#356148;font-weight:750}
+.adm-user-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 24px}
+.adm-user-fields>div{min-width:0;padding:14px;background:#f8faf6;border:1px solid #e8eee5;border-radius:10px}
+.adm-user-fields dt{margin-bottom:6px;color:#788479;font-size:11px}
+.adm-user-fields dd{margin:0;color:#2c4434;font-size:13px;font-weight:650;overflow-wrap:anywhere}
+.adm-customer-orders,.adm-order-detail{border-top:1px solid #edf1eb}
+.adm-customer-orders>.adm-detail-head,.adm-order-detail>.adm-detail-head{padding:18px 0}
+.adm-order-detail{margin-top:18px}
+.adm-order-detail .adm-order-info{padding:18px 0}
+.adm-order-detail .adm-order-items{padding:0 0 18px}
+.adm-order-detail .adm-order-items table{min-width:520px}
+.adm-users .adm-pagination{border-top:1px solid #edf1eb}
+.adm-reset-requests{margin:0 24px 24px;border-top:1px solid #edf1eb}
+.adm-reset-requests .adm-detail-head{padding:18px 0}
+.adm-reset-requests .adm-table-scroll{border:1px solid #edf1eb;border-radius:10px}
+.adm-reset-requests .adm-actions{flex-wrap:wrap}
 .adm-order-status-control{align-items:flex-start}
 .adm-status-editor{display:flex;align-items:center;gap:7px;width:100%;margin-top:5px}
 .adm-shell .adm-status-editor select{min-width:0;flex:1;padding:8px;font-size:11px}
@@ -132,6 +164,7 @@ body:has(.adm-shell),
 .adm-status-error{background:#fff0e9;color:#9c4126}
 @media(max-width:1100px){.adm-order-info{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.adm-order-info{grid-template-columns:1fr;padding:0 18px 18px}}
+@media(max-width:700px){.adm-user-fields{grid-template-columns:1fr}.adm-account-detail{padding:0 18px 18px}.adm-order-detail .adm-order-info{padding:14px 0}}
 @media(max-width:700px){.adm-status-message,.adm-status-error{margin:0 18px 18px!important}}
 
 /* ===== Giao dien don hang ===== */

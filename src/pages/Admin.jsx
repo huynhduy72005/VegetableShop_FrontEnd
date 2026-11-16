@@ -2294,6 +2294,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { api } from '../services/api';
 import './Admin.css';
 import AdminOrders from './AdminOrders';
+import AdminUserManagement from './AdminUserManagement';
 import VariantEditor from '../components/VariantEditor';
 import { summarizeVariants, validateVariants } from '../services/ProductVariants';
 
@@ -2346,11 +2347,12 @@ const allTabs = [
     ['inventory', '▤', 'Kiểm tra tồn kho'],
     ['categories', '◈', 'Danh mục'],
     ['orders', '▣', 'Đơn hàng'],
-    ['vouchers', '🎟', 'Voucher']
+    ['vouchers', '🎟', 'Voucher'],
+    ['users', '♙', 'Tài khoản']
 ];
 
 export default function Admin({ currentUser, onBackToAccount }) {
-    const isAdmin = currentUser?.role === 'Admin';
+    const isAdmin = currentUser?.role === 'Admin' || currentUser?.role === 'AdminVIP';
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [vouchers, setVouchers] = useState([]);
@@ -2873,7 +2875,8 @@ export default function Admin({ currentUser, onBackToAccount }) {
                                 inventory: 'Kiểm tra tồn kho',
                                 categories: 'Danh mục sản phẩm',
                                 orders: 'Quản lý đơn hàng',
-                                vouchers: 'Quản lý Voucher'
+                                vouchers: 'Quản lý Voucher',
+                                users: 'Quản lý tài khoản'
                             }[tab]}
                     </h1>
                     <p>Theo dõi rõ ràng, quản lý dễ dàng.</p>
@@ -3255,6 +3258,8 @@ export default function Admin({ currentUser, onBackToAccount }) {
                     )}
 
                     {tab === 'orders' && <AdminOrders />}
+
+                    {tab === 'users' && <AdminUserManagement currentUser={currentUser} />}
 
                     {/* Tab Quản lý Voucher */}
                     {tab === 'vouchers' && (

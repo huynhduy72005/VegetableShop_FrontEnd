@@ -596,7 +596,7 @@ import Wishlist from './Wishlist';
 import Vouchers from './Vouchers';
 import EmployeeManagement from './EmployeeManagement';
 
-const roles = { Admin: 'Quản trị viên', Staff: 'Nhân viên', Customer: 'Khách hàng' };
+const roles = { Admin: 'Quản trị viên', AdminVIP: 'Quản trị viên VIP', Staff: 'Nhân viên', Customer: 'Khách hàng' };
 const genders = ['Nam', 'Nữ', 'Khác', 'Không muốn tiết lộ'];
 const initials = name => (name || '?').trim().split(/\s+/).slice(-2).map(word => word[0]).join('').toUpperCase();
 const orderStatuses = {
@@ -654,7 +654,9 @@ export default function Account({
     onUseVoucher
 }) {
     const [tab, setTab] = useState(
-        currentUser?.mustChangePassword ? 'change_password' : 'profile'
+        currentUser?.mustChangePassword && !currentUser?.isVipAdmin
+            ? 'change_password'
+            : 'profile'
     );
     const [users, setUsers] = useState([]);
     const [passwordResetRequests, setPasswordResetRequests] = useState([]);
@@ -677,7 +679,9 @@ export default function Account({
     const [selectedOrderDetail, setSelectedOrderDetail] = useState(null);
     const [orderDetailLoading, setOrderDetailLoading] = useState(false);
     const [orderDetailError, setOrderDetailError] = useState('');
-    const [loading, setLoading] = useState(currentUser?.role === 'Admin');
+    const [loading, setLoading] = useState(
+        currentUser?.role === 'Admin' || currentUser?.role === 'AdminVIP'
+    );
     const [busy, setBusy] = useState(false);
     const [notice, setNotice] = useState(null);
     const [passwords, setPasswords] = useState({
@@ -685,8 +689,10 @@ export default function Account({
         newPassword: '',
         confirmPassword: ''
     });
-    const isAdmin = currentUser?.role === 'Admin';
-    const forcePasswordChange = Boolean(currentUser?.mustChangePassword);
+    const isAdmin = currentUser?.role === 'Admin' || currentUser?.role === 'AdminVIP';
+    const isVipAdmin = Boolean(currentUser?.isVipAdmin);
+    const forcePasswordChange =
+        !isVipAdmin && Boolean(currentUser?.mustChangePassword);
 
     function openUserDetails(user) {
         setSelectedOrderId(null);
@@ -989,16 +995,14 @@ export default function Account({
                         <button className={tab === 'profile' ? 'active' : ''} onClick={() => setTab('profile')}>
                             <span>◉</span>Thông tin cá nhân
                         </button>
-                        <button className={tab === 'change_password' ? 'active' : ''} onClick={() => { setTab('change_password'); setNotice(null); }}>
-                            <span>♙</span>Đổi mật khẩu
-                        </button>
+                        {!isVipAdmin && (
+                            <button className={tab === 'change_password' ? 'active' : ''} onClick={() => { setTab('change_password'); setNotice(null); }}>
+                                <span>♙</span>Đổi mật khẩu
+                            </button>
+                        )}
 
                         {isAdmin && (
                             <>
-                                <button className={tab === 'manage_users' ? 'active' : ''} onClick={() => setTab('manage_users')}>
-                                    <span>♧</span>Nhân sự & phân quyền
-                                </button>
-
                                 <button
                                     className={tab === 'manage_employees' ? 'active' : ''}
                                     onClick={() => {
@@ -1307,8 +1311,8 @@ export default function Account({
                         </>
 
                     ) : isAdmin && tab === 'manage_employees' ? (
-                        <EmployeeManagement />
-                    ) : tab === 'change_password' ? (
+                        <EmployeeManagement currentUser={currentUser} />
+                    ) : tab === 'change_password' && !isVipAdmin ? (
 
                         <section className="acc2-panel">
                             <header className="acc2-panel-head">

@@ -15,6 +15,7 @@ const navItems = [
 
 const roleNames = {
     Admin: 'Quản trị viên',
+    AdminVIP: 'Quản trị viên VIP',
     Staff: 'Nhân viên',
     Customer: 'Khách hàng'
 };
@@ -472,7 +473,7 @@ export default function Header({
 
                             <small>
                                 {currentUser
-                                    ? currentUser.role === 'Admin'
+                                    ? currentUser.role === 'Admin' || currentUser.role === 'AdminVIP'
                                         ? roleNames[currentUser.role] || currentUser.role
                                         : 'Tài khoản của bạn'
                                     : 'Tài khoản của bạn'}
