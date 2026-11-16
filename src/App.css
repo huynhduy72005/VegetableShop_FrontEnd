@@ -1,13 +1,15 @@
-/* ===========================================
+/* =========================================================
    App.css  –  App-level layout + main-content
-   =========================================== */
+   ========================================================= */
 
 .app-container {
   display: flex;
   flex-direction: column;
   min-height: 100svh;
+  overflow: visible;
 }
 
 .main-content {
   flex: 1;
+  overflow: visible;
 }

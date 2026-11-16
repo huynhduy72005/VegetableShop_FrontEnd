@@ -1,0 +1,229 @@
+.ve-box {
+    margin: 0;
+    padding: 14px 16px;
+    border: 1px dashed #b9d3c0;
+    border-radius: 14px;
+    background: #f7fbf8;
+}
+.ve-box legend { padding: 0 8px; font-weight: 700; color: #1f4d36; }
+.ve-box legend span { font-weight: 400; font-size: 12px; color: #7b8a81; }
+.ve-hint { margin: 0 0 12px; font-size: 13px; line-height: 1.5; color: #5f6f66; }
+
+.ve-card {
+    margin-bottom: 12px;
+    padding: 12px 14px;
+    background: #fff;
+    border: 1px solid #d6e2d9;
+    border-radius: 12px;
+}
+.ve-card.is-hidden { background: #f4f4f2; border-style: dashed; }
+
+.ve-card-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 10px;
+}
+.ve-card-head strong { margin-right: auto; color: #1f4d36; }
+.ve-check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #44574c; cursor: pointer; }
+.ve-delete {
+    padding: 6px 12px;
+    font-size: 13px;
+    color: #a12a2a;
+    cursor: pointer;
+    background: #fff;
+    border: 1px solid #efc9c9;
+    border-radius: 8px;
+}
+
+.ve-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px 12px;
+}
+.ve-grid label,
+.ve-image { display: grid; gap: 4px; font-size: 12px; font-weight: 600; color: #6b7a72; }
+.ve-grid input[type='text'],
+.ve-grid input[type='number'] {
+    width: 100%;
+    padding: 9px 10px;
+    font: inherit;
+    font-weight: 400;
+    color: #1f2d25;
+    background: #fff;
+    border: 1px solid #d6e2d9;
+    border-radius: 10px;
+}
+.ve-grid input:focus { outline: 2px solid rgba(34, 96, 63, 0.25); border-color: #22603f; }
+.ve-image { grid-column: 1 / -1; }
+.ve-image-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.ve-image-row img { width: 56px; height: 56px; object-fit: cover; border-radius: 10px; border: 1px solid #d6e2d9; }
+.ve-image-empty { font-size: 12px; font-weight: 400; color: #8a978f; }
+.ve-file,
+.ve-image-row button {
+    padding: 7px 12px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: #22603f;
+    cursor: pointer;
+    background: #fff;
+    border: 1px solid #22603f;
+    border-radius: 8px;
+}
+.ve-image-row button { color: #6b7a72; border-color: #d6e2d9; }
+
+.ve-note { margin: 8px 0 0; font-size: 12px; color: #8a6d1a; }
+.ve-error { margin: 0 0 10px; font-size: 13px; color: #a12a2a; }
+
+.ve-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.ve-add {
+    padding: 9px 16px;
+    font-weight: 700;
+    color: #22603f;
+    cursor: pointer;
+    background: #fff;
+    border: 1px solid #22603f;
+    border-radius: 10px;
+}
+.ve-add:disabled { opacity: 0.5; cursor: not-allowed; }
+.ve-summary { font-size: 13px; color: #5f6f66; }
+
+.ve-box {
+    margin: 0;
+    padding: 14px 16px;
+    border: 1px dashed #b9d3c0;
+    border-radius: 14px;
+    background: #f7fbf8;
+}
+.ve-box legend { padding: 0 8px; font-weight: 700; color: #1f4d36; }
+.ve-box legend span { font-weight: 400; font-size: 12px; color: #7b8a81; }
+.ve-hint { margin: 0 0 12px; font-size: 13px; line-height: 1.5; color: #5f6f66; }
+
+.ve-card {
+    margin-bottom: 12px;
+    padding: 12px 14px;
+    background: #fff;
+    border: 1px solid #d6e2d9;
+    border-radius: 12px;
+}
+.ve-card.is-hidden { background: #f4f4f2; border-style: dashed; }
+
+.ve-card-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 10px;
+}
+.ve-card-head strong { margin-right: auto; color: #1f4d36; }
+.ve-check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #44574c; cursor: pointer; }
+.ve-delete {
+    padding: 6px 12px;
+    font-size: 13px;
+    color: #a12a2a;
+    cursor: pointer;
+    background: #fff;
+    border: 1px solid #efc9c9;
+    border-radius: 8px;
+}
+
+.ve-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px 12px;
+}
+.ve-grid label,
+.ve-image { display: grid; gap: 4px; font-size: 12px; font-weight: 600; color: #6b7a72; }
+.ve-grid input[type='text'],
+.ve-grid input[type='number'] {
+    width: 100%;
+    padding: 9px 10px;
+    font: inherit;
+    font-weight: 400;
+    color: #1f2d25;
+    background: #fff;
+    border: 1px solid #d6e2d9;
+    border-radius: 10px;
+}
+.ve-grid input:focus { outline: 2px solid rgba(34, 96, 63, 0.25); border-color: #22603f; }
+.ve-image { grid-column: 1 / -1; }
+.ve-image-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.ve-image-row img { width: 56px; height: 56px; object-fit: cover; border-radius: 10px; border: 1px solid #d6e2d9; }
+.ve-image-empty { font-size: 12px; font-weight: 400; color: #8a978f; }
+.ve-file,
+.ve-image-row button {
+    padding: 7px 12px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: #22603f;
+    cursor: pointer;
+    background: #fff;
+    border: 1px solid #22603f;
+    border-radius: 8px;
+}
+.ve-image-row button { color: #6b7a72; border-color: #d6e2d9; }
+
+.ve-note { margin: 8px 0 0; font-size: 12px; color: #8a6d1a; }
+.ve-error { margin: 0 0 10px; font-size: 13px; color: #a12a2a; }
+
+.ve-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.ve-add {
+    padding: 9px 16px;
+    font-weight: 700;
+    color: #22603f;
+    cursor: pointer;
+    background: #fff;
+    border: 1px solid #22603f;
+    border-radius: 10px;
+}
+.ve-add:disabled { opacity: 0.5; cursor: not-allowed; }
+.ve-summary { font-size: 13px; color: #5f6f66; }
+
+/* --- Sao chép biến thể từ sản phẩm khác --- */
+.ve-copy { margin-bottom: 12px; }
+.ve-copy-toggle {
+    padding: 6px 2px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    color: #22603f;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+.ve-copy-panel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid #d6e2d9;
+    border-radius: 12px;
+}
+.ve-copy-panel select {
+    flex: 1 1 240px;
+    min-width: 0;
+    padding: 9px 10px;
+    font: inherit;
+    background: #fff;
+    border: 1px solid #d6e2d9;
+    border-radius: 10px;
+}
+.ve-copy-message { flex-basis: 100%; margin: 0; font-size: 13px; color: #2e7d4f; }

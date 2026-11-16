@@ -1,3 +1,391 @@
+// import { useRef, useState } from 'react';
+// import Header from './components/Header';
+// import Footer from './components/Footer';
+// import Home from './pages/Home';
+// import Products from './pages/Products';
+// import ProductDetail from './pages/ProductDetail';
+// import Cart from './pages/Cart';
+// import Checkout from './pages/Checkout';
+// import Login from './pages/Login';
+// import Register from './pages/Register';
+// import Account from './pages/Account';
+// import Admin from './pages/Admin';
+// import Wishlist from './pages/Wishlist';
+// import AboutUs from './pages/AboutUs';
+// import KitchenTips from './pages/KitchenTips';
+// import Promotions from './pages/Promotions';
+// import Reviews from './pages/Reviews';
+// import Contact from './pages/Contact';
+// import ChatWidget from './components/ChatWidget';
+
+// import Orders from './pages/Orders';
+
+// import './App.css';
+
+// export default function App() {
+//     const [currentUser, setCurrentUser] = useState(() => {
+//         try {
+//             const storedUser = sessionStorage.getItem('currentUser');
+//             return storedUser ? JSON.parse(storedUser) : null;
+//         } catch {
+//             return null;
+//         }
+//     });
+//     const [pageAfterLogin, setPageAfterLogin] = useState(null);
+//     const [activePage, setActivePage] = useState(() =>
+//         currentUser?.mustChangePassword
+//             ? 'account'
+//             : currentUser?.role === 'Staff' ? 'admin' : 'home'
+//     );
+//     const [selectedProduct, setSelectedProduct] = useState(null);
+//     const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+//     const [cartItems, setCartItems] = useState([]);
+//     const [checkoutItems, setCheckoutItems] = useState(null);
+//     const [checkoutCartItemIds, setCheckoutCartItemIds] = useState(null);
+//     const [wishlistItems, setWishlistItems] = useState([]);
+//     const [selectedVoucher, setSelectedVoucher] = useState(null);
+//     const detailPreviousPage = useRef('home');
+//     const mustChangePassword = Boolean(currentUser?.mustChangePassword);
+
+//     const handleViewDetail = (product) => {
+//         if (activePage !== 'detail') {
+//             detailPreviousPage.current = activePage;
+//         }
+//         setSelectedProduct(product);
+//         setActivePage('detail');
+//         window.scrollTo({ top: 0, behavior: 'smooth' });
+//     };
+
+//     const handleBackFromDetail = () => {
+//         setActivePage(detailPreviousPage.current);
+//         window.scrollTo({ top: 0, behavior: 'smooth' });
+//     };
+
+//     const handleBuyNow = (product) => {
+//         setCheckoutItems([{
+//             ...product,
+//             quantity: Number(product.quantity) || 1
+//         }]);
+//         setCheckoutCartItemIds(null);
+//         setActivePage('checkout');
+//         window.scrollTo({ top: 0, behavior: 'smooth' });
+//     };
+
+//     const handleBuyAgain = (products) => {
+//         setCheckoutItems(products);
+//         setCheckoutCartItemIds(null);
+//         setActivePage('checkout');
+//         window.scrollTo({ top: 0, behavior: 'smooth' });
+//     };
+
+//     const handleCheckoutFromCart = (selectedItems) => {
+//         setCheckoutItems(selectedItems);
+//         setCheckoutCartItemIds(selectedItems.map(item => item.id));
+//         setActivePage('checkout');
+//     };
+
+//     const handleOrderSuccess = () => {
+//         if (checkoutCartItemIds !== null) {
+//             const orderedItemIds = new Set(checkoutCartItemIds);
+//             setCartItems(prev => prev.filter(item => !orderedItemIds.has(item.id)));
+//         }
+//         setCheckoutItems(null);
+//         setCheckoutCartItemIds(null);
+//         setSelectedVoucher(null);
+//         setActivePage('home');
+//     };
+
+//     // Thêm một sản phẩm vào giỏ hàng
+//     const handleAddToCart = (product) => {
+//         setCartItems(prev => {
+//             const exist = prev.find(item => item.id === product.id);
+//             const qty = product.quantity || 1;
+//             if (exist) {
+//                 return prev.map(item =>
+//                     item.id === product.id
+//                         ? { ...item, quantity: item.quantity + qty }
+//                         : item
+//                 );
+//             }
+//             return [...prev, { ...product, quantity: qty }];
+//         });
+//         alert(`Đã thêm ${product.name} vào giỏ hàng!`);
+//     };
+
+//     // Thêm nhiều sản phẩm do Gemini AI đề xuất vào giỏ hàng
+//     const handleAddMultipleToCart = (products) => {
+//         if (!Array.isArray(products) || products.length === 0) {
+//             alert('Không có sản phẩm để thêm.');
+//             return;
+//         }
+
+//         const updatedCart = [...cartItems];
+//         const processedIds = new Set();
+//         let addedCount = 0;
+//         let skippedCount = 0;
+
+//         products.forEach(product => {
+//             const id = Number(product.id);
+//             const stock = Number(product.stockQuantity);
+//             const price = Number(product.price);
+
+//             if (
+//                 !Number.isInteger(id) ||
+//                 id <= 0 ||
+//                 !Number.isInteger(stock) ||
+//                 stock <= 0 ||
+//                 !Number.isFinite(price) ||
+//                 price < 0 ||
+//                 processedIds.has(id)
+//             ) {
+//                 skippedCount++;
+//                 return;
+//             }
+
+//             processedIds.add(id);
+//             const index = updatedCart.findIndex(item => Number(item.id) === id);
+//             const currentQuantity = index >= 0
+//                 ? Number(updatedCart[index].quantity) || 0
+//                 : 0;
+
+//             if (currentQuantity >= stock) {
+//                 skippedCount++;
+//                 return;
+//             }
+
+//             if (index >= 0) {
+//                 updatedCart[index] = {
+//                     ...updatedCart[index],
+//                     quantity: currentQuantity + 1
+//                 };
+//             } else {
+//                 updatedCart.push({ ...product, id, quantity: 1 });
+//             }
+
+//             addedCount++;
+//         });
+
+//         if (addedCount === 0) {
+//             alert('Không có sản phẩm nào có thể thêm vào giỏ hàng.');
+//             return;
+//         }
+
+//         setCartItems(updatedCart);
+//         alert(
+//             `Đã thêm ${addedCount} sản phẩm vào giỏ hàng!` +
+//             (skippedCount > 0
+//                 ? ` Bỏ qua ${skippedCount} sản phẩm do trùng lặp, hết hàng hoặc đã đạt giới hạn tồn kho.`
+//                 : '')
+//         );
+//     };
+
+//     // Thêm / Xóa khỏi danh sách yêu thích
+//     const handleToggleWishlist = (product) => {
+//         setWishlistItems(prev => {
+//             const exist = prev.find(item => item.id === product.id);
+//             if (exist) {
+//                 alert(`Đã xóa ${product.name} khỏi sản phẩm yêu thích.`);
+//                 return prev.filter(item => item.id !== product.id);
+//             }
+//             alert(`Đã thêm ${product.name} vào sản phẩm yêu thích!`);
+//             return [...prev, product];
+//         });
+//     };
+
+//     return (
+//         <div className="app-container">
+//             {!mustChangePassword && <Header
+//                 setActivePage={setActivePage}
+//                 activePage={activePage}
+//                 cartCount={cartItems.reduce(
+//                     (sum, item) => sum + item.quantity,
+//                     0
+//                 )}
+//                 wishlistCount={wishlistItems.length}
+//                 currentUser={currentUser}
+//                 onSelectCategory={setSelectedCategoryId}
+//                 onViewProduct={handleViewDetail}
+//             />}
+
+//             <main className="main-content">
+//                 {activePage === 'home' && (
+//                     <Home
+//                         onViewDetail={handleViewDetail}
+//                         onBuyNow={handleBuyNow}
+//                         onToggleWishlist={handleToggleWishlist}
+//                         wishlistItems={wishlistItems}
+//                         onBrowseProducts={(categoryId = null) => {
+//                             setSelectedCategoryId(categoryId);
+//                             setActivePage('products');
+//                             window.scrollTo({ top: 0, behavior: 'smooth' });
+//                         }}
+//                         onNavigate={(page) => {
+//                             setActivePage(page);
+//                             window.scrollTo({ top: 0, behavior: 'smooth' });
+//                         }}
+//                     />
+//                 )}
+//                 {activePage === 'products' && (
+//                     <Products
+//                         categoryId={selectedCategoryId}
+//                         onViewDetail={handleViewDetail}
+//                         onBuyNow={handleBuyNow}
+//                         onAddToCart={handleAddToCart}
+//                     />
+//                 )}
+//                 {activePage === 'about' && <AboutUs />}
+//                 {activePage === 'tips' && <KitchenTips />}
+//                 {activePage === 'promotions' && (
+//                     <Promotions
+//                         currentUser={currentUser}
+//                         onNavigateToLogin={() => {
+//                             setPageAfterLogin('promotions');
+//                             setActivePage('login');
+//                         }}
+//                         onBrowseProducts={() => setActivePage('home')}
+//                     />
+//                 )}
+//                 {activePage === 'reviews' && <Reviews />}
+//                 {activePage === 'contact' && <Contact />}
+//                 {activePage === 'orders' && <Orders currentUser={currentUser} onBuyAgain={handleBuyAgain} />}
+//                 {activePage === 'detail' && (
+//                     <ProductDetail
+//                         product={selectedProduct}
+//                         onAddToCart={handleAddToCart}
+//                         onToggleWishlist={handleToggleWishlist}
+//                         isWishlisted={wishlistItems.some(item => item.id === selectedProduct?.id)}
+//                         onViewCart={() => setActivePage('cart')}
+//                         onBack={handleBackFromDetail}
+//                     />
+//                 )}
+//                 {activePage === 'cart' && (
+//                     <Cart
+//                         cartItems={cartItems}
+//                         onUpdateQuantity={(id, q) => setCartItems(prev =>
+//                             prev.map(i => i.id === id ? { ...i, quantity: q } : i)
+//                                 .filter(i => i.quantity > 0)
+//                         )}
+//                         onRemoveItem={(id) => setCartItems(prev =>
+//                             prev.filter(i => i.id !== id)
+//                         )}
+//                         onProceedCheckout={handleCheckoutFromCart}
+//                     />
+//                 )}
+//                 {activePage === 'checkout' && (
+//                     <Checkout
+//                         cartItems={checkoutItems ?? cartItems}
+//                         currentUser={currentUser}
+//                         selectedVoucher={selectedVoucher}
+//                         onOrderSuccess={handleOrderSuccess}
+//                     />
+//                 )}
+//                 {activePage === 'wishlist' && (
+//                     <Wishlist
+//                         wishlistItems={wishlistItems}
+//                         onViewDetail={(p) => { setSelectedProduct(p); setActivePage('detail'); }}
+//                         onBuyNow={handleBuyNow}
+//                         onRemoveWishlist={(id) => setWishlistItems(prev =>
+//                             prev.filter(i => i.id !== id)
+//                         )}
+//                     />
+//                 )}
+//                 {activePage === 'account' && (
+//                     <Account
+//                         currentUser={currentUser}
+//                         onUserUpdated={(user, token) => {
+//                             if (token) sessionStorage.setItem('token', token);
+//                             sessionStorage.setItem('currentUser', JSON.stringify(user));
+//                             setCurrentUser(user);
+//                             if (currentUser?.mustChangePassword && !user.mustChangePassword) {
+//                                 setActivePage(
+//                                     user.role === 'Staff' ? 'admin' : 'home'
+//                                 );
+//                             }
+//                         }}
+//                         onLogout={() => {
+//                             sessionStorage.removeItem('token');
+//                             sessionStorage.removeItem('currentUser');
+//                             setCurrentUser(null);
+//                             setPageAfterLogin(null);
+//                             setSelectedVoucher(null);
+//                             setActivePage('home');
+//                         }}
+//                         onViewOrders={() => setActivePage('orders')}
+//                         onBuyAgain={handleBuyAgain}
+//                         onNavigateToAdmin={() => {
+//                             setActivePage('admin');
+//                             window.scrollTo({ top: 0, behavior: 'smooth' });
+//                         }}
+//                         wishlistItems={wishlistItems}
+//                         onViewDetail={handleViewDetail}
+//                         onBuyNow={handleBuyNow}
+//                         onRemoveWishlist={(id) =>
+//                             setWishlistItems(prev => prev.filter(i => i.id !== id))
+//                         }
+//                         onBrowseProducts={() => {
+//                             setSelectedCategoryId(null);
+//                             setActivePage('products');
+//                             window.scrollTo({ top: 0, behavior: 'smooth' });
+//                         }}
+//                         onUseVoucher={(voucher) => {
+//                             setSelectedVoucher(voucher);
+//                             if (cartItems.length > 0) {
+//                                 setCheckoutItems(null);
+//                                 setCheckoutCartItemIds(null);
+//                                 setActivePage('checkout');
+//                             } else {
+//                                 alert(`Đã chọn mã ${voucher.code}! Hãy thêm sản phẩm vào giỏ hàng để áp dụng.`);
+//                                 setSelectedCategoryId(null);
+//                                 setActivePage('products');
+//                             }
+//                             window.scrollTo({ top: 0, behavior: 'smooth' });
+//                         }}
+//                     />
+//                 )}
+//                 {activePage === 'admin' &&
+//                     ['Admin', 'Staff'].includes(currentUser?.role) && (
+//                         <Admin
+//                             currentUser={currentUser}
+//                             onBackToAccount={() => {
+//                                 setActivePage('account');
+//                                 window.scrollTo({ top: 0, behavior: 'smooth' });
+//                             }}
+//                         />
+//                     )}
+//                 {activePage === 'login' && (
+//                     <Login
+//                         onLoginSuccess={(user, token) => {
+//                             sessionStorage.setItem('token', token);
+//                             sessionStorage.setItem('currentUser', JSON.stringify(user));
+//                             setCurrentUser(user);
+//                             const destination = pageAfterLogin || (
+//                                 user.role === 'Staff' ? 'admin' : 'home'
+//                             );
+//                             setPageAfterLogin(null);
+//                             setActivePage(
+//                                 user.mustChangePassword
+//                                     ? 'account'
+//                                     : destination
+//                             );
+//                         }}
+//                         onSwitchToRegister={() => setActivePage('register')}
+//                     />
+//                 )}
+//                 {activePage === 'register' && (
+//                     <Register onSwitchToLogin={() => setActivePage('login')} />
+//                 )}
+//             </main>
+
+//             {!mustChangePassword && <Footer />}
+
+//             {/* Gemini AI Chatbot */}
+//             {!mustChangePassword && <ChatWidget
+//                 onAddToCart={handleAddToCart}
+//                 onAddMultipleToCart={handleAddMultipleToCart}
+//             />}
+//         </div>
+//     );
+// }
 import { useRef, useState } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -19,6 +407,7 @@ import Contact from './pages/Contact';
 import ChatWidget from './components/ChatWidget';
 
 import Orders from './pages/Orders';
+import { cartKeyOf, cartKeyOfItem, getDefaultVariant, hasVariants } from './services/ProductVariants';
 
 import './App.css';
 
@@ -31,7 +420,6 @@ export default function App() {
             return null;
         }
     });
-    const [pageAfterLogin, setPageAfterLogin] = useState(null);
     const [activePage, setActivePage] = useState(() =>
         currentUser?.mustChangePassword
             ? 'account'
@@ -43,7 +431,6 @@ export default function App() {
     const [checkoutItems, setCheckoutItems] = useState(null);
     const [checkoutCartItemIds, setCheckoutCartItemIds] = useState(null);
     const [wishlistItems, setWishlistItems] = useState([]);
-    const [selectedVoucher, setSelectedVoucher] = useState(null);
     const detailPreviousPage = useRef('home');
     const mustChangePassword = Boolean(currentUser?.mustChangePassword);
 
@@ -62,6 +449,11 @@ export default function App() {
     };
 
     const handleBuyNow = (product) => {
+        // Sản phẩm có nhiều loại mà chưa chọn loại: mở trang chi tiết để khách chọn
+        if (hasVariants(product) && product.variantId == null) {
+            handleViewDetail(product);
+            return;
+        }
         setCheckoutItems([{
             ...product,
             quantity: Number(product.quantity) || 1
@@ -80,36 +472,37 @@ export default function App() {
 
     const handleCheckoutFromCart = (selectedItems) => {
         setCheckoutItems(selectedItems);
-        setCheckoutCartItemIds(selectedItems.map(item => item.id));
+        setCheckoutCartItemIds(selectedItems.map(item => cartKeyOfItem(item)));
         setActivePage('checkout');
     };
 
     const handleOrderSuccess = () => {
         if (checkoutCartItemIds !== null) {
             const orderedItemIds = new Set(checkoutCartItemIds);
-            setCartItems(prev => prev.filter(item => !orderedItemIds.has(item.id)));
+            setCartItems(prev => prev.filter(item => !orderedItemIds.has(cartKeyOfItem(item))));
         }
         setCheckoutItems(null);
         setCheckoutCartItemIds(null);
-        setSelectedVoucher(null);
         setActivePage('home');
     };
 
     // Thêm một sản phẩm vào giỏ hàng
     const handleAddToCart = (product) => {
+        // Cùng sản phẩm nhưng khác loại (500g / 1kg) là hai dòng riêng trong giỏ
+        const key = product.cartKey ?? cartKeyOf(product.id, product.variantId);
         setCartItems(prev => {
-            const exist = prev.find(item => item.id === product.id);
+            const exist = prev.find(item => cartKeyOfItem(item) === key);
             const qty = product.quantity || 1;
             if (exist) {
                 return prev.map(item =>
-                    item.id === product.id
+                    cartKeyOfItem(item) === key
                         ? { ...item, quantity: item.quantity + qty }
                         : item
                 );
             }
-            return [...prev, { ...product, quantity: qty }];
+            return [...prev, { ...product, cartKey: key, quantity: qty }];
         });
-        alert(`Đã thêm ${product.name} vào giỏ hàng!`);
+        alert(`Đã thêm ${product.name}${product.variantName ? ` (${product.variantName})` : ''} vào giỏ hàng!`);
     };
 
     // Thêm nhiều sản phẩm do Gemini AI đề xuất vào giỏ hàng
@@ -126,8 +519,11 @@ export default function App() {
 
         products.forEach(product => {
             const id = Number(product.id);
-            const stock = Number(product.stockQuantity);
-            const price = Number(product.price);
+            // Sản phẩm có nhiều loại: AI thêm loại còn hàng đầu tiên
+            const variant = hasVariants(product) ? getDefaultVariant(product) : null;
+            const cartKey = cartKeyOf(id, variant?.id);
+            const stock = Number(variant ? variant.quantity : product.stockQuantity);
+            const price = Number(variant ? variant.price : product.price);
 
             if (
                 !Number.isInteger(id) ||
@@ -143,7 +539,7 @@ export default function App() {
             }
 
             processedIds.add(id);
-            const index = updatedCart.findIndex(item => Number(item.id) === id);
+            const index = updatedCart.findIndex(item => cartKeyOfItem(item) === cartKey);
             const currentQuantity = index >= 0
                 ? Number(updatedCart[index].quantity) || 0
                 : 0;
@@ -159,7 +555,16 @@ export default function App() {
                     quantity: currentQuantity + 1
                 };
             } else {
-                updatedCart.push({ ...product, id, quantity: 1 });
+                updatedCart.push({
+                    ...product,
+                    id,
+                    price,
+                    stockQuantity: stock,
+                    variantId: variant?.id ?? null,
+                    variantName: variant?.name ?? null,
+                    cartKey,
+                    quantity: 1
+                });
             }
 
             addedCount++;
@@ -194,37 +599,37 @@ export default function App() {
 
     return (
         <div className="app-container">
-            {!mustChangePassword && <Header
-                setActivePage={setActivePage}
-                activePage={activePage}
-                cartCount={cartItems.reduce(
-                    (sum, item) => sum + item.quantity,
-                    0
-                )}
-                wishlistCount={wishlistItems.length}
-                currentUser={currentUser}
-                onSelectCategory={setSelectedCategoryId}
-                onViewProduct={handleViewDetail}
-            />}
+          {!mustChangePassword && <Header
+            setActivePage={setActivePage}
+            activePage={activePage}
+            cartCount={cartItems.reduce(
+                (sum, item) => sum + item.quantity,
+                0
+            )}
+            wishlistCount={wishlistItems.length}
+            currentUser={currentUser}
+            onSelectCategory={setSelectedCategoryId}
+            onViewProduct={handleViewDetail}
+/>}
 
             <main className="main-content">
                 {activePage === 'home' && (
-                    <Home
-                        onViewDetail={handleViewDetail}
-                        onBuyNow={handleBuyNow}
-                        onToggleWishlist={handleToggleWishlist}
-                        wishlistItems={wishlistItems}
-                        onBrowseProducts={(categoryId = null) => {
-                            setSelectedCategoryId(categoryId);
-                            setActivePage('products');
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }}
-                        onNavigate={(page) => {
-                            setActivePage(page);
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }}
-                    />
-                )}
+    <Home
+        onViewDetail={handleViewDetail}
+        onBuyNow={handleBuyNow}
+        onToggleWishlist={handleToggleWishlist}
+        wishlistItems={wishlistItems}
+        onBrowseProducts={(categoryId = null) => {
+            setSelectedCategoryId(categoryId);
+            setActivePage('products');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        onNavigate={(page) => {
+            setActivePage(page);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+    />
+)}
                 {activePage === 'products' && (
                     <Products
                         categoryId={selectedCategoryId}
@@ -236,14 +641,7 @@ export default function App() {
                 {activePage === 'about' && <AboutUs />}
                 {activePage === 'tips' && <KitchenTips />}
                 {activePage === 'promotions' && (
-                    <Promotions
-                        currentUser={currentUser}
-                        onNavigateToLogin={() => {
-                            setPageAfterLogin('promotions');
-                            setActivePage('login');
-                        }}
-                        onBrowseProducts={() => setActivePage('home')}
-                    />
+                    <Promotions onBrowseProducts={() => setActivePage('home')} />
                 )}
                 {activePage === 'reviews' && <Reviews />}
                 {activePage === 'contact' && <Contact />}
@@ -261,12 +659,12 @@ export default function App() {
                 {activePage === 'cart' && (
                     <Cart
                         cartItems={cartItems}
-                        onUpdateQuantity={(id, q) => setCartItems(prev =>
-                            prev.map(i => i.id === id ? { ...i, quantity: q } : i)
+                        onUpdateQuantity={(key, q) => setCartItems(prev =>
+                            prev.map(i => cartKeyOfItem(i) === key ? { ...i, quantity: q } : i)
                                 .filter(i => i.quantity > 0)
                         )}
-                        onRemoveItem={(id) => setCartItems(prev =>
-                            prev.filter(i => i.id !== id)
+                        onRemoveItem={(key) => setCartItems(prev =>
+                            prev.filter(i => cartKeyOfItem(i) !== key)
                         )}
                         onProceedCheckout={handleCheckoutFromCart}
                     />
@@ -275,7 +673,6 @@ export default function App() {
                     <Checkout
                         cartItems={checkoutItems ?? cartItems}
                         currentUser={currentUser}
-                        selectedVoucher={selectedVoucher}
                         onOrderSuccess={handleOrderSuccess}
                     />
                 )}
@@ -287,9 +684,14 @@ export default function App() {
                         onRemoveWishlist={(id) => setWishlistItems(prev =>
                             prev.filter(i => i.id !== id)
                         )}
+                        onBrowseProducts={() => {
+                            setSelectedCategoryId(null);
+                            setActivePage('products');
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
                     />
                 )}
-                {activePage === 'account' && (
+           {activePage === 'account' && (
                     <Account
                         currentUser={currentUser}
                         onUserUpdated={(user, token) => {
@@ -306,51 +708,30 @@ export default function App() {
                             sessionStorage.removeItem('token');
                             sessionStorage.removeItem('currentUser');
                             setCurrentUser(null);
-                            setPageAfterLogin(null);
-                            setSelectedVoucher(null);
                             setActivePage('home');
                         }}
                         onViewOrders={() => setActivePage('orders')}
-                        onBuyAgain={handleBuyAgain}
-                        onNavigateToAdmin={() => {
-                            setActivePage('admin');
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }}
                         wishlistItems={wishlistItems}
                         onViewDetail={handleViewDetail}
                         onBuyNow={handleBuyNow}
-                        onRemoveWishlist={(id) =>
-                            setWishlistItems(prev => prev.filter(i => i.id !== id))
-                        }
+                        onRemoveWishlist={(id) => setWishlistItems(prev =>
+                            prev.filter(i => i.id !== id)
+                        )}
                         onBrowseProducts={() => {
                             setSelectedCategoryId(null);
                             setActivePage('products');
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                         }}
-                        onUseVoucher={(voucher) => {
-                            setSelectedVoucher(voucher);
-                            if (cartItems.length > 0) {
-                                setCheckoutItems(null);
-                                setCheckoutCartItemIds(null);
-                                setActivePage('checkout');
-                            } else {
-                                alert(`Đã chọn mã ${voucher.code}! Hãy thêm sản phẩm vào giỏ hàng để áp dụng.`);
-                                setSelectedCategoryId(null);
-                                setActivePage('products');
-                            }
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        // THÊM DÒNG NÀY ĐỂ CHUYỂN SANG TRANG QUẢN TRỊ TOÀN MÀN HÌNH
+                        onNavigateToAdmin={() => { 
+                            setActivePage('admin'); 
+                            window.scrollTo({ top: 0, behavior: 'smooth' }); 
                         }}
                     />
                 )}
                 {activePage === 'admin' &&
                     ['Admin', 'Staff'].includes(currentUser?.role) && (
-                        <Admin
-                            currentUser={currentUser}
-                            onBackToAccount={() => {
-                                setActivePage('account');
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                            }}
-                        />
+                        <Admin currentUser={currentUser} />
                     )}
                 {activePage === 'login' && (
                     <Login
@@ -358,14 +739,10 @@ export default function App() {
                             sessionStorage.setItem('token', token);
                             sessionStorage.setItem('currentUser', JSON.stringify(user));
                             setCurrentUser(user);
-                            const destination = pageAfterLogin || (
-                                user.role === 'Staff' ? 'admin' : 'home'
-                            );
-                            setPageAfterLogin(null);
                             setActivePage(
                                 user.mustChangePassword
                                     ? 'account'
-                                    : destination
+                                    : user.role === 'Staff' ? 'admin' : 'home'
                             );
                         }}
                         onSwitchToRegister={() => setActivePage('register')}
@@ -384,5 +761,8 @@ export default function App() {
                 onAddMultipleToCart={handleAddMultipleToCart}
             />}
         </div>
+
+        
     );
+    
 }

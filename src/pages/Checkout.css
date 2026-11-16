@@ -733,3 +733,182 @@
 .checkout-cost-discount strong {
     color: #15803d;
 }
+
+
+/* ================= Ô CHỌN MÃ GIẢM GIÁ ================= */
+.checkout-voucher {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 14px 0 18px;
+}
+
+.checkout-voucher label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #182b23;
+}
+
+.checkout-voucher select {
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid #d5e2d2;
+    background-color: #ffffff;
+    color: #182b23;
+    font-size: 0.9rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.checkout-voucher select:focus {
+    outline: none;
+    border-color: #1b4d3e;
+    box-shadow: 0 0 0 3px rgba(27, 77, 62, 0.12);
+}
+
+.checkout-voucher-error {
+    font-size: 0.8rem;
+    color: #b91c1c;
+}
+
+.checkout-cost-row--discount strong {
+    color: #1b4d3e;
+}
+
+/* ================= POPUP ĐẶT HÀNG THÀNH CÔNG ================= */
+.order-success-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(16, 32, 25, 0.52);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: orderOverlayFade 0.2s ease-out;
+}
+
+.order-success-modal {
+    width: 100%;
+    max-width: 430px;
+    background: #ffffff;
+    border-radius: 22px;
+    padding: 32px 28px 26px;
+    text-align: center;
+    border: 1px solid #e1ece3;
+    box-shadow: 0 24px 48px rgba(16, 38, 28, 0.2);
+    animation: orderModalPop 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.order-success-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: #e6f4ec;
+    color: #1b4d3e;
+    font-size: 30px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 8px #f3faf6;
+}
+
+.order-success-modal h3 {
+    margin: 0 0 6px;
+    font-size: 1.42rem;
+    font-weight: 700;
+    color: #163a2d;
+}
+
+.order-success-sub {
+    margin: 0 0 20px;
+    font-size: 0.92rem;
+    color: #52685d;
+}
+
+.order-success-details {
+    background: #f6faf7;
+    border: 1px solid #dce8df;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.order-success-details > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 0.92rem;
+    color: #4c6358;
+}
+
+.order-success-details > div strong {
+    font-size: 0.98rem;
+    color: #182b23;
+}
+
+.order-success-details > div:last-child {
+    padding-top: 10px;
+    border-top: 1px dashed #d3e2d7;
+}
+
+.order-success-details > div:last-child strong {
+    font-size: 1.12rem;
+    color: #1b4d3e;
+}
+
+.order-success-mail {
+    margin: 0 0 20px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #f2f7f4;
+    color: #2f5242;
+    font-size: 0.84rem;
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+.order-success-mail--warn {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #92400e;
+}
+
+.order-success-btn {
+    width: 100%;
+    height: 46px;
+    border: none;
+    border-radius: 12px;
+    background: #1b4d3e;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 0.96rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.order-success-btn:hover {
+    background: #143b2f;
+    transform: translateY(-1px);
+}
+
+@keyframes orderOverlayFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes orderModalPop {
+    from { opacity: 0; transform: scale(0.94) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
