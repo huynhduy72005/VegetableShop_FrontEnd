@@ -88,6 +88,12 @@
   box-shadow: 0 0 0 3px rgba(82,183,136,0.18);
 }
 .auth-form input::placeholder { color: var(--n-400); }
+.auth-form .auth-hint {
+  display: block;
+  margin-top: 6px;
+  color: var(--n-500);
+  font-size: 12px;
+}
 
 /* Submit button */
 .btn-auth {
