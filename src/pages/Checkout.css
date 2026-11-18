@@ -782,22 +782,24 @@
 .order-success-overlay {
     position: fixed;
     inset: 0;
-    z-index: 1000;
+    z-index: 99999;
     background: rgba(16, 32, 25, 0.52);
     backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 16px;
+    padding: 20px;
     animation: orderOverlayFade 0.2s ease-out;
 }
 
 .order-success-modal {
-    width: 100%;
-    max-width: 430px;
+    width: 95%;
+    max-width: 760px;
+    max-height: 92vh;
+    overflow-y: auto;
     background: #ffffff;
     border-radius: 22px;
-    padding: 32px 28px 26px;
+    padding: 26px 28px 24px;
     text-align: center;
     border: 1px solid #e1ece3;
     box-shadow: 0 24px 48px rgba(16, 38, 28, 0.2);
@@ -911,4 +913,155 @@
 @keyframes orderModalPop {
     from { opacity: 0; transform: scale(0.94) translateY(10px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
+}
+/* ================= THANH TOÁN VIETQR ================= */
+.checkout-qr-notice {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background-color: #f0fdf4;
+    border: 1px dashed #22c55e;
+    font-size: 0.9rem;
+    color: #166534;
+    line-height: 1.5;
+}
+
+.checkout-qr-notice-header {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.checkout-qr-notice p {
+    margin: 2px 0;
+}
+
+.order-qr-box {
+    margin: 14px 0 18px;
+    padding: 16px;
+    border-radius: 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+}
+
+.order-qr-title {
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 14px;
+    font-size: 1rem;
+}
+
+.order-qr-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    text-align: left;
+}
+
+.order-qr-image {
+    width: 210px;
+    flex-shrink: 0;
+    height: auto;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    padding: 6px;
+    display: block;
+}
+
+.order-qr-details {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.92rem;
+    background: #ffffff;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.order-qr-details div {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    border-bottom: 1px dashed #f1f5f9;
+    padding-bottom: 6px;
+}
+
+.order-qr-details div:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.order-qr-details span {
+    color: #64748b;
+    white-space: nowrap;
+}
+
+.order-qr-details strong {
+    text-align: right;
+    color: #0f172a;
+    word-break: break-word;
+}
+
+.order-qr-amount {
+    color: #dc2626 !important;
+    font-size: 1.05rem;
+}
+
+@media (max-width: 680px) {
+    .order-qr-content {
+        flex-direction: column;
+    }
+    .order-qr-image {
+        width: 200px;
+    }
+    .order-qr-details {
+        width: 100%;
+    }
+}
+.order-qr-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    margin-bottom: 10px;
+    border-radius: 999px;
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.order-qr-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 6px;
+}
+
+.order-qr-cancel-btn {
+    flex: 0 0 140px;
+    height: 46px;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #475569;
+    font-family: inherit;
+    font-size: 0.94rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.order-qr-cancel-btn:hover:not(:disabled) {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.order-qr-actions .order-success-btn {
+    flex: 1;
 }

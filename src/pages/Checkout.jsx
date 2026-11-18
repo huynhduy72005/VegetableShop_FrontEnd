@@ -3,6 +3,12 @@ import { api } from '../services/api';
 import './Checkout.css';
 
 const LOCATION_API_URL = 'https://provinces.open-api.vn/api/v2/?depth=2';
+const VIETQR_CONFIG = {
+    bankId: 'ICB', // VietinBank
+    accountNo: '107879941718',
+    accountName: 'PHUONG GIA KIET',
+    template: 'compact2'
+};
 
 const isVietnamesePhoneNumber = (phone) => {
     const normalizedPhone = phone.trim().replace(/[\s().-]/g, '');
@@ -31,6 +37,7 @@ export default function Checkout({ cartItems, currentUser, onOrderSuccess }) {
     const [voucherCode, setVoucherCode] = useState('');
     const [discount, setDiscount] = useState(0);
     const [voucherMessage, setVoucherMessage] = useState('');
+    const [pendingTransfer, setPendingTransfer] = useState(null);
     const [successInfo, setSuccessInfo] = useState(null);
     const phoneInputRef = useRef(null);
 
@@ -49,16 +56,19 @@ export default function Checkout({ cartItems, currentUser, onOrderSuccess }) {
         onOrderSuccess();
     };
 
-    // Nhấn Esc để đóng popup đặt hàng thành công
+    // Nhấn Esc để đóng popup
     useEffect(() => {
-        if (!successInfo) return;
+        if (!successInfo && !pendingTransfer) return;
         const onKeyDown = (event) => {
-            if (event.key === 'Escape') handleCloseSuccess();
+            if (event.key === 'Escape') {
+                if (successInfo) handleCloseSuccess();
+                else if (pendingTransfer && !isSubmitting) setPendingTransfer(null);
+            }
         };
         window.addEventListener('keydown', onKeyDown);
         return () => window.removeEventListener('keydown', onKeyDown);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [successInfo]);
+    }, [successInfo, pendingTransfer, isSubmitting]);
 
     // Tải voucher còn dùng được trong ví của khách
     useEffect(() => {
@@ -72,7 +82,7 @@ export default function Checkout({ cartItems, currentUser, onOrderSuccess }) {
                     : (response.data?.myWallet || []);
                 setMyVouchers(wallet.filter(item => item.status === 'Available'));
             })
-            .catch(() => {});
+            .catch(() => { });
         return () => { active = false; };
     }, [currentUser]);
 
@@ -91,7 +101,6 @@ export default function Checkout({ cartItems, currentUser, onOrderSuccess }) {
             return;
         }
 
-        // Nếu api.js có sẵn previewVoucher hoặc validateVoucher thì ưu tiên gọi server
         const serverPreviewFn =
             typeof api.previewVoucher === 'function'
                 ? api.previewVoucher
@@ -116,7 +125,6 @@ export default function Checkout({ cartItems, currentUser, onOrderSuccess }) {
             return () => { active = false; };
         }
 
-        // Tự kiểm tra điều kiện và tính mức giảm trực tiếp từ thông tin voucher trong ví
         const minOrder = Number(selected.minOrderValue) || 0;
         if (subtotal < minOrder) {
             setDiscount(0);
@@ -185,6 +193,28 @@ export default function Checkout({ cartItems, currentUser, onOrderSuccess }) {
         event.target.setCustomValidity('');
     };
 
+    const submitOrderToServer = async (orderPayload) => {
+        setIsSubmitting(true);
+        setOrderError('');
+        try {
+            const response = await api.createOrder(orderPayload);
+            const result = response?.data ?? response;
+
+            setPendingTransfer(null);
+            setSuccessInfo({
+                orderId: result?.orderId,
+                email: formData.email.trim(),
+                emailSent: Boolean(result?.emailSent),
+                total: orderPayload.totalPrice,
+                paymentMethod: orderPayload.paymentMethod
+            });
+        } catch (error) {
+            setOrderError(error.response?.data?.message || error.message || 'Không thể đặt hàng. Vui lòng thử lại.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     const handleSubmitOrder = async (event) => {
         event.preventDefault();
         setOrderError('');
@@ -235,22 +265,28 @@ export default function Checkout({ cartItems, currentUser, onOrderSuccess }) {
             }))
         };
 
-        setIsSubmitting(true);
-        try {
-            const response = await api.createOrder(orderData);
-            const result = response?.data ?? response;
-
-            setSuccessInfo({
-                orderId: result?.orderId,
-                email: formData.email.trim(),
-                emailSent: Boolean(result?.emailSent),
-                total
+        // Nếu chọn Chuyển khoản -> Mở popup QR trước, chưa gọi API tạo đơn
+        if (paymentMethod === 'Transfer') {
+            const transferRef = `VN${Date.now().toString().slice(-6)}`;
+            setPendingTransfer({
+                transferRef,
+                transferContent: `THANH TOAN ${transferRef}`,
+                total,
+                orderData: {
+                    ...orderData,
+                    note: [orderData.note, `[Ma CK: ${transferRef}]`].filter(Boolean).join(' - ')
+                }
             });
-        } catch (error) {
-            setOrderError(error.response?.data?.message || error.message || 'Không thể đặt hàng. Vui lòng thử lại.');
-        } finally {
-            setIsSubmitting(false);
+            return;
         }
+
+        // Nếu chọn COD -> Lưu đơn trực tiếp
+        await submitOrderToServer(orderData);
+    };
+
+    const handleConfirmTransferPaid = async () => {
+        if (!pendingTransfer) return;
+        await submitOrderToServer(pendingTransfer.orderData);
     };
 
     return (
@@ -493,38 +529,117 @@ export default function Checkout({ cartItems, currentUser, onOrderSuccess }) {
                             />
                             <span className="payment-option-copy">
                                 <strong>Chuyển khoản ngân hàng</strong>
-                                <small>Thanh toán trực tuyến</small>
+                                <small>Quét mã QR trước khi hoàn tất đơn</small>
                             </span>
                             <span className="payment-option-icon" aria-hidden="true">↗</span>
                         </label>
                     </fieldset>
+
+                    {paymentMethod === 'Transfer' && (
+                        <div className="checkout-qr-notice">
+                            <div className="checkout-qr-notice-header">
+                                <span>🏦 Thông tin chuyển khoản VietQR</span>
+                            </div>
+                            <p>Ngân hàng: <strong>VietinBank ({VIETQR_CONFIG.bankId})</strong> · STK: <strong>{VIETQR_CONFIG.accountNo}</strong></p>
+                            <p>Chủ tài khoản: <strong>{VIETQR_CONFIG.accountName}</strong></p>
+                            <small>Bấm nút bên dưới để mở mã QR thanh toán <strong>{total.toLocaleString()} đ</strong>. Đơn hàng chỉ được tạo sau khi bạn xác nhận đã chuyển khoản.</small>
+                        </div>
+                    )}
 
                     <div className="summary-total">
                         <span>Tổng thanh toán</span>
                         <strong>{total.toLocaleString()} đ</strong>
                     </div>
 
-                    {orderError && <div className="checkout-order-error" role="alert">{orderError}</div>}
+                    {orderError && !pendingTransfer && <div className="checkout-order-error" role="alert">{orderError}</div>}
 
                     <button type="submit" className="btn-place-order" disabled={isSubmitting || locationStatus !== 'ready'}>
-                        {isSubmitting ? 'Đang xử lý đơn hàng...' : 'Xác nhận đặt hàng'}
+                        {isSubmitting
+                            ? 'Đang xử lý đơn hàng...'
+                            : paymentMethod === 'Transfer'
+                                ? 'Tiếp tục thanh toán QR'
+                                : 'Xác nhận đặt hàng'}
                         {!isSubmitting && <span aria-hidden="true">→</span>}
                     </button>
                     <p className="checkout-secure-note"><span aria-hidden="true">✓</span> Thông tin của bạn được bảo mật an toàn</p>
                 </aside>
             </form>
 
+            {/* BƯỚC 1 (VỚI CHUYỂN KHOẢN): POPUP QUÉT MÃ QR TRƯỚC KHI TẠO ĐƠN */}
+            {pendingTransfer && (
+                <div className="order-success-overlay" role="dialog" aria-modal="true" aria-labelledby="order-qr-modal-title">
+                    <div className="order-success-modal">
+                        <div className="order-qr-badge">CHỜ THANH TOÁN CHUYỂN KHOẢN</div>
+                        <h3 id="order-qr-modal-title">Quét mã QR để thanh toán</h3>
+                        <p className="order-success-sub">
+                            Vui lòng hoàn tất chuyển khoản trước khi bấm <strong>Tôi đã chuyển khoản</strong>
+                        </p>
+
+                        <div className="order-qr-box">
+                            <div className="order-qr-content">
+                                <img
+                                    className="order-qr-image"
+                                    src={`https://img.vietqr.io/image/${VIETQR_CONFIG.bankId}-${VIETQR_CONFIG.accountNo}-${VIETQR_CONFIG.template}.png?amount=${Math.round(pendingTransfer.total)}&addInfo=${encodeURIComponent(pendingTransfer.transferContent)}&accountName=${encodeURIComponent(VIETQR_CONFIG.accountName)}`}
+                                    alt="Mã QR thanh toán VietQR"
+                                />
+                                <div className="order-qr-details">
+                                    <div><span>Ngân hàng:</span> <strong>VietinBank ({VIETQR_CONFIG.bankId})</strong></div>
+                                    <div><span>Số tài khoản:</span> <strong>{VIETQR_CONFIG.accountNo}</strong></div>
+                                    <div><span>Chủ tài khoản:</span> <strong>{VIETQR_CONFIG.accountName}</strong></div>
+                                    <div><span>Số tiền:</span> <strong className="order-qr-amount">{pendingTransfer.total.toLocaleString()} đ</strong></div>
+                                    <div><span>Nội dung CK:</span> <strong>{pendingTransfer.transferContent}</strong></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {orderError && <div className="checkout-order-error" role="alert" style={{ marginBottom: '12px' }}>{orderError}</div>}
+
+                        <div className="order-qr-actions">
+                            <button
+                                type="button"
+                                className="order-qr-cancel-btn"
+                                disabled={isSubmitting}
+                                onClick={() => {
+                                    setOrderError('');
+                                    setPendingTransfer(null);
+                                }}
+                            >
+                                Quay lại
+                            </button>
+                            <button
+                                type="button"
+                                className="order-success-btn"
+                                disabled={isSubmitting}
+                                onClick={handleConfirmTransferPaid}
+                                autoFocus
+                            >
+                                {isSubmitting ? 'Đang tạo đơn hàng...' : 'Tôi đã chuyển khoản'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* BƯỚC 2: POPUP ĐẶT HÀNG THÀNH CÔNG (SAU KHI ĐÃ TẠO ĐƠN) */}
             {successInfo && (
                 <div className="order-success-overlay" role="dialog" aria-modal="true" aria-labelledby="order-success-title">
                     <div className="order-success-modal">
                         <div className="order-success-icon" aria-hidden="true">✓</div>
                         <h3 id="order-success-title">Đặt hàng thành công!</h3>
-                        <p className="order-success-sub">Cảm ơn bạn đã mua sắm tại Vườn Nhà 🥬</p>
+                        <p className="order-success-sub">
+                            {successInfo.paymentMethod === 'Transfer'
+                                ? 'Cảm ơn bạn! Vườn Nhà đã ghi nhận yêu cầu thanh toán chuyển khoản của bạn 🥬'
+                                : 'Cảm ơn bạn đã mua sắm tại Vườn Nhà 🥬'}
+                        </p>
 
                         <div className="order-success-details">
                             <div>
                                 <span>Mã đơn hàng</span>
                                 <strong>#{successInfo.orderId}</strong>
+                            </div>
+                            <div>
+                                <span>Phương thức</span>
+                                <strong>{successInfo.paymentMethod === 'Transfer' ? 'Chuyển khoản VietQR' : 'Thanh toán khi nhận hàng (COD)'}</strong>
                             </div>
                             <div>
                                 <span>Tổng thanh toán</span>
