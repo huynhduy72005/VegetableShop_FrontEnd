@@ -33,6 +33,7 @@ export const api = {
     getRevenue: () => client.get(`${API_BASE_URL}/orders/revenue`),
 
     getOrders: (params) => client.get(`${API_BASE_URL}/orders`, { params }),
+    getPendingOrdersSummary: () => client.get(`${API_BASE_URL}/orders/pending-summary`),
     getOrderById: (id) => client.get(`${API_BASE_URL}/orders/${id}`),
     cancelOrder: (id) => client.put(`${API_BASE_URL}/orders/${id}/cancel`),
     updateOrderStatus: (id, status) => client.put(`${API_BASE_URL}/orders/${id}/status`, { status }),

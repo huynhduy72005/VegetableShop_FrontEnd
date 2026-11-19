@@ -5,6 +5,7 @@ import AdminOrders from './AdminOrders';
 import AdminUserManagement from './AdminUserManagement';
 import AdminSuppliers from '../components/AdminSuppliers';
 import AdminContentFeedback from '../components/AdminContentFeedback';
+import NewOrderNotifier from '../components/NewOrderNotifier';
 import VariantEditor from '../components/VariantEditor';
 import BatchModal from '../components/BatchModal';
 import AnalyticsDashboard from '../components/AnalyticsDashboard';
@@ -78,6 +79,8 @@ export default function Admin({ currentUser, onBackToAccount }) {
     const [vouchers, setVouchers] = useState([]);
     const [batchAlerts, setBatchAlerts] = useState(emptyBatchAlerts);
     const [pendingContactCount, setPendingContactCount] = useState(0);
+    const [pendingOrderCount, setPendingOrderCount] = useState(0);
+    const [ordersRefreshKey, setOrdersRefreshKey] = useState(0);
     const [batchModalProduct, setBatchModalProduct] = useState(null);
     const [stats, setStats] = useState({});
     const [tab, setTab] = useState('overview');
@@ -188,6 +191,7 @@ export default function Admin({ currentUser, onBackToAccount }) {
         setLoading(true);
         try {
             await loadData();
+            setOrdersRefreshKey(prev => prev + 1);
         } catch {
             setNotice({ error: true, text: 'Không tải được dữ liệu. Kiểm tra backend đang chạy tại cổng 7179 rồi bấm Tải lại.' });
         } finally { setLoading(false); }
@@ -698,6 +702,7 @@ export default function Admin({ currentUser, onBackToAccount }) {
                         }}
                     >
                         <span>{icon}</span>{label}
+                        {id === 'orders' && pendingOrderCount > 0 && <b>{pendingOrderCount}</b>}
                         {id === 'inventory' && <b>{totalAlertCount}</b>}
                         {id === 'content' && pendingContactCount > 0 && <b>{pendingContactCount}</b>}
                     </button>
@@ -733,6 +738,20 @@ export default function Admin({ currentUser, onBackToAccount }) {
                     <p>Theo dõi rõ ràng, quản lý dễ dàng.</p>
                 </div>
                 <div className="adm-heading-actions">
+                    <NewOrderNotifier
+                        enabled={canManageOrders}
+                        onPendingCountChange={setPendingOrderCount}
+                        onNewOrderArrived={() => {
+                            setOrdersRefreshKey(prev => prev + 1);
+                            if (canManageOrders) {
+                                api.getRevenue().then(({ data }) => setStats(data)).catch(() => {});
+                            }
+                        }}
+                        onOpenOrdersTab={() => {
+                            setTab('orders');
+                            setOrdersRefreshKey(prev => prev + 1);
+                        }}
+                    />
                     {backButton}
                     <button disabled={loading || saving} onClick={refresh}>
                         {loading ? 'Đang tải…' : '↻ Tải lại'}
@@ -1150,7 +1169,7 @@ export default function Admin({ currentUser, onBackToAccount }) {
                     {/* Tab Quản lý Nội dung & Phản hồi */}
                     {tab === 'content' && <AdminContentFeedback onChanged={loadData} />}
 
-                    {tab === 'orders' && <AdminOrders />}
+                    {tab === 'orders' && <AdminOrders key={ordersRefreshKey} />}
 
                     {tab === 'users' && <AdminUserManagement currentUser={currentUser} />}
 
