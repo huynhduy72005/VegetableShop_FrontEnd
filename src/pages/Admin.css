@@ -278,7 +278,7 @@ body:has(.adm-shell),
 .adm-variant-stock { display: grid; gap: 12px; }
 .adm-variant-stock p { margin: 0; color: #5f6f66; font-size: 14px; }
 
-<<<<<<< HEAD
+
 /* ===== Quản lý lô hàng & Cảnh báo hạn sử dụng ===== */
 .adm-batch-alert-pills {
     display: flex;
