@@ -69,6 +69,7 @@ const allTabs = [
 
 export default function Admin({ currentUser, onBackToAccount }) {
     const isAdmin = currentUser?.role === 'Admin' || currentUser?.role === 'AdminVIP';
+    const isVip = String(currentUser?.role || '').toLowerCase() === 'adminvip';
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [vouchers, setVouchers] = useState([]);
@@ -216,11 +217,11 @@ export default function Admin({ currentUser, onBackToAccount }) {
     }, [permissionLoading, permissionError, canViewProducts, canManageOrders, canManageInventory, isAdmin]);
 
     if (permissionLoading)
-        return <div className="adm-shell"><main className="adm-main">Đang tải quyền nhân viên…</main></div>;
+        return <div className={`adm-shell${isVip ? ' adm-vip-shell' : ''}`}><main className="adm-main">Đang tải quyền nhân viên…</main></div>;
     if (permissionError)
-        return <div className="adm-shell"><main className="adm-main"><div role="alert" className="adm-notice error">{permissionError}</div></main></div>;
+        return <div className={`adm-shell${isVip ? ' adm-vip-shell' : ''}`}><main className="adm-main"><div role="alert" className="adm-notice error">{permissionError}</div></main></div>;
     if (!isAdmin && !availableTabs.length)
-        return <div className="adm-shell"><main className="adm-main"><div role="status" className="adm-notice">Tài khoản chưa được cấp quyền quản lý cửa hàng. Vui lòng liên hệ Admin.</div></main></div>;
+        return <div className={`adm-shell${isVip ? ' adm-vip-shell' : ''}`}><main className="adm-main"><div role="status" className="adm-notice">Tài khoản chưa được cấp quyền quản lý cửa hàng. Vui lòng liên hệ Admin.</div></main></div>;
 
     const lowStock = products.filter(p => p.quantity < 10).sort((a, b) =>
         stockPriority(a.quantity) - stockPriority(b.quantity) || a.quantity - b.quantity
@@ -654,7 +655,7 @@ export default function Admin({ currentUser, onBackToAccount }) {
 
     const totalAlertCount = lowStock.length + (batchAlerts.nearExpiryTotalBatches || 0) + (batchAlerts.expiredTotalBatches || 0);
 
-    return <div className="adm-shell">
+    return <div className={`adm-shell${isVip ? ' adm-vip-shell' : ''}`}>
         <aside className="adm-sidebar">
             <div className="adm-brand"><span>✿</span> Vegetable<span className="adm-brand-light">Shop</span></div>
             <p className="adm-eyebrow">KHÔNG GIAN QUẢN TRỊ</p>

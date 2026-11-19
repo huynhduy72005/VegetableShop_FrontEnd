@@ -82,3 +82,479 @@
     .acc2-order-items{padding:0 14px}
 }
 
+/* ===== Không gian tài khoản VIP ===== */
+.acc2-page-vip {
+    max-width: none;
+    width: 100%;
+    min-height: calc(100svh - 78px);
+    margin: 0;
+    padding: 34px max(28px, calc((100vw - 1320px) / 2)) 50px;
+    color: #dff7e5;
+    background:
+        radial-gradient(circle at 12% 10%, rgba(99,239,131,.08), transparent 24rem),
+        radial-gradient(circle at 88% 78%, rgba(207,255,99,.055), transparent 28rem),
+        #090d0b;
+}
+.acc2-page-vip *{box-sizing:border-box}
+.acc2-page-vip .acc2-eyebrow{color:#92b89c!important}
+.acc2-page-vip .acc2-top h1{color:#effff2;text-shadow:0 0 18px rgba(99,239,131,.16)}
+.acc2-page-vip .acc2-top p{color:#93ad99}
+.acc2-page-vip .acc2-top-tag{
+    background:rgba(99,239,131,.10);
+    border:1px solid rgba(99,239,131,.22);
+    color:#cfff63;
+    box-shadow:0 0 14px rgba(99,239,131,.08)
+}
+.acc2-page-vip .acc2-sidebar,
+.acc2-page-vip .acc2-panel,
+.acc2-page-vip .acc2-profile-banner,
+.acc2-page-vip .acc2-order-detail{
+    background:linear-gradient(145deg,rgba(99,239,131,.045),transparent 48%),#141d17;
+    border-color:rgba(126,255,157,.18);
+    box-shadow:0 12px 28px rgba(0,0,0,.18)
+}
+.acc2-page-vip .acc2-person,
+.acc2-page-vip .acc2-sidebar .acc2-logout,
+.acc2-page-vip .acc2-panel-head,
+.acc2-page-vip .acc2-customer-orders,
+.acc2-page-vip .acc2-account-detail>.acc2-panel-head,
+.acc2-page-vip .acc2-order-detail>.acc2-panel-head{
+    border-color:rgba(126,255,157,.10)
+}
+.acc2-page-vip .acc2-person h2,
+.acc2-page-vip .acc2-profile-banner h2,
+.acc2-page-vip .acc2-panel-head h2,
+.acc2-page-vip .acc2-profile-fields strong,
+.acc2-page-vip .acc2-account-summary h3,
+.acc2-page-vip .acc2-account-fields dd,
+.acc2-page-vip .acc2-order-info>div>strong,
+.acc2-page-vip .acc2-order-shipping p strong,
+.acc2-page-vip .acc2-customer-orders .acc2-panel-head h3,
+.acc2-page-vip .acc2-order-detail .acc2-panel-head h3{
+    color:#e0f7e5
+}
+.acc2-page-vip .acc2-person p,
+.acc2-page-vip .acc2-top-tag,
+.acc2-page-vip .acc2-profile-banner p,
+.acc2-page-vip .acc2-profile-fields small,
+.acc2-page-vip .acc2-account-fields dt,
+.acc2-page-vip .acc2-member small,
+.acc2-page-vip .acc2-help,
+.acc2-page-vip .acc2-panel-head p,
+.acc2-page-vip .acc2-order-info small,
+.acc2-page-vip .acc2-order-info p,
+.acc2-page-vip .acc2-order-shipping p span{
+    color:#94ad99
+}
+.acc2-page-vip .acc2-avatar,
+.acc2-page-vip .acc2-avatar.large{
+    background:radial-gradient(circle at 35% 30%,rgba(207,255,99,.24),transparent 48%),#152018;
+    color:#cfff63;
+    border:1px solid rgba(99,239,131,.22);
+    box-shadow:0 0 18px rgba(99,239,131,.10)
+}
+.acc2-page-vip .acc2-badge,
+.acc2-page-vip .acc2-badge.Admin,
+.acc2-page-vip .acc2-badge.Staff,
+.acc2-page-vip .acc2-badge.Customer{
+    background:rgba(99,239,131,.10);
+    border:1px solid rgba(99,239,131,.22);
+    color:#adffa3
+}
+.acc2-page-vip button,
+.acc2-page-vip input,
+.acc2-page-vip select{
+    border-color:rgba(126,255,157,.18);
+    background:#0d130f;
+    color:#dff7e5
+}
+.acc2-page-vip button:hover:not(:disabled){
+    background:rgba(99,239,131,.12);
+    color:#effff2
+}
+.acc2-page-vip .acc2-sidebar nav button.active{
+    background:linear-gradient(90deg,rgba(99,239,131,.18),rgba(207,255,99,.08));
+    border-color:rgba(99,239,131,.36);
+    color:#d9ffe1;
+    box-shadow:inset 3px 0 0 #63ef83
+}
+.acc2-page-vip .acc2-sidebar .acc2-logout{color:#ff9d99}
+.acc2-page-vip .acc2-nav-badge{
+    background:rgba(207,255,99,.12);
+    color:#cfff63;
+    border:1px solid rgba(207,255,99,.18)
+}
+.acc2-page-vip th{
+    background:#101612;
+    color:#91c39b;
+    border-bottom:1px solid rgba(126,255,157,.10)
+}
+.acc2-page-vip td{
+    border-bottom-color:rgba(126,255,157,.09);
+    color:#cfe5d3
+}
+.acc2-page-vip tr:hover td,
+.acc2-page-vip .acc2-order-items tfoot td,
+.acc2-page-vip .acc2-order-info>div{
+    background:rgba(99,239,131,.04)
+}
+.acc2-page-vip .acc2-profile-banner>span{color:#cfff63}
+.acc2-page-vip .acc2-notice{
+    background:rgba(99,239,131,.10);
+    border:1px solid rgba(99,239,131,.20);
+    color:#c9edcf
+}
+.acc2-page-vip .acc2-notice.error{
+    background:rgba(255,82,82,.10);
+    border-color:rgba(255,82,82,.24);
+    color:#ffaaa7
+}
+.acc2-page-vip input:focus,
+.acc2-page-vip select:focus{
+    border-color:#63ef83;
+    outline:2px solid rgba(99,239,131,.12);
+    box-shadow:0 0 12px rgba(99,239,131,.11)
+}
+.acc2-page-vip .acc2-page .acc2-password-submit,
+.acc2-page-vip .acc2-profile-actions .acc2-password-submit{
+    background:linear-gradient(135deg,#277d43,#51aa62);
+    border-color:#67ef86;
+    color:#effff2
+}
+
+/* Phủ đầy các tab và surface con còn sót trong tài khoản VIP */
+.acc2-page-vip .acc2-layout,
+.acc2-page-vip .acc2-main,
+.acc2-page-vip .acc2-toolbar,
+.acc2-page-vip .acc2-account-actions,
+.acc2-page-vip .acc2-pagination,
+.acc2-page-vip .acc2-reset-actions,
+.acc2-page-vip .acc2-account-summary,
+.acc2-page-vip .acc2-account-fields,
+.acc2-page-vip .acc2-profile-fields,
+.acc2-page-vip .acc2-profile-form,
+.acc2-page-vip .acc2-password-form,
+.acc2-page-vip .acc2-table-scroll,
+.acc2-page-vip .acc2-customer-orders,
+.acc2-page-vip .acc2-order-detail,
+.acc2-page-vip .acc2-order-info,
+.acc2-page-vip .acc2-order-items {
+    background-color: transparent;
+}
+.acc2-page-vip .acc2-toolbar,
+.acc2-page-vip .acc2-pagination,
+.acc2-page-vip .acc2-account-detail>.acc2-panel-head,
+.acc2-page-vip .acc2-customer-orders>.acc2-panel-head,
+.acc2-page-vip .acc2-order-detail>.acc2-panel-head {
+    background: #101612;
+}
+.acc2-page-vip .acc2-toolbar input,
+.acc2-page-vip .acc2-toolbar select,
+.acc2-page-vip .acc2-profile-form input,
+.acc2-page-vip .acc2-profile-form select,
+.acc2-page-vip .acc2-password-form input {
+    background: #0d130f;
+    border-color: rgba(126,255,157,.18);
+    color: #dff7e5;
+}
+.acc2-page-vip .acc2-toolbar input::placeholder,
+.acc2-page-vip .acc2-password-form input::placeholder,
+.acc2-page-vip .acc2-profile-form input::placeholder {
+    color: #668170;
+}
+.acc2-page-vip .acc2-empty,
+.acc2-page-vip .acc2-member small,
+.acc2-page-vip .acc2-member em,
+.acc2-page-vip .acc2-pagination,
+.acc2-page-vip .acc2-password-help {
+    color: #94ad99;
+}
+.acc2-page-vip .acc2-empty h2 {
+    color: #e0f7e5;
+}
+.acc2-page-vip .acc2-member em,
+.acc2-page-vip .acc2-reset-pending {
+    background: rgba(207,255,99,.10);
+    color: #cfff63;
+    border: 1px solid rgba(207,255,99,.18);
+}
+.acc2-page-vip .acc2-member strong,
+.acc2-page-vip .acc2-member .acc2-id {
+    color: #dff7e5;
+}
+.acc2-page-vip .acc2-page table,
+.acc2-page-vip table {
+    background: #141d17;
+}
+.acc2-page-vip .acc2-order-items tfoot td {
+    border-top: 1px solid rgba(126,255,157,.10);
+}
+.acc2-page-vip .acc2-order-view,
+.acc2-page-vip .acc2-delete {
+    border-color: rgba(126,255,157,.18);
+    background: #101612;
+    color: #cfe5d3;
+}
+.acc2-page-vip .acc2-delete {
+    border-color: rgba(255,82,82,.24);
+    color: #ffaaa7;
+}
+.acc2-page-vip .emp-page {
+    background:
+        linear-gradient(145deg, rgba(99,239,131,.045), transparent 48%),
+        #141d17;
+    border-color: rgba(126,255,157,.18);
+    color: #dff7e5;
+}
+.acc2-page-vip .emp-page > h2,
+.acc2-page-vip .emp-page .emp-form > h3,
+.acc2-page-vip .emp-field,
+.acc2-page-vip .emp-field > span,
+.acc2-page-vip .emp-page table,
+.acc2-page-vip .emp-page td,
+.acc2-page-vip .emp-page th {
+    color: #dff7e5;
+}
+.acc2-page-vip .emp-toolbar,
+.acc2-page-vip .emp-form,
+.acc2-page-vip .emp-table-wrap,
+.acc2-page-vip .emp-page .emp-search {
+    background: #101612;
+    border-color: rgba(126,255,157,.18);
+}
+.acc2-page-vip .emp-page th {
+    background: #101612;
+    border-bottom: 1px solid rgba(126,255,157,.10);
+}
+.acc2-page-vip .emp-page td {
+    border-bottom-color: rgba(126,255,157,.09);
+}
+.acc2-page-vip .emp-page tbody tr:hover {
+    background: rgba(99,239,131,.055);
+}
+.acc2-page-vip .emp-page button,
+.acc2-page-vip .emp-field input,
+.acc2-page-vip .emp-field select,
+.acc2-page-vip .emp-page .emp-search input {
+    background: #0d130f;
+    border-color: rgba(126,255,157,.18);
+    color: #dff7e5;
+}
+.acc2-page-vip .emp-page button:hover:not(:disabled),
+.acc2-page-vip .emp-toolbar button:nth-child(2),
+.acc2-page-vip .emp-form > button[type="submit"] {
+    background: linear-gradient(135deg, #277d43, #51aa62);
+    border-color: #67ef86;
+    color: #effff2;
+}
+.acc2-page-vip .emp-page .emp-alert,
+.acc2-page-vip .emp-page > p[role="status"] {
+    background: rgba(99,239,131,.10);
+    border: 1px solid rgba(99,239,131,.20);
+    color: #c9edcf;
+}
+
+/* Checkbox trong form thêm nhân viên và phân quyền */
+.acc2-page-vip .emp-form label:has(input[type="checkbox"]) {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid rgba(126,255,157,.18);
+    border-radius: 10px;
+    background: #0d130f;
+    color: #dff7e5;
+}
+.acc2-page-vip .emp-page input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid rgba(126,255,157,.42);
+    border-radius: 5px;
+    background: #090d0b;
+    box-shadow: inset 0 0 0 1px rgba(99,239,131,.06), 0 0 8px rgba(99,239,131,.06);
+    cursor: pointer;
+}
+.acc2-page-vip .emp-page input[type="checkbox"]:hover {
+    border-color: #63ef83;
+    box-shadow: 0 0 10px rgba(99,239,131,.20);
+}
+.acc2-page-vip .emp-page input[type="checkbox"]:checked {
+    border-color: #cfff63;
+    background:
+        linear-gradient(135deg, rgba(207,255,99,.10), transparent),
+        #63ef83;
+    box-shadow: 0 0 12px rgba(99,239,131,.34);
+}
+.acc2-page-vip .emp-page input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    width: 8px;
+    height: 4px;
+    margin: 4px 0 0 4px;
+    border-left: 2px solid #081108;
+    border-bottom: 2px solid #081108;
+    transform: rotate(-45deg);
+}
+.acc2-page-vip .emp-page input[type="checkbox"]:focus-visible {
+    outline: 2px solid #cfff63;
+    outline-offset: 3px;
+}
+
+/* Menu xổ xuống trong toàn bộ không gian tài khoản VIP */
+.acc2-page-vip,
+.acc2-page-vip select,
+.acc2-page-vip option,
+.acc2-page-vip optgroup {
+    color-scheme: dark;
+}
+.acc2-page-vip select {
+    background: #0d130f;
+    color: #dff7e5;
+    border: 1px solid rgba(126,255,157,.24);
+}
+.acc2-page-vip select:hover,
+.acc2-page-vip select:focus,
+.acc2-page-vip select:focus-visible {
+    background: #101812;
+    color: #effff2;
+    border-color: #63ef83;
+    outline: 2px solid rgba(99,239,131,.12);
+    box-shadow: 0 0 12px rgba(99,239,131,.12);
+}
+.acc2-page-vip option,
+.acc2-page-vip optgroup {
+    background: #101612;
+    color: #dff7e5;
+}
+.acc2-page-vip option:checked,
+.acc2-page-vip option:hover {
+    background: #1a3021;
+    color: #cfff63;
+}
+
+.acc2-page-vip input,
+.acc2-page-vip input[type="text"],
+.acc2-page-vip input[type="number"],
+.acc2-page-vip input[type="email"],
+.acc2-page-vip input[type="password"],
+.acc2-page-vip input[type="search"],
+.acc2-page-vip input[type="tel"],
+.acc2-page-vip input[type="date"],
+.acc2-page-vip textarea,
+.acc2-page-vip select {
+    background-color: #0d130f !important;
+    color: #dff7e5 !important;
+    border-color: rgba(126,255,157,.24) !important;
+    color-scheme: dark;
+}
+.acc2-page-vip input:focus,
+.acc2-page-vip input:active,
+.acc2-page-vip input:focus-visible,
+.acc2-page-vip textarea:focus,
+.acc2-page-vip textarea:active,
+.acc2-page-vip textarea:focus-visible,
+.acc2-page-vip select:focus,
+.acc2-page-vip select:active,
+.acc2-page-vip select:focus-visible,
+.acc2-page-vip :focus-within input,
+.acc2-page-vip :focus-within textarea,
+.acc2-page-vip :focus-within select {
+    background-color: #101812 !important;
+    color: #effff2 !important;
+    border-color: #63ef83 !important;
+    caret-color: #cfff63;
+}
+.acc2-page-vip input:-webkit-autofill,
+.acc2-page-vip input:-webkit-autofill:hover,
+.acc2-page-vip input:-webkit-autofill:focus,
+.acc2-page-vip textarea:-webkit-autofill,
+.acc2-page-vip textarea:-webkit-autofill:hover,
+.acc2-page-vip textarea:-webkit-autofill:focus {
+    -webkit-text-fill-color: #dff7e5;
+    -webkit-box-shadow: 0 0 0 1000px #0d130f inset;
+    caret-color: #cfff63;
+}
+.acc2-page-vip input::selection,
+.acc2-page-vip textarea::selection {
+    background: #4fae63;
+    color: #071009;
+}
+.acc2-page-vip select option,
+.acc2-page-vip select optgroup {
+    background-color: #101612;
+    color: #dff7e5;
+}
+
+/* Chi tiết đơn hàng trong không gian tài khoản VIP */
+.acc2-page-vip .acc2-order-detail,
+.acc2-page-vip .acc2-customer-orders,
+.acc2-page-vip .acc2-order-items {
+    background: #141d17 !important;
+    border-color: rgba(126,255,157,.18) !important;
+}
+.acc2-page-vip .acc2-order-detail>.acc2-panel-head,
+.acc2-page-vip .acc2-customer-orders>.acc2-panel-head {
+    background: #101612;
+    border-bottom: 1px solid rgba(126,255,157,.12);
+}
+.acc2-page-vip .acc2-order-info {
+    background: #141d17;
+}
+.acc2-page-vip .acc2-order-info>div,
+.acc2-page-vip .acc2-order-info .acc2-order-shipping {
+    background:
+        linear-gradient(145deg, rgba(99,239,131,.055), transparent 48%),
+        #101612 !important;
+    border: 1px solid rgba(126,255,157,.18) !important;
+    box-shadow: 0 8px 18px rgba(0,0,0,.12);
+}
+.acc2-page-vip .acc2-order-info small,
+.acc2-page-vip .acc2-order-shipping p span {
+    color: #91ad98;
+}
+.acc2-page-vip .acc2-order-info p,
+.acc2-page-vip .acc2-order-shipping p {
+    color: #cfe5d3;
+    border-top-color: rgba(126,255,157,.09);
+}
+.acc2-page-vip .acc2-order-info>div>strong,
+.acc2-page-vip .acc2-order-shipping p strong,
+.acc2-page-vip .acc2-order-items strong,
+.acc2-page-vip .acc2-order-items td {
+    color: #dff7e5;
+}
+.acc2-page-vip .acc2-order-items table {
+    background: #101612;
+    border: 1px solid rgba(126,255,157,.18);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.acc2-page-vip .acc2-order-items th {
+    background: #101612;
+    color: #91c39b;
+    border-bottom: 1px solid rgba(126,255,157,.12);
+}
+.acc2-page-vip .acc2-order-items td {
+    background: #141d17;
+    border-bottom: 1px solid rgba(126,255,157,.09);
+}
+.acc2-page-vip .acc2-order-items tbody tr:hover td {
+    background: rgba(99,239,131,.055);
+}
+.acc2-page-vip .acc2-order-items tfoot td {
+    background: #101612 !important;
+    color: #b9cdbd;
+}
+.acc2-page-vip .acc2-order-items tfoot tr:last-child td,
+.acc2-page-vip .acc2-order-items tfoot tr:last-child td strong {
+    background: rgba(99,239,131,.09) !important;
+    color: #cfff63 !important;
+}
+

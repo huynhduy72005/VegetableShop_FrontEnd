@@ -278,6 +278,7 @@ body:has(.adm-shell),
 .adm-variant-stock { display: grid; gap: 12px; }
 .adm-variant-stock p { margin: 0; color: #5f6f66; font-size: 14px; }
 
+<<<<<<< HEAD
 /* ===== Quản lý lô hàng & Cảnh báo hạn sử dụng ===== */
 .adm-batch-alert-pills {
     display: flex;
@@ -351,4 +352,580 @@ body:has(.adm-shell),
     background: #ffe5e3;
     border-color: #ec9a94;
     color: #9e231c;
+=======
+/* ===== Biến thể sản phẩm trong Admin VIP ===== */
+.adm-vip-shell .ve-box {
+    background:
+        linear-gradient(145deg, rgba(99,239,131,.055), transparent 48%),
+        #141d17;
+    border: 1px solid rgba(126,255,157,.22);
+    color: #dff7e5;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.025), 0 12px 26px rgba(0,0,0,.16);
+}
+.adm-vip-shell .ve-box legend,
+.adm-vip-shell .ve-card-head strong {
+    color: #eaffed;
+}
+.adm-vip-shell .ve-box legend span,
+.adm-vip-shell .ve-hint,
+.adm-vip-shell .ve-check,
+.adm-vip-shell .ve-grid label,
+.adm-vip-shell .ve-image,
+.adm-vip-shell .ve-image-empty,
+.adm-vip-shell .ve-summary {
+    color: #94ad99;
+}
+.adm-vip-shell .ve-hint b,
+.adm-vip-shell .ve-summary b {
+    color: #cfff63;
+}
+.adm-vip-shell .ve-copy-panel,
+.adm-vip-shell .ve-card,
+.adm-vip-shell .ve-card.is-hidden {
+    background: #101612;
+    border: 1px solid rgba(126,255,157,.18);
+    color: #dff7e5;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.02);
+}
+.adm-vip-shell .ve-card.is-hidden {
+    background: #0d110f;
+    border-style: dashed;
+}
+.adm-vip-shell .ve-copy-toggle,
+.adm-vip-shell .ve-add,
+.adm-vip-shell .ve-file,
+.adm-vip-shell .ve-image-row button {
+    background: #101612;
+    border: 1px solid rgba(126,255,157,.24);
+    color: #bfffc9;
+}
+.adm-vip-shell .ve-copy-toggle:hover,
+.adm-vip-shell .ve-add:hover:not(:disabled),
+.adm-vip-shell .ve-file:hover,
+.adm-vip-shell .ve-image-row button:hover {
+    background: rgba(99,239,131,.12);
+    color: #cfff63;
+    box-shadow: 0 0 12px rgba(99,239,131,.10);
+}
+.adm-vip-shell .ve-copy-panel select,
+.adm-vip-shell .ve-grid input[type='text'],
+.adm-vip-shell .ve-grid input[type='number'] {
+    background: #0d130f;
+    border: 1px solid rgba(126,255,157,.18);
+    color: #dff7e5;
+}
+.adm-vip-shell .ve-copy-panel select:focus,
+.adm-vip-shell .ve-grid input[type='text']:focus,
+.adm-vip-shell .ve-grid input[type='number']:focus {
+    border-color: #63ef83;
+    outline: 2px solid rgba(99,239,131,.12);
+    box-shadow: 0 0 12px rgba(99,239,131,.11);
+}
+.adm-vip-shell .ve-grid input::placeholder {
+    color: #668170;
+}
+.adm-vip-shell .ve-image-row img {
+    border: 1px solid rgba(126,255,157,.20);
+}
+.adm-vip-shell .ve-delete {
+    background: rgba(255,82,82,.08);
+    border: 1px solid rgba(255,82,82,.30);
+    color: #ffaaa7;
+}
+.adm-vip-shell .ve-delete:hover {
+    background: rgba(255,82,82,.16);
+    box-shadow: 0 0 12px rgba(255,82,82,.10);
+}
+.adm-vip-shell .ve-copy-message {
+    color: #aaffb8;
+}
+.adm-vip-shell .ve-note {
+    color: #e5ff86;
+}
+.adm-vip-shell .ve-error {
+    color: #ffaaa7;
+}
+
+/* Menu xổ xuống trong toàn bộ không gian Admin VIP */
+.adm-vip-shell,
+.adm-vip-shell select,
+.adm-vip-shell option,
+.adm-vip-shell optgroup {
+    color-scheme: dark;
+}
+.adm-vip-shell select,
+.adm-vip-shell .adm-form select,
+.adm-vip-shell .adm-filters select,
+.adm-vip-shell .adm-status-editor select,
+.adm-vip-shell .ve-copy-panel select,
+.adm-vip-shell input[list] {
+    background: #0d130f;
+    color: #dff7e5;
+    border: 1px solid rgba(126,255,157,.24);
+    box-shadow: inset 0 0 12px rgba(99,239,131,.025);
+}
+.adm-vip-shell select:hover,
+.adm-vip-shell select:focus,
+.adm-vip-shell select:focus-visible {
+    background: #101812;
+    color: #effff2;
+    border-color: #63ef83;
+    outline: 2px solid rgba(99,239,131,.12);
+    box-shadow: 0 0 12px rgba(99,239,131,.12);
+}
+.adm-vip-shell option,
+.adm-vip-shell optgroup {
+    background: #101612;
+    color: #dff7e5;
+}
+.adm-vip-shell option:checked,
+.adm-vip-shell option:hover {
+    background: #1a3021;
+    color: #cfff63;
+}
+
+/* Giữ textbox và select tối trong mọi trạng thái tương tác */
+.adm-vip-shell input,
+.adm-vip-shell input[type="text"],
+.adm-vip-shell input[type="number"],
+.adm-vip-shell input[type="email"],
+.adm-vip-shell input[type="password"],
+.adm-vip-shell input[type="search"],
+.adm-vip-shell input[type="tel"],
+.adm-vip-shell input[type="date"],
+.adm-vip-shell input[type="file"],
+.adm-vip-shell textarea,
+.adm-vip-shell select {
+    background-color: #0d130f !important;
+    color: #dff7e5 !important;
+    border-color: rgba(126,255,157,.24) !important;
+    color-scheme: dark;
+}
+.adm-vip-shell input:focus,
+.adm-vip-shell input:active,
+.adm-vip-shell input:focus-visible,
+.adm-vip-shell textarea:focus,
+.adm-vip-shell textarea:active,
+.adm-vip-shell textarea:focus-visible,
+.adm-vip-shell select:focus,
+.adm-vip-shell select:active,
+.adm-vip-shell select:focus-visible,
+.adm-vip-shell :focus-within input,
+.adm-vip-shell :focus-within textarea,
+.adm-vip-shell :focus-within select {
+    background-color: #101812 !important;
+    color: #effff2 !important;
+    border-color: #63ef83 !important;
+    caret-color: #cfff63;
+}
+.adm-vip-shell input:-webkit-autofill,
+.adm-vip-shell input:-webkit-autofill:hover,
+.adm-vip-shell input:-webkit-autofill:focus,
+.adm-vip-shell textarea:-webkit-autofill,
+.adm-vip-shell textarea:-webkit-autofill:hover,
+.adm-vip-shell textarea:-webkit-autofill:focus {
+    -webkit-text-fill-color: #dff7e5;
+    -webkit-box-shadow: 0 0 0 1000px #0d130f inset;
+    caret-color: #cfff63;
+}
+.adm-vip-shell input::selection,
+.adm-vip-shell textarea::selection {
+    background: #4fae63;
+    color: #071009;
+}
+.adm-vip-shell select option,
+.adm-vip-shell select optgroup {
+    background-color: #101612;
+    color: #dff7e5;
+}
+
+/* Chi tiết đơn hàng trong không gian quản trị VIP */
+.adm-vip-shell .adm-order-detail,
+.adm-vip-shell .adm-order-info,
+.adm-vip-shell .adm-order-items {
+    background: #141d17 !important;
+}
+.adm-vip-shell .adm-order-detail {
+    border: 1px solid rgba(126,255,157,.18);
+    border-radius: 15px;
+    overflow: hidden;
+}
+.adm-vip-shell .adm-order-detail>.adm-panel-head {
+    background:
+        linear-gradient(120deg, rgba(99,239,131,.07), transparent),
+        #101612 !important;
+    border-bottom: 1px solid rgba(126,255,157,.12);
+}
+.adm-vip-shell .adm-order-info>div,
+.adm-vip-shell .adm-order-info .adm-order-status-control,
+.adm-vip-shell .adm-order-info .adm-order-shipping {
+    background:
+        linear-gradient(145deg, rgba(99,239,131,.055), transparent 48%),
+        #101612 !important;
+    border: 1px solid rgba(126,255,157,.18) !important;
+    box-shadow: 0 8px 18px rgba(0,0,0,.12);
+}
+.adm-vip-shell .adm-order-info>div>small,
+.adm-vip-shell .adm-shipping-line span {
+    color: #91ad98;
+}
+.adm-vip-shell .adm-order-info p,
+.adm-vip-shell .adm-shipping-line strong {
+    color: #cfe5d3;
+}
+.adm-vip-shell .adm-shipping-line {
+    border-top-color: rgba(126,255,157,.09);
+}
+.adm-vip-shell .adm-order-info>div:last-child strong {
+    color: #cfff63;
+    text-shadow: 0 0 10px rgba(207,255,99,.20);
+}
+.adm-vip-shell .adm-order-items table {
+    background: #101612;
+    border: 1px solid rgba(126,255,157,.18) !important;
+}
+.adm-vip-shell .adm-order-items th {
+    background: #101612;
+    color: #91c39b;
+    border-bottom: 1px solid rgba(126,255,157,.12);
+}
+.adm-vip-shell .adm-order-items td {
+    background: #141d17;
+    color: #cfe5d3;
+    border-bottom: 1px solid rgba(126,255,157,.09);
+}
+.adm-vip-shell .adm-order-items tbody tr:hover td {
+    background: rgba(99,239,131,.055);
+}
+.adm-vip-shell .adm-order-items .adm-thumb {
+    background:
+        radial-gradient(circle at 35% 30%, rgba(207,255,99,.20), transparent 48%),
+        #101612;
+    border: 1px solid rgba(126,255,157,.18);
+}
+.adm-vip-shell .adm-order-items tfoot td {
+    background: #101612 !important;
+    color: #b9cdbd;
+}
+.adm-vip-shell .adm-order-items tfoot tr:last-child td,
+.adm-vip-shell .adm-order-items tfoot tr:last-child td strong {
+    background: rgba(99,239,131,.09) !important;
+    color: #cfff63 !important;
+}
+
+/* ===== Không gian quản trị VIP: dark neon theo phong cách rau củ quả ===== */
+.adm-vip-admin-space,
+.adm-vip-admin-space .main-content {
+    background:
+        radial-gradient(circle at 12% 18%, rgba(74, 255, 132, .09), transparent 24rem),
+        radial-gradient(circle at 88% 82%, rgba(194, 255, 75, .07), transparent 28rem),
+        #090d0b;
+}
+
+.adm-vip-admin-space .main-content {
+    min-height: calc(100svh - 78px);
+}
+
+.adm-vip-shell {
+    --vip-green: #63ef83;
+    --vip-lime: #cfff63;
+    --vip-cyan: #67ffd2;
+    --vip-black: #090d0b;
+    --vip-panel: rgba(20, 29, 23, .96);
+    --vip-line: rgba(126, 255, 157, .18);
+    --vip-text: #dff7e5;
+    max-width: 1500px;
+    width: calc(100% - 32px);
+    margin: 16px auto 24px;
+    border: 1px solid var(--vip-line);
+    border-radius: 18px;
+    background:
+        linear-gradient(135deg, rgba(99, 239, 131, .035), transparent 38%),
+        var(--vip-black);
+    color: var(--vip-text);
+    box-shadow:
+        0 24px 70px rgba(0, 0, 0, .48),
+        0 0 32px rgba(75, 255, 125, .035);
+}
+
+.adm-vip-shell.adm-shell {
+    background:
+        linear-gradient(135deg, rgba(99, 239, 131, .035), transparent 38%),
+        var(--vip-black);
+}
+
+.adm-vip-shell .adm-sidebar {
+    background:
+        radial-gradient(circle at 18% 15%, rgba(99, 239, 131, .12), transparent 13rem),
+        linear-gradient(180deg, #101913 0%, #0b110d 100%);
+    border: 1px solid var(--vip-line);
+    border-right: 0;
+    color: var(--vip-text);
+    box-shadow: inset -1px 0 18px rgba(99, 239, 131, .025);
+}
+
+.adm-vip-shell .adm-brand {
+    color: #effff2;
+    text-shadow: 0 0 18px rgba(99, 239, 131, .28);
+}
+
+.adm-vip-shell .adm-brand > span:first-child,
+.adm-vip-shell .adm-category-icon,
+.adm-vip-shell .adm-thumb-fallback,
+.adm-vip-shell .adm-thumb-fallback span {
+    color: var(--vip-lime);
+    text-shadow: 0 0 10px rgba(207, 255, 99, .72);
+}
+
+.adm-vip-shell .adm-sidebar > .adm-eyebrow,
+.adm-vip-shell .adm-heading .adm-eyebrow,
+.adm-vip-shell small,
+.adm-vip-shell .adm-heading p,
+.adm-vip-shell .adm-panel p {
+    color: #93ad99;
+}
+
+.adm-vip-shell .adm-sidebar nav button {
+    color: #a7c4ad;
+    border: 1px solid transparent;
+}
+
+.adm-vip-shell .adm-sidebar nav button.active,
+.adm-vip-shell .adm-sidebar nav button:hover:not(:disabled) {
+    border-color: rgba(99, 239, 131, .42);
+    background:
+        linear-gradient(90deg, rgba(99, 239, 131, .18), rgba(207, 255, 99, .08));
+    color: #d9ffe1;
+    box-shadow: 0 0 14px rgba(99, 239, 131, .15), inset 3px 0 0 var(--vip-green);
+}
+
+.adm-vip-shell .adm-sidebar-note {
+    border-top-color: var(--vip-line);
+}
+
+.adm-vip-shell .adm-sidebar-note strong {
+    color: var(--vip-lime);
+}
+
+.adm-vip-shell .adm-sidebar-note p {
+    color: #91a998;
+}
+
+.adm-vip-shell .adm-heading h1 {
+    color: #effff2;
+    text-shadow: 0 0 20px rgba(99, 239, 131, .16);
+}
+
+.adm-vip-shell .adm-welcome,
+.adm-vip-shell .adm-stats article,
+.adm-vip-shell .adm-panel,
+.adm-vip-shell .adm-category-grid article,
+.adm-vip-shell .adm-order-info > div,
+.adm-vip-shell .adm-user-fields > div {
+    background:
+        linear-gradient(145deg, rgba(99, 239, 131, .045), transparent 48%),
+        var(--vip-panel);
+    border-color: var(--vip-line);
+    color: var(--vip-text);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .025),
+        0 12px 26px rgba(0, 0, 0, .16);
+}
+
+.adm-vip-shell .adm-welcome {
+    border: 1px solid rgba(207, 255, 99, .22);
+}
+
+.adm-vip-shell .adm-welcome h2 {
+    color: #edffe9;
+}
+
+.adm-vip-shell .adm-welcome p {
+    color: #9db89f;
+}
+
+.adm-vip-shell .adm-welcome > span {
+    color: var(--vip-lime);
+    opacity: .68;
+    filter: drop-shadow(0 0 16px rgba(207, 255, 99, .55));
+}
+
+.adm-vip-shell .adm-stats article > span,
+.adm-vip-shell .adm-stats article strong,
+.adm-vip-shell .adm-panel h2,
+.adm-vip-shell .adm-detail-head h3,
+.adm-vip-shell .adm-user-summary h3,
+.adm-vip-shell .adm-user-fields dd,
+.adm-vip-shell .adm-order-info strong,
+.adm-vip-shell .adm-order-items .adm-product strong {
+    color: var(--vip-text);
+}
+
+.adm-vip-shell .adm-stats article > strong {
+    text-shadow: 0 0 12px rgba(99, 239, 131, .18);
+}
+
+.adm-vip-shell table {
+    color: #cfe5d3;
+}
+
+.adm-vip-shell th {
+    background: #111914;
+    color: #91c39b;
+    border-bottom: 1px solid var(--vip-line);
+}
+
+.adm-vip-shell td {
+    border-bottom-color: rgba(126, 255, 157, .09);
+}
+
+.adm-vip-shell tbody tr:hover,
+.adm-vip-shell .adm-orders-table tbody tr:hover {
+    background: rgba(99, 239, 131, .055);
+}
+
+.adm-vip-shell .adm-thumb,
+.adm-vip-shell .adm-user-avatar {
+    background:
+        radial-gradient(circle at 35% 30%, rgba(207, 255, 99, .22), transparent 45%),
+        #152018;
+    border: 1px solid rgba(99, 239, 131, .18);
+    color: var(--vip-lime);
+}
+
+.adm-vip-shell .adm-badge {
+    background: rgba(99, 239, 131, .12);
+    color: #8fffa7;
+    border: 1px solid rgba(99, 239, 131, .22);
+}
+
+.adm-vip-shell .adm-badge.amber {
+    background: rgba(207, 255, 99, .11);
+    color: #e5ff86;
+    border-color: rgba(207, 255, 99, .26);
+}
+
+.adm-vip-shell .adm-badge.red,
+.adm-vip-shell .adm-badge.stock-out {
+    background: rgba(255, 82, 82, .11);
+    color: #ff9797;
+    border-color: rgba(255, 82, 82, .5);
+    box-shadow: 0 0 12px rgba(255, 82, 82, .12);
+}
+
+.adm-vip-shell .adm-badge.blue {
+    background: rgba(103, 255, 210, .10);
+    color: #67ffd2;
+    border-color: rgba(103, 255, 210, .28);
+}
+
+.adm-vip-shell .adm-badge.purple {
+    background: rgba(167, 133, 255, .10);
+    color: #c4afff;
+    border-color: rgba(167, 133, 255, .28);
+}
+
+.adm-vip-shell button,
+.adm-vip-shell input,
+.adm-vip-shell select,
+.adm-vip-shell textarea {
+    border-color: rgba(126, 255, 157, .17);
+}
+
+.adm-vip-shell button {
+    background: #111812;
+    color: #cde7d2;
+}
+
+.adm-vip-shell button:hover:not(:disabled) {
+    background: rgba(99, 239, 131, .12);
+    color: #edffef;
+}
+
+.adm-vip-shell .adm-primary,
+.adm-vip-shell .adm-status-save {
+    background: linear-gradient(135deg, #277d43, #51aa62);
+    border-color: #67ef86;
+    color: #effff2;
+    box-shadow: 0 0 14px rgba(99, 239, 131, .16);
+}
+
+.adm-vip-shell input,
+.adm-vip-shell select,
+.adm-vip-shell textarea {
+    background: #0d130f;
+    color: #dff7e5;
+}
+
+.adm-vip-shell input::placeholder,
+.adm-vip-shell textarea::placeholder {
+    color: #668170;
+}
+
+.adm-vip-shell input:focus,
+.adm-vip-shell select:focus,
+.adm-vip-shell textarea:focus {
+    border-color: var(--vip-green);
+    outline: 2px solid rgba(99, 239, 131, .12);
+    box-shadow: 0 0 12px rgba(99, 239, 131, .11);
+}
+
+.adm-vip-shell .adm-panel-head,
+.adm-vip-shell .adm-pagination,
+.adm-vip-shell .adm-detail-head,
+.adm-vip-shell .adm-order-detail,
+.adm-vip-shell .adm-customer-orders,
+.adm-vip-shell .adm-reset-requests,
+.adm-vip-shell tfoot td {
+    border-color: rgba(126, 255, 157, .09);
+}
+
+.adm-vip-shell .adm-panel-head,
+.adm-vip-shell .adm-orders .adm-panel-head,
+.adm-vip-shell .adm-order-detail .adm-panel-head,
+.adm-vip-shell .adm-filters,
+.adm-vip-shell .adm-orders-table th,
+.adm-vip-shell .adm-order-items table,
+.adm-vip-shell tfoot td,
+.adm-vip-shell .adm-reset-requests .adm-table-scroll {
+    background: #101612;
+}
+
+.adm-vip-shell .adm-notice {
+    background: rgba(99, 239, 131, .10);
+    border: 1px solid rgba(99, 239, 131, .20);
+    color: #c9edcf;
+}
+
+.adm-vip-shell .adm-notice.error,
+.adm-vip-shell .adm-status-error {
+    background: rgba(255, 82, 82, .10);
+    border-color: rgba(255, 82, 82, .24);
+    color: #ffaaa7;
+}
+
+.adm-vip-shell .adm-status-message {
+    background: rgba(99, 239, 131, .10);
+    color: #aaffb8;
+}
+
+.adm-vip-shell .adm-footer,
+.adm-vip-shell .adm-visibility-toggle {
+    color: #7e9a84;
+}
+
+.adm-vip-shell :focus-visible {
+    outline-color: var(--vip-lime);
+}
+
+@media(max-width:700px){
+    .adm-vip-shell {
+        width: calc(100% - 16px);
+        margin: 8px auto 16px;
+        border-radius: 12px;
+    }
+    .adm-vip-shell .adm-sidebar {
+        border-right: 1px solid var(--vip-line);
+    }
+>>>>>>> af16a10acd02104bf45382208d4c3e685fd5fd8f
 }

@@ -73,6 +73,7 @@ export default function Header({
     cartCount = 0,
     wishlistCount = 0,
     currentUser,
+    vipMode = false,
     onSelectCategory,
     onViewProduct
 }) {
@@ -237,7 +238,7 @@ export default function Header({
     const badge = count => count > 99 ? '99+' : count;
 
     return (
-        <header className="vh-header" ref={headerRef}>
+        <header className={`vh-header${vipMode ? ' vh-header-vip' : ''}`} ref={headerRef}>
             {/* Thanh thông báo */}
             <div className="vh-topbar">
                 <div className="vh-container vh-topbar-inner">
