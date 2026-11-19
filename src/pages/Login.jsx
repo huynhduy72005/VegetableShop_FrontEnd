@@ -7,49 +7,25 @@ export default function Login({ onLoginSuccess, onSwitchToRegister }) {
     const [password, setPassword] = useState('');
     const [isRequestingReset, setIsRequestingReset] = useState(false);
     const [verifiedEmail, setVerifiedEmail] = useState('');
-    const [isAdminAccount, setIsAdminAccount] = useState(false);
     const [isCheckingEmail, setIsCheckingEmail] = useState(false);
     const [emailCheckError, setEmailCheckError] = useState('');
+    const [otp, setOtp] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [adminRecoveryKey, setAdminRecoveryKey] = useState('');
-    const [requestId, setRequestId] = useState('');
-    const [requestStatus, setRequestStatus] = useState('');
+    const [resendSeconds, setResendSeconds] = useState(0);
+    const [isResetComplete, setIsResetComplete] = useState(false);
     const [resetMessage, setResetMessage] = useState('');
     const [resetError, setResetError] = useState('');
     const [isSubmittingReset, setIsSubmittingReset] = useState(false);
 
     useEffect(() => {
-        if (!requestId || requestStatus !== 'Pending') return undefined;
-
-        let active = true;
-        const checkStatus = async () => {
-            try {
-                const response = await api.getPasswordResetRequestStatus(requestId);
-                if (!active) return;
-                setRequestStatus(response.data.status);
-                if (response.data.status === 'Approved') {
-                    setResetMessage('Admin đã chấp nhận yêu cầu. Bạn có thể đăng nhập bằng mật khẩu mới.');
-                } else if (response.data.status === 'Rejected') {
-                    setResetMessage('Admin đã từ chối yêu cầu đổi mật khẩu.');
-                }
-            } catch (error) {
-                if (active) {
-                    setResetError(
-                        error.response?.data?.message ||
-                        'Không thể cập nhật trạng thái yêu cầu. Vui lòng thử lại sau.'
-                    );
-                }
-            }
-        };
-
-        checkStatus();
-        const intervalId = window.setInterval(checkStatus, 3000);
-        return () => {
-            active = false;
-            window.clearInterval(intervalId);
-        };
-    }, [requestId, requestStatus]);
+        if (!isRequestingReset || resendSeconds <= 0) return undefined;
+        const timeoutId = window.setTimeout(
+            () => setResendSeconds(seconds => Math.max(0, seconds - 1)),
+            1000
+        );
+        return () => window.clearTimeout(timeoutId);
+    }, [isRequestingReset, resendSeconds]);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -72,16 +48,38 @@ export default function Login({ onLoginSuccess, onSwitchToRegister }) {
         setIsCheckingEmail(true);
         setEmailCheckError('');
         try {
-            const response = await api.checkPasswordResetEligibility(normalizedEmail);
+            const response = await api.sendPasswordResetOtp(normalizedEmail);
             setVerifiedEmail(normalizedEmail);
-            setIsAdminAccount(response.data.requiresAdminRecoveryKey);
             setIsRequestingReset(true);
-            setResetMessage('');
+            setResendSeconds(60);
+            setOtp('');
+            setNewPassword('');
+            setConfirmPassword('');
+            setIsResetComplete(false);
+            setResetMessage(response.data.message);
             setResetError('');
         } catch (error) {
             setEmailCheckError(
                 error.response?.data?.message ||
                 'Không kiểm tra được email. Vui lòng thử lại sau.'
+            );
+        } finally {
+            setIsCheckingEmail(false);
+        }
+    };
+
+    const handleResendOtp = async () => {
+        if (resendSeconds > 0 || isCheckingEmail) return;
+        setIsCheckingEmail(true);
+        setResetError('');
+        try {
+            const response = await api.sendPasswordResetOtp(verifiedEmail);
+            setResetMessage(response.data.message);
+            setResendSeconds(60);
+        } catch (error) {
+            setResetError(
+                error.response?.data?.message ||
+                'Không thể gửi lại mã OTP. Vui lòng thử lại sau.'
             );
         } finally {
             setIsCheckingEmail(false);
@@ -100,32 +98,17 @@ export default function Login({ onLoginSuccess, onSwitchToRegister }) {
 
         setIsSubmittingReset(true);
         try {
-            const response = await api.createPasswordResetRequest({
+            const response = await api.confirmPasswordReset({
                 email: verifiedEmail,
+                code: otp.trim(),
                 newPassword,
-                ...(isAdminAccount ? { adminRecoveryKey } : {})
             });
-
-            if (response.data.status === 'Approved') {
-                setRequestStatus('Approved');
-                setResetMessage(response.data.message);
-            } else if (response.data.requestId) {
-                setRequestId(response.data.requestId);
-                setRequestStatus(response.data.status);
-                setResetMessage(
-                    response.data.status === 'Pending'
-                        ? 'Yêu cầu đã được gửi đến admin. Trạng thái sẽ tự cập nhật sau khi được xử lý.'
-                        : 'Yêu cầu đã được xử lý.'
-                );
-            } else {
-                setResetMessage(
-                    'Nếu email thuộc tài khoản hợp lệ, yêu cầu sẽ được gửi đến admin.'
-                );
-            }
+            setIsResetComplete(true);
+            setResetMessage(response.data.message);
         } catch (err) {
             setResetError(
                 err.response?.data?.message ||
-                'Không thể gửi yêu cầu lúc này. Vui lòng thử lại sau.'
+                'Không thể xác minh mã OTP. Vui lòng thử lại sau.'
             );
         } finally {
             setIsSubmittingReset(false);
@@ -136,12 +119,11 @@ export default function Login({ onLoginSuccess, onSwitchToRegister }) {
         setIsRequestingReset(false);
         setEmail(verifiedEmail);
         setVerifiedEmail('');
-        setIsAdminAccount(false);
-        setRequestId('');
-        setRequestStatus('');
+        setOtp('');
         setNewPassword('');
         setConfirmPassword('');
-        setAdminRecoveryKey('');
+        setResendSeconds(0);
+        setIsResetComplete(false);
         setResetMessage('');
         setResetError('');
         setEmailCheckError('');
@@ -154,73 +136,91 @@ export default function Login({ onLoginSuccess, onSwitchToRegister }) {
                     <>
                         <h2>Quên mật khẩu?</h2>
                         <p className="auth-subtitle">
-                            {isAdminAccount
-                                ? 'Nhập mã khôi phục admin và mật khẩu mới.'
-                                : 'Nhập mật khẩu mới. Yêu cầu đổi mật khẩu sẽ chờ admin duyệt.'}
+                            Nhập mã OTP gửi về email để xác minh và đặt lại mật khẩu.
                         </p>
-                        <form onSubmit={handlePasswordResetRequest} className="auth-form">
-                            <div className="form-group">
-                                <label htmlFor="reset-email">Email tài khoản</label>
-                                <input
-                                    id="reset-email"
-                                    type="email"
-                                    required
-                                    autoComplete="email"
-                                    className="auth-locked-field"
-                                    value={verifiedEmail}
-                                    readOnly
-                                    placeholder="Nhập email..."
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="reset-new-password">Mật khẩu mới</label>
-                                <input
-                                    id="reset-new-password"
-                                    type="password"
-                                    required
-                                    minLength={8}
-                                    autoComplete="new-password"
-                                    value={newPassword}
-                                    onChange={e => setNewPassword(e.target.value)}
-                                    placeholder="Ít nhất 8 ký tự"
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="reset-confirm-password">Xác nhận mật khẩu mới</label>
-                                <input
-                                    id="reset-confirm-password"
-                                    type="password"
-                                    required
-                                    minLength={8}
-                                    autoComplete="new-password"
-                                    value={confirmPassword}
-                                    onChange={e => setConfirmPassword(e.target.value)}
-                                    placeholder="Nhập lại mật khẩu mới"
-                                />
-                            </div>
-                            {isAdminAccount && (
-                                <div className="form-group">
-                                    <label htmlFor="admin-recovery-key">Mã khôi phục admin</label>
-                                    <input
-                                        id="admin-recovery-key"
-                                        type="password"
-                                        required
-                                        autoComplete="off"
-                                        value={adminRecoveryKey}
-                                        onChange={e => setAdminRecoveryKey(e.target.value)}
-                                        placeholder="Nhập mã khôi phục admin"
-                                    />
-                                </div>
-                            )}
-                            {resetMessage && <p className="auth-feedback" role="status">{resetMessage}</p>}
-                            {requestStatus === 'Pending' && (
-                                <p className="auth-pending">Đang chờ admin xử lý yêu cầu…</p>
-                            )}
-                            {resetError && <p className="auth-feedback error" role="alert">{resetError}</p>}
-                            <button type="submit" className="btn-auth" disabled={isSubmittingReset || requestStatus === 'Pending'}>
-                                {isSubmittingReset ? 'Đang gửi...' : 'Gửi yêu cầu'}
-                            </button>
-                        </form>
+                        {isResetComplete ? (
+                            resetMessage && <p className="auth-feedback" role="status">{resetMessage}</p>
+                        ) : (
+                            <>
+                                {resetMessage && <p className="auth-feedback" role="status">{resetMessage}</p>}
+                                <form onSubmit={handlePasswordResetRequest} className="auth-form">
+                                    <div className="form-group">
+                                        <label htmlFor="reset-email">Email tài khoản</label>
+                                        <input
+                                            id="reset-email"
+                                            type="email"
+                                            required
+                                            autoComplete="email"
+                                            className="auth-locked-field"
+                                            value={verifiedEmail}
+                                            readOnly
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="reset-otp">Mã OTP</label>
+                                        <input
+                                            id="reset-otp"
+                                            type="text"
+                                            required
+                                            inputMode="numeric"
+                                            autoComplete="one-time-code"
+                                            pattern="[0-9]{6}"
+                                            maxLength={6}
+                                            value={otp}
+                                            onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                            placeholder="Nhập mã 6 chữ số"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="reset-new-password">Mật khẩu mới</label>
+                                        <input
+                                            id="reset-new-password"
+                                            type="password"
+                                            required
+                                            minLength={8}
+                                            autoComplete="new-password"
+                                            value={newPassword}
+                                            onChange={e => setNewPassword(e.target.value)}
+                                            placeholder="Ít nhất 8 ký tự"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="reset-confirm-password">Xác nhận mật khẩu mới</label>
+                                        <input
+                                            id="reset-confirm-password"
+                                            type="password"
+                                            required
+                                            minLength={8}
+                                            autoComplete="new-password"
+                                            value={confirmPassword}
+                                            onChange={e => setConfirmPassword(e.target.value)}
+                                            placeholder="Nhập lại mật khẩu mới"
+                                        />
+                                    </div>
+                                    {resetError && <p className="auth-feedback error" role="alert">{resetError}</p>}
+                                    <button type="submit" className="btn-auth" disabled={isSubmittingReset}>
+                                        {isSubmittingReset ? 'Đang xác minh...' : 'Xác minh OTP và đổi mật khẩu'}
+                                    </button>
+                                </form>
+                                <p className="auth-switch">
+                                    <button
+                                        type="button"
+                                        className="auth-text-button"
+                                        onClick={handleResendOtp}
+                                        disabled={isCheckingEmail || resendSeconds > 0}
+                                    >
+                                        {isCheckingEmail
+                                            ? 'Đang gửi mã...'
+                                            : resendSeconds > 0
+                                                ? `Gửi lại mã sau ${resendSeconds}s`
+                                                : 'Gửi lại mã OTP'}
+                                    </button>
+                                </p>
+                            </>
+                        )}
+                        {resetError && isResetComplete && (
+                            <p className="auth-feedback error" role="alert">{resetError}</p>
+                        )}
                         <p className="auth-switch">
                             <button type="button" className="auth-text-button" onClick={showLoginForm}>
                                 Quay lại đăng nhập

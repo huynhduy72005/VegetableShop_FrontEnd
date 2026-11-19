@@ -364,10 +364,8 @@ export default function Account({
     const visible = filtered.slice((currentPage - 1) * 8, currentPage * 8);
     const management = isAdmin && tab === 'manage_users';
 
-    const isVipTheme = String(currentUser?.role || '').toLowerCase() === 'adminvip';
-
     return (
-        <div className={`acc2-page${forcePasswordChange ? ' acc2-password-required' : ''}${isVipTheme ? ' acc2-page-vip' : ''}`}>
+        <div className={`acc2-page${forcePasswordChange ? ' acc2-password-required' : ''}`}>
             <div className="acc2-top">
                 <div>
                     <p className="acc2-eyebrow"></p>

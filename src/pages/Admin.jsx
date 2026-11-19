@@ -71,7 +71,6 @@ const allTabs = [
 
 export default function Admin({ currentUser, onBackToAccount }) {
     const isAdmin = currentUser?.role === 'Admin' || currentUser?.role === 'AdminVIP';
-    const isVip = String(currentUser?.role || '').toLowerCase() === 'adminvip';
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [vouchers, setVouchers] = useState([]);
@@ -219,12 +218,22 @@ export default function Admin({ currentUser, onBackToAccount }) {
         return () => { active = false; };
     }, [permissionLoading, permissionError, canViewProducts, canManageOrders, canManageInventory, isAdmin]);
 
+    const backButton = onBackToAccount && (
+        <button
+            type="button"
+            className="adm-back-button"
+            onClick={onBackToAccount}
+        >
+            ← Tài khoản
+        </button>
+    );
+
     if (permissionLoading)
-        return <div className={`adm-shell${isVip ? ' adm-vip-shell' : ''}`}><main className="adm-main">Đang tải quyền nhân viên…</main></div>;
+        return <div className="adm-shell"><main className="adm-main">{backButton}Đang tải quyền nhân viên…</main></div>;
     if (permissionError)
-        return <div className={`adm-shell${isVip ? ' adm-vip-shell' : ''}`}><main className="adm-main"><div role="alert" className="adm-notice error">{permissionError}</div></main></div>;
+        return <div className="adm-shell"><main className="adm-main">{backButton}<div role="alert" className="adm-notice error">{permissionError}</div></main></div>;
     if (!isAdmin && !availableTabs.length)
-        return <div className={`adm-shell${isVip ? ' adm-vip-shell' : ''}`}><main className="adm-main"><div role="status" className="adm-notice">Tài khoản chưa được cấp quyền quản lý cửa hàng. Vui lòng liên hệ Admin.</div></main></div>;
+        return <div className="adm-shell"><main className="adm-main">{backButton}<div role="status" className="adm-notice">Tài khoản chưa được cấp quyền quản lý cửa hàng. Vui lòng liên hệ Admin.</div></main></div>;
 
     const lowStock = products.filter(p => p.quantity < 10).sort((a, b) =>
         stockPriority(a.quantity) - stockPriority(b.quantity) || a.quantity - b.quantity
@@ -658,7 +667,7 @@ export default function Admin({ currentUser, onBackToAccount }) {
 
     const totalAlertCount = lowStock.length + (batchAlerts.nearExpiryTotalBatches || 0) + (batchAlerts.expiredTotalBatches || 0);
 
-    return <div className={`adm-shell${isVip ? ' adm-vip-shell' : ''}`}>
+    return <div className="adm-shell">
         <aside className="adm-sidebar">
             <div className="adm-brand"><span>✿</span> Vegetable<span className="adm-brand-light">Shop</span></div>
             <p className="adm-eyebrow">KHÔNG GIAN QUẢN TRỊ</p>
@@ -708,10 +717,8 @@ export default function Admin({ currentUser, onBackToAccount }) {
                     </h1>
                     <p>Theo dõi rõ ràng, quản lý dễ dàng.</p>
                 </div>
-                <div className="adm-actions">
-                    {onBackToAccount && (
-                        <button type="button" onClick={onBackToAccount}>← Tài khoản</button>
-                    )}
+                <div className="adm-heading-actions">
+                    {backButton}
                     <button disabled={loading || saving} onClick={refresh}>
                         {loading ? 'Đang tải…' : '↻ Tải lại'}
                     </button>
