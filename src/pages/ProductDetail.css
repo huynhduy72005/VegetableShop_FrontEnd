@@ -246,7 +246,7 @@
     font-size: 13px;
     line-height: 1.85;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    
     -webkit-box-orient: vertical;
     overflow: hidden;
     margin-bottom: 22px;
@@ -894,4 +894,180 @@
     .vd-origin-grid {
         grid-template-columns: 1fr;
     }
+}
+
+
+/* Khu vực Đánh giá khách hàng trong trang Chi tiết sản phẩm */
+.vd-rating-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.85rem;
+    margin: 0.45rem 0 0.7rem;
+    border-radius: 999px;
+    border: 1px solid #f0dfb4;
+    background: #fffbeb;
+    font-size: 0.84rem;
+    color: #5c4918;
+    cursor: pointer;
+}
+
+.vd-rating-stars {
+    font-weight: 700;
+    color: #d98200;
+}
+
+.vd-reviews-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.vd-reviews-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.vd-reviews-score {
+    background: #f2faf5;
+    border: 1px solid #cbe5d4;
+    border-radius: 14px;
+    padding: 0.65rem 1.1rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+}
+
+.vd-reviews-score strong {
+    font-size: 1.55rem;
+    color: #186235;
+}
+
+.vd-reviews-score span {
+    font-size: 0.85rem;
+    color: #556d5e;
+}
+
+.vd-review-form {
+    background: #f8fbf9;
+    border: 1px solid #dce9e0;
+    border-radius: 14px;
+    padding: 1rem 1.15rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.vd-star-picker {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.9rem;
+    color: #213a2b;
+}
+
+.vd-star-picker button {
+    background: transparent;
+    border: none;
+    font-size: 1.45rem;
+    color: #cbd5cf;
+    cursor: pointer;
+    padding: 0 2px;
+}
+
+.vd-star-picker button.active {
+    color: #f59e0b;
+}
+
+.vd-review-form textarea {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid #cde0d4;
+    border-radius: 10px;
+    font: inherit;
+    font-size: 0.92rem;
+}
+
+.vd-review-submit {
+    align-self: flex-start;
+    padding: 0.6rem 1.35rem !important;
+}
+
+.vd-review-notice {
+    margin: 0;
+    font-size: 0.86rem;
+    color: #166534;
+}
+
+.vd-review-notice.error {
+    color: #b91c1c;
+}
+
+.vd-review-login-hint,
+.vd-reviews-empty {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #5c7264;
+}
+
+.vd-review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.vd-review-item {
+    border: 1px solid #e3ede6;
+    border-radius: 14px;
+    padding: 1rem 1.15rem;
+    background: #ffffff;
+}
+
+.vd-review-item-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.45rem;
+}
+
+.vd-review-item-top strong {
+    color: #153120;
+    margin-right: 0.6rem;
+}
+
+.vd-review-stars {
+    color: #f59e0b;
+    font-size: 0.92rem;
+}
+
+.vd-review-comment {
+    margin: 0;
+    color: #243d2e;
+    font-size: 0.93rem;
+    line-height: 1.5;
+}
+
+.vd-review-shop-reply {
+    margin-top: 0.7rem;
+    padding: 0.65rem 0.9rem;
+    background: #f2faf4;
+    border-left: 3px solid #1f6e3d;
+    border-radius: 8px;
+}
+
+.vd-review-shop-reply strong {
+    display: block;
+    font-size: 0.82rem;
+    color: #185e34;
+    margin-bottom: 3px;
+}
+
+.vd-review-shop-reply p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: #2d4637;
 }
