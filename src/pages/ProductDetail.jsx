@@ -16,6 +16,11 @@ const formatDate = value => {
     });
 };
 
+const renderStars = rating => {
+    const count = Math.max(1, Math.min(5, Number(rating) || 5));
+    return '★'.repeat(count) + '☆'.repeat(5 - count);
+};
+
 // Icon SVG, không cần cài thư viện.
 const paths = {
     leaf: 'M20 4C9 2 3 8 5 15c2 6 13 7 15-11Z M4 21 15 10',
@@ -83,6 +88,32 @@ function ProductDetailContent({
     const [activeTab, setActiveTab] = useState('description');
     const [origin, setOrigin] = useState(() => product.origin || product.Origin || null);
 
+    // State đánh giá sản phẩm từ khách hàng
+    const [reviewSummary, setReviewSummary] = useState({
+        averageRating: 0,
+        totalReviews: 0,
+        reviews: []
+    });
+    const [newRating, setNewRating] = useState(5);
+    const [newComment, setNewComment] = useState('');
+    const [submittingReview, setSubmittingReview] = useState(false);
+    const [reviewNotice, setReviewNotice] = useState(null);
+
+    const isLoggedIn = Boolean(sessionStorage.getItem('token'));
+
+    async function loadReviews(productId) {
+        try {
+            const { data } = await api.getProductReviews(productId);
+            setReviewSummary({
+                averageRating: Number(data?.averageRating || 0),
+                totalReviews: Number(data?.totalReviews || 0),
+                reviews: Array.isArray(data?.reviews) ? data.reviews : []
+            });
+        } catch {
+            // Bỏ qua nếu chưa tải được đánh giá
+        }
+    }
+
     useEffect(() => {
         let active = true;
         if (product?.id) {
@@ -93,9 +124,43 @@ function ProductDetailContent({
                     setOrigin(resolvedOrigin);
                 })
                 .catch(() => {});
+
+            loadReviews(product.id);
         }
         return () => { active = false; };
     }, [product?.id]);
+
+    async function handleSubmitReview(e) {
+        e.preventDefault();
+        if (submittingReview || !product?.id) return;
+
+        const comment = newComment.trim();
+        if (!comment) {
+            setReviewNotice({ error: true, text: 'Vui lòng nhập nhận xét của bạn về sản phẩm.' });
+            return;
+        }
+
+        setSubmittingReview(true);
+        setReviewNotice(null);
+        try {
+            const { data } = await api.createProductReview({
+                productId: product.id,
+                rating: newRating,
+                comment
+            });
+            setNewComment('');
+            setNewRating(5);
+            setReviewNotice({ error: false, text: data?.message || 'Cảm ơn bạn đã gửi đánh giá!' });
+            await loadReviews(product.id);
+        } catch (error) {
+            setReviewNotice({
+                error: true,
+                text: error.response?.data?.message || 'Gửi đánh giá thất bại. Vui lòng thử lại.'
+            });
+        } finally {
+            setSubmittingReview(false);
+        }
+    }
 
     // Biến thể: mặc định chọn loại còn hàng đầu tiên
     const variants = getVariants(product);
@@ -241,6 +306,20 @@ function ProductDetailContent({
                     </div>
 
                     <h1>{product.name}</h1>
+
+                    {/* Tóm tắt điểm sao đánh giá */}
+                    <button
+                        type="button"
+                        className="vd-rating-pill"
+                        onClick={() => setActiveTab('reviews')}
+                    >
+                        <span className="vd-rating-stars">
+                            {reviewSummary.totalReviews > 0
+                                ? `★ ${reviewSummary.averageRating.toFixed(1)} / 5`
+                                : '☆ Chưa có đánh giá'}
+                        </span>
+                        <span>({reviewSummary.totalReviews} nhận xét từ khách hàng)</span>
+                    </button>
 
                     <p className="vd-summary">
                         {product.description ||
@@ -488,7 +567,7 @@ function ProductDetailContent({
                 ))}
             </div>
 
-            {/* Mô tả và cách đặt hàng */}
+            {/* Mô tả, Đánh giá khách hàng và Cách đặt hàng */}
             <section className="vd-details">
                 <div
                     className="vd-tabs"
@@ -510,6 +589,17 @@ function ProductDetailContent({
                         }
                     >
                         Thông tin sản phẩm
+                    </button>
+
+                    <button
+                        type="button"
+                        className={
+                            activeTab === 'reviews' ? 'active' : ''
+                        }
+                        aria-pressed={activeTab === 'reviews'}
+                        onClick={() => setActiveTab('reviews')}
+                    >
+                        Đánh giá khách hàng ({reviewSummary.totalReviews})
                     </button>
 
                     <button
@@ -549,6 +639,94 @@ function ProductDetailContent({
                                 </span>
                             </div>
                         </>
+                    ) : activeTab === 'reviews' ? (
+                        <div className="vd-reviews-section">
+                            <div className="vd-reviews-head">
+                                <div>
+                                    <span className="vd-eyebrow">CẢM NHẬN TỪ KHÁCH HÀNG</span>
+                                    <h2>Đánh giá về {product.name}</h2>
+                                </div>
+                                <div className="vd-reviews-score">
+                                    <strong>
+                                        {reviewSummary.totalReviews > 0
+                                            ? reviewSummary.averageRating.toFixed(1)
+                                            : '—'}
+                                    </strong>
+                                    <span>/ 5 sao ({reviewSummary.totalReviews} lượt)</span>
+                                </div>
+                            </div>
+
+                            {/* Form gửi đánh giá cho khách đã đăng nhập */}
+                            {isLoggedIn ? (
+                                <form className="vd-review-form" onSubmit={handleSubmitReview}>
+                                    <div className="vd-star-picker" role="radiogroup" aria-label="Chọn số sao">
+                                        <span>Chất lượng sản phẩm:</span>
+                                        {[1, 2, 3, 4, 5].map(star => (
+                                            <button
+                                                key={star}
+                                                type="button"
+                                                className={star <= newRating ? 'active' : ''}
+                                                onClick={() => setNewRating(star)}
+                                                aria-label={`${star} sao`}
+                                            >
+                                                ★
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <textarea
+                                        rows="3"
+                                        maxLength={1000}
+                                        placeholder="Chia sẻ trải nghiệm của bạn về độ tươi ngon, đóng gói sản phẩm..."
+                                        value={newComment}
+                                        onChange={e => setNewComment(e.target.value)}
+                                    />
+                                    {reviewNotice && (
+                                        <p className={`vd-review-notice ${reviewNotice.error ? 'error' : ''}`}>
+                                            {reviewNotice.text}
+                                        </p>
+                                    )}
+                                    <button
+                                        type="submit"
+                                        className="vd-add-button vd-review-submit"
+                                        disabled={submittingReview}
+                                    >
+                                        {submittingReview ? 'Đang gửi…' : 'Gửi đánh giá'}
+                                    </button>
+                                </form>
+                            ) : (
+                                <p className="vd-review-login-hint">
+                                    Vui lòng <strong>đăng nhập</strong> để gửi đánh giá cho sản phẩm này.
+                                </p>
+                            )}
+
+                            {/* Danh sách đánh giá */}
+                            {reviewSummary.reviews.length === 0 ? (
+                                <p className="vd-reviews-empty">
+                                    Chưa có đánh giá nào. Hãy là người đầu tiên nhận xét sản phẩm này!
+                                </p>
+                            ) : (
+                                <div className="vd-review-list">
+                                    {reviewSummary.reviews.map(rev => (
+                                        <article key={rev.id} className="vd-review-item">
+                                            <div className="vd-review-item-top">
+                                                <div>
+                                                    <strong>{rev.customerName}</strong>
+                                                    <span className="vd-review-stars">{renderStars(rev.rating)}</span>
+                                                </div>
+                                                <small>{formatDate(rev.createdAt)}</small>
+                                            </div>
+                                            <p className="vd-review-comment">{rev.comment}</p>
+                                            {rev.adminReply && (
+                                                <div className="vd-review-shop-reply">
+                                                    <strong>🌱 Phản hồi từ Vườn Nhà:</strong>
+                                                    <p>{rev.adminReply}</p>
+                                                </div>
+                                            )}
+                                        </article>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     ) : (
                         <>
                             <span className="vd-eyebrow">

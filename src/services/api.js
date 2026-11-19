@@ -122,4 +122,42 @@ export const api = {
         client.get(`${API_BASE_URL}/Analytics/category-share`, { params }),
     getAnalyticsRates: (params) =>
         client.get(`${API_BASE_URL}/Analytics/rates`, { params }),
+
+    // ========== MẸO HAY NHÀ BẾP ==========
+    getKitchenTips: (params) =>
+        client.get(`${API_BASE_URL}/KitchenTips`, { params }),
+    getKitchenTipById: (id) =>
+        client.get(`${API_BASE_URL}/KitchenTips/${id}`),
+    getAdminKitchenTips: (params) =>
+        client.get(`${API_BASE_URL}/KitchenTips/admin`, { params }),
+    createKitchenTip: (data) =>
+        client.post(`${API_BASE_URL}/KitchenTips`, data),
+    updateKitchenTip: (id, data) =>
+        client.put(`${API_BASE_URL}/KitchenTips/${id}`, data),
+    deleteKitchenTip: (id) =>
+        client.delete(`${API_BASE_URL}/KitchenTips/${id}`),
+
+    // ========== ĐÁNH GIÁ SẢN PHẨM ==========
+    getProductReviews: (productId) =>
+        client.get(`${API_BASE_URL}/Reviews/product/${productId}`),
+    createProductReview: (data) =>
+        client.post(`${API_BASE_URL}/Reviews`, data),
+    getAdminReviews: (params) =>
+        client.get(`${API_BASE_URL}/Reviews/admin`, { params }),
+    toggleReviewVisibility: (id, isHidden) =>
+        client.put(`${API_BASE_URL}/Reviews/${id}/visibility`, { isHidden }),
+    replyReview: (id, adminReply) =>
+        client.put(`${API_BASE_URL}/Reviews/${id}/reply`, { adminReply }),
+    deleteReview: (id) =>
+        client.delete(`${API_BASE_URL}/Reviews/${id}`),
+
+    // ========== LIÊN HỆ & KHIẾU NẠI ==========
+    sendContactMessage: (data) =>
+        client.post(`${API_BASE_URL}/Contact`, data),
+    getContactMessages: (params) =>
+        client.get(`${API_BASE_URL}/Contact`, { params }),
+    updateContactStatus: (id, data) =>
+        client.put(`${API_BASE_URL}/Contact/${id}/status`, data),
+    deleteContactMessage: (id) =>
+        client.delete(`${API_BASE_URL}/Contact/${id}`),
 };

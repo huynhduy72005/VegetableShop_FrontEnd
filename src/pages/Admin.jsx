@@ -4,6 +4,7 @@ import './Admin.css';
 import AdminOrders from './AdminOrders';
 import AdminUserManagement from './AdminUserManagement';
 import AdminSuppliers from '../components/AdminSuppliers';
+import AdminContentFeedback from '../components/AdminContentFeedback';
 import VariantEditor from '../components/VariantEditor';
 import BatchModal from '../components/BatchModal';
 import AnalyticsDashboard from '../components/AnalyticsDashboard';
@@ -66,6 +67,7 @@ const allTabs = [
     ['categories', '◈', 'Danh mục'],
     ['orders', '▣', 'Đơn hàng'],
     ['vouchers', '🎟', 'Voucher'],
+    ['content', '◈', 'Nội dung & Phản hồi'],
     ['users', '♙', 'Tài khoản']
 ];
 
@@ -75,6 +77,7 @@ export default function Admin({ currentUser, onBackToAccount }) {
     const [categories, setCategories] = useState([]);
     const [vouchers, setVouchers] = useState([]);
     const [batchAlerts, setBatchAlerts] = useState(emptyBatchAlerts);
+    const [pendingContactCount, setPendingContactCount] = useState(0);
     const [batchModalProduct, setBatchModalProduct] = useState(null);
     const [stats, setStats] = useState({});
     const [tab, setTab] = useState('overview');
@@ -130,14 +133,16 @@ export default function Admin({ currentUser, onBackToAccount }) {
     const canManageOrders = isAdmin || Boolean(staffPermissions?.canManageOrders);
     const canManageInventory = isAdmin || Boolean(staffPermissions?.canManageInventory);
     const canViewProducts = canManageProducts || canManageInventory;
-    const availableTabs = useMemo(() => isAdmin
-        ? allTabs
-        : [
-            ...(canManageProducts ? [allTabs[1], allTabs[4]] : []),
-            ...(canManageInventory ? [allTabs[2]] : []),
-            ...(canViewProducts ? [allTabs[3]] : []),
-            ...(canManageOrders ? [allTabs[5]] : [])
-        ], [isAdmin, canManageProducts, canManageInventory, canViewProducts, canManageOrders]);
+    const availableTabs = useMemo(() => {
+        if (isAdmin) return allTabs;
+        const pick = id => allTabs.find(t => t[0] === id);
+        return [
+            ...(canManageProducts ? [pick('products'), pick('categories'), pick('content')] : []),
+            ...(canManageInventory ? [pick('inventory')] : []),
+            ...(canViewProducts ? [pick('suppliers')] : []),
+            ...(canManageOrders ? [pick('orders')] : [])
+        ].filter(Boolean);
+    }, [isAdmin, canManageProducts, canManageInventory, canViewProducts, canManageOrders]);
 
     const batchAlertByProductId = useMemo(() => {
         const map = {};
@@ -155,7 +160,7 @@ export default function Admin({ currentUser, onBackToAccount }) {
     }, [permissionLoading, permissionError, availableTabs, tab]);
 
     async function loadData() {
-        const [p, c, s, v, b] = await Promise.all([
+        const [p, c, s, v, b, cm] = await Promise.all([
             canViewProducts ? api.getProducts() : Promise.resolve({ data: [] }),
             canViewProducts ? api.getCategories() : Promise.resolve({ data: [] }),
             canManageOrders ? api.getRevenue() : Promise.resolve({ data: {} }),
@@ -164,13 +169,17 @@ export default function Admin({ currentUser, onBackToAccount }) {
                 : Promise.resolve({ data: [] }),
             canManageInventory && typeof api.getExpiringBatches === 'function'
                 ? api.getExpiringBatches(3).catch(() => ({ data: emptyBatchAlerts }))
-                : Promise.resolve({ data: emptyBatchAlerts })
+                : Promise.resolve({ data: emptyBatchAlerts }),
+            canManageProducts && typeof api.getContactMessages === 'function'
+                ? api.getContactMessages({ status: 'Pending' }).catch(() => ({ data: [] }))
+                : Promise.resolve({ data: [] })
         ]);
         setProducts(p.data);
         setCategories(c.data);
         setStats(s.data);
         setVouchers(Array.isArray(v.data) ? v.data : []);
         setBatchAlerts(b.data || emptyBatchAlerts);
+        setPendingContactCount(Array.isArray(cm.data) ? cm.data.length : 0);
     }
 
     async function refresh() {
@@ -202,21 +211,25 @@ export default function Admin({ currentUser, onBackToAccount }) {
                 : Promise.resolve({ data: [] }),
             canManageInventory && typeof api.getExpiringBatches === 'function'
                 ? api.getExpiringBatches(3).catch(() => ({ data: emptyBatchAlerts }))
-                : Promise.resolve({ data: emptyBatchAlerts })
+                : Promise.resolve({ data: emptyBatchAlerts }),
+            canManageProducts && typeof api.getContactMessages === 'function'
+                ? api.getContactMessages({ status: 'Pending' }).catch(() => ({ data: [] }))
+                : Promise.resolve({ data: [] })
         ])
-            .then(([p, c, s, v, b]) => {
+            .then(([p, c, s, v, b, cm]) => {
                 if (active) {
                     setProducts(p.data);
                     setCategories(c.data);
                     setStats(s.data);
                     setVouchers(Array.isArray(v.data) ? v.data : []);
                     setBatchAlerts(b.data || emptyBatchAlerts);
+                    setPendingContactCount(Array.isArray(cm.data) ? cm.data.length : 0);
                 }
             })
             .catch(() => { if (active) setNotice({ error: true, text: 'Không tải được dữ liệu. Hãy chạy backend và bấm Tải lại.' }); })
             .finally(() => { if (active) setLoading(false); });
         return () => { active = false; };
-    }, [permissionLoading, permissionError, canViewProducts, canManageOrders, canManageInventory, isAdmin]);
+    }, [permissionLoading, permissionError, canViewProducts, canManageOrders, canManageInventory, canManageProducts, isAdmin]);
 
     const backButton = onBackToAccount && (
         <button
@@ -686,6 +699,7 @@ export default function Admin({ currentUser, onBackToAccount }) {
                     >
                         <span>{icon}</span>{label}
                         {id === 'inventory' && <b>{totalAlertCount}</b>}
+                        {id === 'content' && pendingContactCount > 0 && <b>{pendingContactCount}</b>}
                     </button>
                 ))}
             </nav>
@@ -712,6 +726,7 @@ export default function Admin({ currentUser, onBackToAccount }) {
                                 categories: 'Danh mục sản phẩm',
                                 orders: 'Quản lý đơn hàng',
                                 vouchers: 'Quản lý Voucher',
+                                content: 'Nội dung & Phản hồi khách hàng',
                                 users: 'Quản lý tài khoản'
                             }[tab]}
                     </h1>
@@ -1131,6 +1146,9 @@ export default function Admin({ currentUser, onBackToAccount }) {
 
                     {/* Tab Quản lý Nhà cung cấp / Nhà vườn */}
                     {tab === 'suppliers' && <AdminSuppliers />}
+
+                    {/* Tab Quản lý Nội dung & Phản hồi */}
+                    {tab === 'content' && <AdminContentFeedback onChanged={loadData} />}
 
                     {tab === 'orders' && <AdminOrders />}
 
