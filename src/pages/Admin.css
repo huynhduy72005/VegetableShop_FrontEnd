@@ -352,7 +352,7 @@ body:has(.adm-shell),
     background: #ffe5e3;
     border-color: #ec9a94;
     color: #9e231c;
-=======
+}
 /* ===== Biến thể sản phẩm trong Admin VIP ===== */
 .adm-vip-shell .ve-box {
     background:
@@ -927,5 +927,5 @@ body:has(.adm-shell),
     .adm-vip-shell .adm-sidebar {
         border-right: 1px solid var(--vip-line);
     }
->>>>>>> af16a10acd02104bf45382208d4c3e685fd5fd8f
+
 }
