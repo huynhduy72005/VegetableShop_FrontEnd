@@ -15,9 +15,9 @@ const footerColumns = [
     },
 ];
 
-export default function Footer() {
+export default function Footer({ vipMode = false }) {
     return (
-        <footer className="site-footer">
+        <footer className={`site-footer${vipMode ? ' site-footer-vip' : ''}`}>
             <div className="footer-content">
                 <div className="footer-brand">
                     <div className="footer-logo">🌿 Vườn Nhà</div>

@@ -209,11 +209,15 @@ export default function App() {
         });
     };
 
+    const isVipAdmin = String(currentUser?.role || '').toLowerCase() === 'adminvip';
+    const isVipAdminSpace = isVipAdmin && ['admin', 'account'].includes(activePage);
+
     return (
-        <div className="app-container">
+        <div className={`app-container${isVipAdminSpace ? ' adm-vip-admin-space' : ''}`}>
           {!mustChangePassword && <Header
             setActivePage={setActivePage}
             activePage={activePage}
+            vipMode={isVipAdminSpace}
             cartCount={cartItems.reduce(
                 (sum, item) => sum + item.quantity,
                 0
@@ -369,7 +373,7 @@ export default function App() {
                 )}
             </main>
 
-            {!mustChangePassword && <Footer />}
+            {!mustChangePassword && <Footer vipMode={isVipAdminSpace} />}
 
             {/* Gemini AI Chatbot */}
             {!mustChangePassword && <ChatWidget
