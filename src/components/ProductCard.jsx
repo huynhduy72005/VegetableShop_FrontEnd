@@ -1,22 +1,42 @@
 import './ProductCard.css';
 import { getMinPrice, getTotalStock, hasVariants as productHasVariants } from '../services/ProductVariants';
 
-export default function ProductCard({ product, onViewDetail, onBuyNow, onAddToCart }) {
+export default function ProductCard({ product, batchAlert, onViewDetail, onBuyNow, onAddToCart }) {
     const hasVariants = productHasVariants(product);
     const stockQuantity = getTotalStock(product);
     const isOutOfStock = stockQuantity <= 0;
+    const isNearExpiry = !isOutOfStock && Boolean(batchAlert?.hasNearExpiry);
 
     return (
         <div className={`product-card ${isOutOfStock ? 'is-out-of-stock' : ''}`} onClick={() => onViewDetail(product)}>
             <div className="pc-image-box">
                 <img src={product.image || 'https://via.placeholder.com/200'} alt={product.name} />
                 {isOutOfStock && <span className="pc-stock-overlay">HẾT HÀNG</span>}
+                {isNearExpiry && (
+                    <span
+                        style={{
+                            position: 'absolute',
+                            top: '10px',
+                            left: '10px',
+                            background: '#fff3cd',
+                            color: '#855800',
+                            border: '1px solid #f0c966',
+                            padding: '4px 9px',
+                            borderRadius: '999px',
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            zIndex: 2
+                        }}
+                        title={`Ưu tiên dùng trong ${batchAlert.minDaysUntilExpiry === 0 ? 'hôm nay' : `${batchAlert.minDaysUntilExpiry} ngày`}`}
+                    >
+                        ⚡ Giá tốt trong ngày · Cận date
+                    </span>
+                )}
                 <button
                     type="button"
                     className="pc-quick-add"
                     onClick={(event) => {
                         event.stopPropagation();
-                        // Sản phẩm có nhiều loại: mở trang chi tiết để khách chọn loại
                         if (hasVariants) {
                             onViewDetail(product);
                             return;

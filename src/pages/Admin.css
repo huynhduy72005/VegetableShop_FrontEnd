@@ -53,7 +53,7 @@ body:has(.adm-shell),
 .adm-shell tbody tr:hover{background:#fbfcf9}
 .adm-product{display:flex;align-items:center;gap:12px}
 .adm-product strong{font-size:13px}
-.adm-thumb{width:42px;height:42px;display:grid;place-items:center;background:#eef3e8;border-radius:11px;color:#749850;overflow:hidden}
+.adm-thumb{width:42px;height:42px;display:grid;place-items:center;background:#eef3e8;border-radius:11px;color:#749850;overflow:hidden;flex-shrink:0}
 .adm-thumb img{width:100%;height:100%;object-fit:cover}
 .adm-badge{display:inline-block;font-size:11px;background:#edf5e8;color:#387443;border-radius:20px;padding:6px 10px}
 .adm-badge.amber{background:#fff2d9;color:#9c6e19}
@@ -277,3 +277,78 @@ body:has(.adm-shell),
 .adm-derived-note { font-weight: 400; font-size: 12px; color: #7b8a81; }
 .adm-variant-stock { display: grid; gap: 12px; }
 .adm-variant-stock p { margin: 0; color: #5f6f66; font-size: 14px; }
+
+/* ===== Quản lý lô hàng & Cảnh báo hạn sử dụng ===== */
+.adm-batch-alert-pills {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.adm-shell .adm-pill-alert {
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.adm-shell .adm-pill-alert.near {
+    background: #fff8e1;
+    border-color: #f0cf7b;
+    color: #8f6008;
+}
+
+.adm-shell .adm-pill-alert.near.active,
+.adm-shell .adm-pill-alert.near:hover:not(:disabled) {
+    background: #ffecb3;
+}
+
+.adm-shell .adm-pill-alert.expired {
+    background: #ffecea;
+    border-color: #f1ada8;
+    color: #a32922;
+}
+
+.adm-shell .adm-pill-alert.expired.active,
+.adm-shell .adm-pill-alert.expired:hover:not(:disabled) {
+    background: #ffd6d2;
+}
+
+.adm-batch-inline-alert {
+    display: inline-block;
+    margin-top: 4px;
+    margin-right: 6px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.adm-batch-inline-alert.near {
+    background: #fff2cc;
+    color: #8a5c00;
+}
+
+.adm-batch-inline-alert.expired {
+    background: #ffe0de;
+    color: #a8241e;
+}
+
+.adm-shell .adm-batch-btn {
+    background: #eef6ea;
+    border-color: #c2d9b8;
+    color: #173f32;
+    font-weight: 650;
+}
+
+.adm-shell .adm-batch-btn.has-near {
+    background: #fff5d6;
+    border-color: #ecc460;
+    color: #825600;
+}
+
+.adm-shell .adm-batch-btn.has-expired {
+    background: #ffe5e3;
+    border-color: #ec9a94;
+    color: #9e231c;
+}

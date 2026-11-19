@@ -4,6 +4,8 @@ import './Admin.css';
 import AdminOrders from './AdminOrders';
 import AdminUserManagement from './AdminUserManagement';
 import VariantEditor from '../components/VariantEditor';
+import BatchModal from '../components/BatchModal';
+import AnalyticsDashboard from '../components/AnalyticsDashboard';
 import { summarizeVariants, validateVariants } from '../services/ProductVariants';
 
 const money = value => Number(value || 0).toLocaleString('vi-VN') + ' ₫';
@@ -38,6 +40,12 @@ const emptyVoucher = {
     isActive: true,
     isPersonal: false
 };
+const emptyBatchAlerts = {
+    nearExpiryTotalBatches: 0,
+    expiredTotalBatches: 0,
+    byProduct: [],
+    batches: []
+};
 
 const stockLabel = quantity => quantity <= 0 ? 'Hết hàng' : quantity < 10 ? 'Sắp hết' : 'Còn hàng';
 const stockPriority = quantity => quantity <= 0 ? 0 : quantity < 10 ? 1 : 2;
@@ -64,6 +72,8 @@ export default function Admin({ currentUser, onBackToAccount }) {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [vouchers, setVouchers] = useState([]);
+    const [batchAlerts, setBatchAlerts] = useState(emptyBatchAlerts);
+    const [batchModalProduct, setBatchModalProduct] = useState(null);
     const [stats, setStats] = useState({});
     const [tab, setTab] = useState('overview');
     const [staffPermissions, setStaffPermissions] = useState(null);
@@ -126,6 +136,14 @@ export default function Admin({ currentUser, onBackToAccount }) {
             ...(canManageOrders ? [allTabs[4]] : [])
         ], [isAdmin, canManageProducts, canManageInventory, canManageOrders]);
 
+    const batchAlertByProductId = useMemo(() => {
+        const map = {};
+        for (const item of batchAlerts.byProduct || []) {
+            map[item.productId] = item;
+        }
+        return map;
+    }, [batchAlerts]);
+
     useEffect(() => {
         if (permissionLoading || permissionError || !availableTabs.length)
             return;
@@ -134,18 +152,22 @@ export default function Admin({ currentUser, onBackToAccount }) {
     }, [permissionLoading, permissionError, availableTabs, tab]);
 
     async function loadData() {
-        const [p, c, s, v] = await Promise.all([
+        const [p, c, s, v, b] = await Promise.all([
             canViewProducts ? api.getProducts() : Promise.resolve({ data: [] }),
             canViewProducts ? api.getCategories() : Promise.resolve({ data: [] }),
             canManageOrders ? api.getRevenue() : Promise.resolve({ data: {} }),
             isAdmin && typeof api.getAdminVouchers === 'function'
                 ? api.getAdminVouchers().catch(() => ({ data: [] }))
-                : Promise.resolve({ data: [] })
+                : Promise.resolve({ data: [] }),
+            canManageInventory && typeof api.getExpiringBatches === 'function'
+                ? api.getExpiringBatches(3).catch(() => ({ data: emptyBatchAlerts }))
+                : Promise.resolve({ data: emptyBatchAlerts })
         ]);
         setProducts(p.data);
         setCategories(c.data);
         setStats(s.data);
         setVouchers(Array.isArray(v.data) ? v.data : []);
+        setBatchAlerts(b.data || emptyBatchAlerts);
     }
 
     async function refresh() {
@@ -174,20 +196,24 @@ export default function Admin({ currentUser, onBackToAccount }) {
             canManageOrders ? api.getRevenue() : Promise.resolve({ data: {} }),
             isAdmin && typeof api.getAdminVouchers === 'function'
                 ? api.getAdminVouchers().catch(() => ({ data: [] }))
-                : Promise.resolve({ data: [] })
+                : Promise.resolve({ data: [] }),
+            canManageInventory && typeof api.getExpiringBatches === 'function'
+                ? api.getExpiringBatches(3).catch(() => ({ data: emptyBatchAlerts }))
+                : Promise.resolve({ data: emptyBatchAlerts })
         ])
-            .then(([p, c, s, v]) => {
+            .then(([p, c, s, v, b]) => {
                 if (active) {
                     setProducts(p.data);
                     setCategories(c.data);
                     setStats(s.data);
                     setVouchers(Array.isArray(v.data) ? v.data : []);
+                    setBatchAlerts(b.data || emptyBatchAlerts);
                 }
             })
             .catch(() => { if (active) setNotice({ error: true, text: 'Không tải được dữ liệu. Hãy chạy backend và bấm Tải lại.' }); })
             .finally(() => { if (active) setLoading(false); });
         return () => { active = false; };
-    }, [permissionLoading, permissionError, canViewProducts, canManageOrders, isAdmin]);
+    }, [permissionLoading, permissionError, canViewProducts, canManageOrders, canManageInventory, isAdmin]);
 
     if (permissionLoading)
         return <div className="adm-shell"><main className="adm-main">Đang tải quyền nhân viên…</main></div>;
@@ -203,15 +229,25 @@ export default function Admin({ currentUser, onBackToAccount }) {
         (p.name || '').toLocaleLowerCase('vi').includes(search.toLocaleLowerCase('vi')) &&
         (!category || String(p.categoryId) === category)
     ).sort((a, b) => sort === 'price' ? a.price - b.price : sort === 'stock' ? a.quantity - b.quantity : b.id - a.id);
-    const inventoryProducts = products.filter(p =>
-        (p.name || '').toLocaleLowerCase('vi').includes(inventorySearch.toLocaleLowerCase('vi')) &&
-        (!inventoryCategory || String(p.categoryId) === inventoryCategory) &&
-        (!inventoryStock || (
-            inventoryStock === 'out' ? p.quantity <= 0 :
-                inventoryStock === 'low' ? p.quantity > 0 && p.quantity < 10 :
-                    p.quantity >= 10
-        ))
-    ).sort((a, b) => {
+
+    const inventoryProducts = products.filter(p => {
+        const alert = batchAlertByProductId[p.id];
+        const matchesName = (p.name || '').toLocaleLowerCase('vi').includes(inventorySearch.toLocaleLowerCase('vi'));
+        const matchesCat = !inventoryCategory || String(p.categoryId) === inventoryCategory;
+        let matchesStock = true;
+        if (inventoryStock === 'out') matchesStock = p.quantity <= 0;
+        else if (inventoryStock === 'low') matchesStock = p.quantity > 0 && p.quantity < 10;
+        else if (inventoryStock === 'available') matchesStock = p.quantity >= 10;
+        else if (inventoryStock === 'near-expiry') matchesStock = Boolean(alert?.hasNearExpiry);
+        else if (inventoryStock === 'expired') matchesStock = Boolean(alert?.hasExpired);
+        return matchesName && matchesCat && matchesStock;
+    }).sort((a, b) => {
+        const alertA = batchAlertByProductId[a.id];
+        const alertB = batchAlertByProductId[b.id];
+        const alertRankA = alertA?.hasExpired ? 0 : alertA?.hasNearExpiry ? 1 : 2;
+        const alertRankB = alertB?.hasExpired ? 0 : alertB?.hasNearExpiry ? 1 : 2;
+        if (alertRankA !== alertRankB) return alertRankA - alertRankB;
+
         const priority = stockPriority(a.quantity) - stockPriority(b.quantity);
         if (priority) return priority;
 
@@ -252,7 +288,6 @@ export default function Admin({ currentUser, onBackToAccount }) {
         setForm(product
             ? {
                 ...product,
-                // đưa giá / tồn kho của biến thể về dạng chuỗi để gõ trong ô nhập
                 variants: (product.variants || []).map(v => ({ ...v, price: String(v.price), quantity: String(v.quantity) }))
             }
             : { ...emptyProduct, categoryId: categories[0]?.id || '' });
@@ -273,7 +308,6 @@ export default function Admin({ currentUser, onBackToAccount }) {
     async function saveProduct(event) {
         event.preventDefault();
         if (saving) return;
-        // Biến thể: kiểm tra rồi đổi về số. Có biến thể thì giá thấp nhất / tổng tồn kho tự tính từ các loại.
         const variantRows = (form.variants || []).map(v => ({ ...v, name: String(v.name ?? '').trim(), unit: String(v.unit ?? '').trim() || String(form.unit ?? '').trim() }));
         const variantError = validateVariants(variantRows);
         if (variantError) { setNotice({ error: true, text: variantError }); return; }
@@ -521,24 +555,104 @@ export default function Admin({ currentUser, onBackToAccount }) {
         const a = document.createElement('a'); a.href = url; a.download = 'san-pham.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    const productRows = (rows, showPrice) => rows.map(p => <tr key={p.id}>
-        <td><div className="adm-product"><span className="adm-thumb">{p.image ? <img src={p.image} alt="" onError={e => { e.currentTarget.style.display = 'none'; }} /> : '✿'}</span><div><strong>{p.name}</strong><small>SP-{p.id} · {categoryName(p.categoryId)}{p.isVisible === false ? ' · Đang ẩn' : ''}</small></div></div></td>
-        {showPrice && <td>{p.variants?.length > 0 && 'Từ '}{money(p.price)}<small>/ {p.unit}</small>{p.variants?.length > 0 && <small> · {p.variants.length} biến thể</small>}</td>}<td><strong>{p.quantity}</strong> {p.unit}</td>
-        <td><span className={`adm-badge ${p.quantity <= 0 ? 'red stock-out' : p.quantity < 10 ? 'amber stock-low' : ''}`}>{stockLabel(p.quantity)}</span></td>
-        <td><div className="adm-actions">
-            {canManageProducts ? <>
-                <button type="button" className="adm-visibility-toggle" disabled={saving} onClick={() => toggleProductVisibility(p)} aria-label={`${p.isVisible === false ? 'Hiện' : 'Ẩn'} ${p.name}`} title={`${p.isVisible === false ? 'Hiện' : 'Ẩn'} sản phẩm trên cửa hàng`}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{p.isVisible === false ? <><path d="M3 3l18 18" /><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" /><path d="M9.9 5.2A10.7 10.7 0 0 1 12 5c5.5 0 9 7 9 7a15.8 15.8 0 0 1-2.2 3.1" /><path d="M6.2 6.2C3.9 7.8 3 12 3 12s3.5 7 9 7a10.7 10.7 0 0 0 4-.8" /></> : <><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></>}</svg></button>
-                <button disabled={saving} onClick={() => startForm(p)}>Sửa</button>
-                <button disabled={saving} className="adm-danger" onClick={() => deleteProduct(p)}>Xóa</button>
-            </> : canManageInventory && <button disabled={saving} onClick={() => setInventoryForm({
-                id: p.id,
-                name: p.name,
-                quantity: String(p.quantity),
-                variants: (p.variants || []).map(v => ({ id: v.id, name: v.name, quantity: String(v.quantity) }))
-            })}>Cập nhật tồn kho</button>}
-        </div></td>
-    </tr>);
-    const table = (rows, showPrice = true) => <div className="adm-table-scroll"><table><thead><tr><th>Sản phẩm</th>{showPrice && <th>Giá bán</th>}<th>Tồn kho</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>{productRows(rows, showPrice)}</tbody></table>{!rows.length && <p className="adm-empty">{loading ? 'Đang tải dữ liệu…' : 'Không có sản phẩm phù hợp.'}</p>}</div>;
+    const productRows = (rows, showPrice) => rows.map(p => {
+        const batchAlert = batchAlertByProductId[p.id];
+        return (
+            <tr key={p.id}>
+                <td>
+                    <div className="adm-product">
+                        <span className="adm-thumb">
+                            {p.image ? <img src={p.image} alt="" onError={e => { e.currentTarget.style.display = 'none'; }} /> : '✿'}
+                        </span>
+                        <div>
+                            <strong>{p.name}</strong>
+                            <small>SP-{p.id} · {categoryName(p.categoryId)}{p.isVisible === false ? ' · Đang ẩn' : ''}</small>
+                            {batchAlert?.hasExpired && (
+                                <span className="adm-batch-inline-alert expired">
+                                    ⚠ Có {batchAlert.expiredQuantity} {p.unit} đã quá hạn sử dụng!
+                                </span>
+                            )}
+                            {batchAlert?.hasNearExpiry && (
+                                <span className="adm-batch-inline-alert near">
+                                    ⏰ Cảnh báo: {batchAlert.nearExpiryQuantity} {p.unit} sắp hết hạn ({batchAlert.minDaysUntilExpiry === 0 ? 'hôm nay' : `trong ${batchAlert.minDaysUntilExpiry} ngày`})
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                </td>
+                {showPrice && (
+                    <td>
+                        {p.variants?.length > 0 && 'Từ '}{money(p.price)}<small>/ {p.unit}</small>
+                        {p.variants?.length > 0 && <small> · {p.variants.length} biến thể</small>}
+                    </td>
+                )}
+                <td><strong>{p.quantity}</strong> {p.unit}</td>
+                <td>
+                    <span className={`adm-badge ${p.quantity <= 0 ? 'red stock-out' : p.quantity < 10 ? 'amber stock-low' : ''}`}>
+                        {stockLabel(p.quantity)}
+                    </span>
+                </td>
+                <td>
+                    <div className="adm-actions">
+                        {canManageInventory && (
+                            <button
+                                type="button"
+                                className={`adm-batch-btn ${batchAlert?.hasExpired ? 'has-expired' : batchAlert?.hasNearExpiry ? 'has-near' : ''}`}
+                                disabled={saving}
+                                onClick={() => setBatchModalProduct(p)}
+                            >
+                                📦 Quản lý lô
+                            </button>
+                        )}
+                        {canManageProducts ? (
+                            <>
+                                <button type="button" className="adm-visibility-toggle" disabled={saving} onClick={() => toggleProductVisibility(p)} aria-label={`${p.isVisible === false ? 'Hiện' : 'Ẩn'} ${p.name}`} title={`${p.isVisible === false ? 'Hiện' : 'Ẩn'} sản phẩm trên cửa hàng`}>
+                                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                        {p.isVisible === false ? (
+                                            <><path d="M3 3l18 18" /><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" /><path d="M9.9 5.2A10.7 10.7 0 0 1 12 5c5.5 0 9 7 9 7a15.8 15.8 0 0 1-2.2 3.1" /><path d="M6.2 6.2C3.9 7.8 3 12 3 12s3.5 7 9 7a10.7 10.7 0 0 0 4-.8" /></>
+                                        ) : (
+                                            <><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></>
+                                        )}
+                                    </svg>
+                                </button>
+                                <button disabled={saving} onClick={() => startForm(p)}>Sửa</button>
+                                <button disabled={saving} className="adm-danger" onClick={() => deleteProduct(p)}>Xóa</button>
+                            </>
+                        ) : canManageInventory && (
+                            <button disabled={saving} onClick={() => setInventoryForm({
+                                id: p.id,
+                                name: p.name,
+                                quantity: String(p.quantity),
+                                variants: (p.variants || []).map(v => ({ id: v.id, name: v.name, quantity: String(v.quantity) }))
+                            })}>
+                                Sửa nhanh
+                            </button>
+                        )}
+                    </div>
+                </td>
+            </tr>
+        );
+    });
+
+    const table = (rows, showPrice = true) => (
+        <div className="adm-table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        {showPrice && <th>Giá bán</th>}
+                        <th>Tồn kho</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>{productRows(rows, showPrice)}</tbody>
+            </table>
+            {!rows.length && <p className="adm-empty">{loading ? 'Đang tải dữ liệu…' : 'Không có sản phẩm phù hợp.'}</p>}
+        </div>
+    );
+
+    const totalAlertCount = lowStock.length + (batchAlerts.nearExpiryTotalBatches || 0) + (batchAlerts.expiredTotalBatches || 0);
 
     return <div className="adm-shell">
         <aside className="adm-sidebar">
@@ -558,7 +672,7 @@ export default function Admin({ currentUser, onBackToAccount }) {
                         }}
                     >
                         <span>{icon}</span>{label}
-                        {id === 'inventory' && <b>{lowStock.length}</b>}
+                        {id === 'inventory' && <b>{totalAlertCount}</b>}
                     </button>
                 ))}
             </nav>
@@ -580,7 +694,7 @@ export default function Admin({ currentUser, onBackToAccount }) {
                             : {
                                 overview: 'Tổng quan cửa hàng',
                                 products: 'Quản lý sản phẩm',
-                                inventory: 'Kiểm tra tồn kho',
+                                inventory: 'Kiểm tra tồn kho & Lô hàng',
                                 categories: 'Danh mục sản phẩm',
                                 orders: 'Quản lý đơn hàng',
                                 vouchers: 'Quản lý Voucher',
@@ -861,10 +975,26 @@ export default function Admin({ currentUser, onBackToAccount }) {
                         <>
                             <div className="adm-stats">
                                 {[
-                                    ['Giá trị tất cả đơn hàng', money(stats.totalRevenue), 'Theo API hiện tại, gồm mọi trạng thái'],
-                                    ['Tổng đơn hàng', stats.totalOrders ?? '—', 'Đơn hàng trong hệ thống'],
-                                    ['Chờ xử lý', stats.pendingOrders ?? '—', 'Cần được xác nhận'],
-                                    ['Sản phẩm', products.length, `${lowStock.length} sản phẩm tồn kho < 10`]
+                                    [
+                                        'Doanh thu thực tế (Tích lũy)',
+                                        money(stats.netRevenue ?? stats.totalRevenue),
+                                        `Đã giao: ${money(stats.completedRevenue ?? 0)}`
+                                    ],
+                                    [
+                                        'Tổng đơn hàng',
+                                        stats.totalOrders ?? '—',
+                                        `${stats.completedOrders ?? 0} hoàn thành · ${stats.cancelledOrders ?? 0} đã hủy`
+                                    ],
+                                    [
+                                        'Chờ xử lý',
+                                        stats.pendingOrders ?? '—',
+                                        'Cần được xác nhận'
+                                    ],
+                                    [
+                                        'Sản phẩm',
+                                        products.length,
+                                        `${lowStock.length} tồn kho < 10 · ${batchAlerts.nearExpiryTotalBatches || 0} lô cận date`
+                                    ]
                                 ].map(([title, value, detail]) => (
                                     <article key={title}>
                                         <span>{title}</span>
@@ -873,11 +1003,15 @@ export default function Admin({ currentUser, onBackToAccount }) {
                                     </article>
                                 ))}
                             </div>
+
+                            {/* Khu vực Biểu đồ & Báo cáo thống kê nâng cao */}
+                            <AnalyticsDashboard />
+
                             <div className="adm-welcome">
                                 <div>
                                     <p className="adm-eyebrow">CHĂM CHÚT CỬA HÀNG CỦA BẠN</p>
                                     <h2>Sản phẩm tươi mới.<br />Vận hành gọn gàng.</h2>
-                                    <p>Thêm sản phẩm, cập nhật giá và kiểm tra lượng hàng sẵn có.</p>
+                                    <p>Thêm sản phẩm, cập nhật giá và kiểm tra hạn sử dụng từng lô hàng.</p>
                                     <button className="adm-primary" disabled={loading} onClick={() => startForm()}>+ Thêm sản phẩm</button>
                                 </div>
                                 <span aria-hidden="true">✿</span>
@@ -935,7 +1069,23 @@ export default function Admin({ currentUser, onBackToAccount }) {
                             <div className="adm-panel-head">
                                 <div>
                                     <h2>{inventoryProducts.length} sản phẩm trong kho</h2>
-                                    <p>Hiển thị tất cả sản phẩm; nhóm tồn kho thấp (&lt; 10) luôn được ưu tiên lên đầu.</p>
+                                    <p>Ưu tiên hiển thị sản phẩm có lô quá hạn, cận date hoặc tồn kho thấp (&lt; 10). Bấm <strong>Quản lý lô</strong> để nhập lô mới hoặc xuất hủy.</p>
+                                </div>
+                                <div className="adm-batch-alert-pills">
+                                    <button
+                                        type="button"
+                                        className={`adm-pill-alert near ${inventoryStock === 'near-expiry' ? 'active' : ''}`}
+                                        onClick={() => setInventoryStock(prev => prev === 'near-expiry' ? '' : 'near-expiry')}
+                                    >
+                                        ⏰ Cận date: <strong>{batchAlerts.nearExpiryTotalBatches || 0} lô</strong>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`adm-pill-alert expired ${inventoryStock === 'expired' ? 'active' : ''}`}
+                                        onClick={() => setInventoryStock(prev => prev === 'expired' ? '' : 'expired')}
+                                    >
+                                        ⚠ Đã hết hạn: <strong>{batchAlerts.expiredTotalBatches || 0} lô</strong>
+                                    </button>
                                 </div>
                             </div>
                             <div className="adm-filters adm-inventory-filters">
@@ -946,6 +1096,8 @@ export default function Admin({ currentUser, onBackToAccount }) {
                                 </select>
                                 <select aria-label="Lọc trạng thái tồn kho" value={inventoryStock} onChange={e => updateFilter(setInventoryStock, e.target.value)}>
                                     <option value="">Mọi trạng thái</option>
+                                    <option value="near-expiry">Sắp hết hạn (Cận date)</option>
+                                    <option value="expired">Đã hết hạn</option>
                                     <option value="available">Còn hàng (từ 10)</option>
                                     <option value="low">Sắp hết (1–9)</option>
                                     <option value="out">Hết hàng</option>
@@ -1142,6 +1294,17 @@ export default function Admin({ currentUser, onBackToAccount }) {
                         )
                     )}
                 </>
+            )}
+
+            {/* Modal Quản lý Lô hàng & Hạn sử dụng */}
+            {batchModalProduct && (
+                <BatchModal
+                    product={batchModalProduct}
+                    onClose={() => setBatchModalProduct(null)}
+                    onChanged={async () => {
+                        await loadData();
+                    }}
+                />
             )}
 
             <footer className="adm-footer">VegetableShop · Trang quản trị cửa hàng</footer>

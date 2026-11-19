@@ -24,11 +24,10 @@ export const api = {
 
     getCategories: () => client.get(`${API_BASE_URL}/categories`),
     
-    // --- 3 HÀM QUẢN LÝ DANH MỤC ĐƯỢC THÊM VÀO ĐÂY ---
+    // --- 3 HÀM QUẢN LÝ DANH MỤC ---
     createCategory: (data) => client.post(`${API_BASE_URL}/categories`, data),
     updateCategory: (id, data) => client.put(`${API_BASE_URL}/categories/${id}`, data),
     deleteCategory: (id) => client.delete(`${API_BASE_URL}/categories/${id}`),
-    // ------------------------------------------------
 
     createOrder: (orderData) => client.post(`${API_BASE_URL}/orders`, orderData),
     getRevenue: () => client.get(`${API_BASE_URL}/orders/revenue`),
@@ -64,36 +63,22 @@ export const api = {
     updateProfile: (id, data) => client.put(`${API_BASE_URL}/users/profile/${id}`, data),
     
     // ========== QUẢN LÝ NHÂN VIÊN ==========
-
-    // Lấy danh sách nhân viên
     getEmployees: () =>
         client.get(`${API_BASE_URL}/employees`),
-
-    // Xem chi tiết một nhân viên
     getEmployeeById: (id) =>
         client.get(`${API_BASE_URL}/employees/${id}`),
-
-    // Thêm nhân viên
     createEmployee: (data) =>
         client.post(`${API_BASE_URL}/employees`, data),
-
-    // Chỉnh sửa thông tin nhân viên
     updateEmployee: (id, data) =>
         client.put(`${API_BASE_URL}/employees/${id}`, data),
-
-    // Cập nhật quyền và trạng thái nhân viên
     updateEmployeePermissions: (id, data) =>
         client.put(`${API_BASE_URL}/employees/${id}/permissions`, data),
-
-    // Xem nhật ký hoạt động
     getEmployeeLogs: () =>
         client.get(`${API_BASE_URL}/employees/logs`),
-
     getMyEmployeeProfile: () =>
         client.get(`${API_BASE_URL}/employee-profile`),
 
-    // ======================================
-    // Voucher
+    // ========== VOUCHER ==========
     getMyVouchers: () => client.get(`${API_BASE_URL}/vouchers/my`),
     getPublicVouchers: () => client.get(`${API_BASE_URL}/vouchers/public`),
     claimVoucher: (code) => client.post(`${API_BASE_URL}/vouchers/claim`, { code }),
@@ -105,4 +90,26 @@ export const api = {
     createVoucher: (data) => client.post(`${API_BASE_URL}/vouchers`, data),
     updateVoucher: (id, data) => client.put(`${API_BASE_URL}/vouchers/${id}`, data),
     deleteVoucher: (id) => client.delete(`${API_BASE_URL}/vouchers/${id}`),
+
+    // ========== QUẢN LÝ LÔ HÀNG & HẠN SỬ DỤNG ==========
+    getBatchesByProduct: (productId) =>
+        client.get(`${API_BASE_URL}/ProductBatches/product/${productId}`),
+    getExpiringBatches: (days = 3) =>
+        client.get(`${API_BASE_URL}/ProductBatches/alerts`, { params: { days } }),
+    importProductBatch: (data) =>
+        client.post(`${API_BASE_URL}/ProductBatches/import`, data),
+    disposeProductBatch: (data) =>
+        client.post(`${API_BASE_URL}/ProductBatches/dispose`, data),
+    getBatchDisposalLogs: (productId) =>
+        client.get(`${API_BASE_URL}/ProductBatches/disposals`, { params: productId ? { productId } : {} }),
+
+    // ========== BÁO CÁO & THỐNG KÊ NÂNG CAO ==========
+    getAnalyticsRevenue: (params) =>
+        client.get(`${API_BASE_URL}/Analytics/revenue`, { params }),
+    getAnalyticsTopProducts: (params) =>
+        client.get(`${API_BASE_URL}/Analytics/top-products`, { params }),
+    getAnalyticsCategoryShare: (params) =>
+        client.get(`${API_BASE_URL}/Analytics/category-share`, { params }),
+    getAnalyticsRates: (params) =>
+        client.get(`${API_BASE_URL}/Analytics/rates`, { params }),
 };

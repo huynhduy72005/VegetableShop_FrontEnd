@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { api } from '../services/api';
 import { isProductVisible } from '../services/productVisibility';
 import ProductCard from '../components/ProductCard';
 import './Products.css';
 
-// Icon minh hoạ theo tên danh mục (có icon mặc định nếu không khớp)
 const categoryIcons = {
     'Rau xanh': '🥬',
     'Củ': '🥕',
@@ -12,7 +11,6 @@ const categoryIcons = {
     'Nấm': '🍄',
 };
 
-// Các mốc khoảng giá để lọc nhanh
 const priceRanges = [
     { id: 'all', label: 'Tất cả mức giá', test: () => true },
     { id: 'lt20', label: 'Dưới 20.000 đ', test: (price) => price < 20000 },
@@ -31,6 +29,7 @@ const sortOptions = [
 export default function Products({ categoryId, onViewDetail, onBuyNow, onAddToCart }) {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [batchAlertList, setBatchAlertList] = useState([]);
     const [activeCategory, setActiveCategory] = useState(categoryId ?? null);
     const [activePriceRange, setActivePriceRange] = useState('all');
     const [sortBy, setSortBy] = useState('default');
@@ -38,13 +37,19 @@ export default function Products({ categoryId, onViewDetail, onBuyNow, onAddToCa
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Tải danh sách sản phẩm + danh mục từ API
     useEffect(() => {
         setLoading(true);
-        Promise.all([api.getProducts(), api.getCategories()])
-            .then(([prodRes, catRes]) => {
+        Promise.all([
+            api.getProducts(),
+            api.getCategories(),
+            typeof api.getExpiringBatches === 'function'
+                ? api.getExpiringBatches(3).catch(() => ({ data: { byProduct: [] } }))
+                : Promise.resolve({ data: { byProduct: [] } })
+        ])
+            .then(([prodRes, catRes, alertRes]) => {
                 setProducts(prodRes.data || []);
                 setCategories(catRes.data || []);
+                setBatchAlertList(alertRes.data?.byProduct || []);
                 setError(null);
             })
             .catch(err => {
@@ -54,10 +59,17 @@ export default function Products({ categoryId, onViewDetail, onBuyNow, onAddToCa
             .finally(() => setLoading(false));
     }, []);
 
-    // Đồng bộ bộ lọc khi người dùng chọn danh mục khác từ menu Header
     useEffect(() => {
         setActiveCategory(categoryId ?? null);
     }, [categoryId]);
+
+    const batchAlertByProductId = useMemo(() => {
+        const map = {};
+        for (const item of batchAlertList) {
+            map[item.productId] = item;
+        }
+        return map;
+    }, [batchAlertList]);
 
     const selectedPriceRange = priceRanges.find(r => r.id === activePriceRange) || priceRanges[0];
 
@@ -88,7 +100,6 @@ export default function Products({ categoryId, onViewDetail, onBuyNow, onAddToCa
         ? categories.find(c => c.id === activeCategory)?.name
         : null;
 
-    // Đếm số sản phẩm theo từng danh mục (không tính bộ lọc giá/tìm kiếm, để số liệu ổn định)
     const countInCategory = (catId) =>
         products.filter(p =>
             isProductVisible(p) && (!catId || p.categoryId === catId)
@@ -216,6 +227,7 @@ export default function Products({ categoryId, onViewDetail, onBuyNow, onAddToCa
                                 <ProductCard
                                     key={product.id}
                                     product={product}
+                                    batchAlert={batchAlertByProductId[product.id]}
                                     onViewDetail={onViewDetail}
                                     onBuyNow={onBuyNow}
                                     onAddToCart={onAddToCart}
