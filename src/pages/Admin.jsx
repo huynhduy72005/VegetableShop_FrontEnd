@@ -3,6 +3,7 @@ import { api } from '../services/api';
 import './Admin.css';
 import AdminOrders from './AdminOrders';
 import AdminUserManagement from './AdminUserManagement';
+import AdminSuppliers from '../components/AdminSuppliers';
 import VariantEditor from '../components/VariantEditor';
 import BatchModal from '../components/BatchModal';
 import AnalyticsDashboard from '../components/AnalyticsDashboard';
@@ -61,6 +62,7 @@ const allTabs = [
     ['overview', '◫', 'Tổng quan'],
     ['products', '▦', 'Sản phẩm'],
     ['inventory', '▤', 'Kiểm tra tồn kho'],
+    ['suppliers', '▤', 'Nhà cung cấp'],
     ['categories', '◈', 'Danh mục'],
     ['orders', '▣', 'Đơn hàng'],
     ['vouchers', '🎟', 'Voucher'],
@@ -132,10 +134,11 @@ export default function Admin({ currentUser, onBackToAccount }) {
     const availableTabs = useMemo(() => isAdmin
         ? allTabs
         : [
-            ...(canManageProducts ? [allTabs[1], allTabs[3]] : []),
+            ...(canManageProducts ? [allTabs[1], allTabs[4]] : []),
             ...(canManageInventory ? [allTabs[2]] : []),
-            ...(canManageOrders ? [allTabs[4]] : [])
-        ], [isAdmin, canManageProducts, canManageInventory, canManageOrders]);
+            ...(canViewProducts ? [allTabs[3]] : []),
+            ...(canManageOrders ? [allTabs[5]] : [])
+        ], [isAdmin, canManageProducts, canManageInventory, canViewProducts, canManageOrders]);
 
     const batchAlertByProductId = useMemo(() => {
         const map = {};
@@ -696,6 +699,7 @@ export default function Admin({ currentUser, onBackToAccount }) {
                                 overview: 'Tổng quan cửa hàng',
                                 products: 'Quản lý sản phẩm',
                                 inventory: 'Kiểm tra tồn kho & Lô hàng',
+                                suppliers: 'Nhà cung cấp & Nhà vườn',
                                 categories: 'Danh mục sản phẩm',
                                 orders: 'Quản lý đơn hàng',
                                 vouchers: 'Quản lý Voucher',
@@ -1117,6 +1121,9 @@ export default function Admin({ currentUser, onBackToAccount }) {
                             {table(inventoryProducts, false)}
                         </section>
                     )}
+
+                    {/* Tab Quản lý Nhà cung cấp / Nhà vườn */}
+                    {tab === 'suppliers' && <AdminSuppliers />}
 
                     {tab === 'orders' && <AdminOrders />}
 

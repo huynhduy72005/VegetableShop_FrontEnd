@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../services/api';
+import { getCertBadgeClass } from './AdminSuppliers';
 import './BatchModal.css';
 
 const money = value => Number(value || 0).toLocaleString('vi-VN') + ' ₫';
@@ -55,6 +56,7 @@ const quickDisposalReasons = [
 export default function BatchModal({ product, onClose, onChanged }) {
     const hasVariants = Array.isArray(product?.variants) && product.variants.length > 0;
     const [batches, setBatches] = useState([]);
+    const [suppliers, setSuppliers] = useState([]);
     const [summary, setSummary] = useState({
         validStock: 0,
         nearExpiryStock: 0,
@@ -74,6 +76,7 @@ export default function BatchModal({ product, onClose, onChanged }) {
         expiryDate: defaultExpiryInput(),
         quantity: '',
         importPrice: '',
+        supplierId: '',
         supplierName: '',
         note: ''
     });
@@ -91,9 +94,10 @@ export default function BatchModal({ product, onClose, onChanged }) {
         if (!product?.id) return;
         setLoading(true);
         try {
-            const [batchRes, disposalRes] = await Promise.all([
+            const [batchRes, disposalRes, supplierRes] = await Promise.all([
                 api.getBatchesByProduct(product.id),
-                api.getBatchDisposalLogs(product.id).catch(() => ({ data: [] }))
+                api.getBatchDisposalLogs(product.id).catch(() => ({ data: [] })),
+                api.getSuppliers({ isActive: true }).catch(() => ({ data: [] }))
             ]);
             setBatches(batchRes.data?.batches || []);
             setSummary(batchRes.data?.summary || {
@@ -104,6 +108,7 @@ export default function BatchModal({ product, onClose, onChanged }) {
                 expiredBatchCount: 0
             });
             setDisposals(Array.isArray(disposalRes.data) ? disposalRes.data : []);
+            setSuppliers(Array.isArray(supplierRes.data) ? supplierRes.data : []);
         } catch (error) {
             setMessage({
                 error: true,
@@ -136,6 +141,10 @@ export default function BatchModal({ product, onClose, onChanged }) {
             return;
         }
 
+        const isManualSupplier = importForm.supplierId === 'manual';
+        const parsedSupplierId =
+            importForm.supplierId && !isManualSupplier ? Number(importForm.supplierId) : null;
+
         setSubmitting(true);
         setMessage(null);
         try {
@@ -147,7 +156,8 @@ export default function BatchModal({ product, onClose, onChanged }) {
                 expiryDate: importForm.expiryDate,
                 quantity: qty,
                 importPrice: importForm.importPrice !== '' ? Number(importForm.importPrice) : null,
-                supplierName: importForm.supplierName.trim() || null,
+                supplierId: parsedSupplierId,
+                supplierName: isManualSupplier ? importForm.supplierName.trim() || null : null,
                 note: importForm.note.trim() || null
             };
 
@@ -161,6 +171,7 @@ export default function BatchModal({ product, onClose, onChanged }) {
                 expiryDate: defaultExpiryInput(),
                 quantity: '',
                 importPrice: '',
+                supplierId: '',
                 supplierName: '',
                 note: ''
             });
@@ -226,6 +237,8 @@ export default function BatchModal({ product, onClose, onChanged }) {
         }
     }
 
+    const selectedSupplier = suppliers.find(s => String(s.id) === String(importForm.supplierId));
+
     return (
         <div className="bm-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="bm-title">
             <div className="bm-modal" onClick={e => e.stopPropagation()}>
@@ -236,7 +249,7 @@ export default function BatchModal({ product, onClose, onChanged }) {
                             {product.image ? <img src={product.image} alt="" /> : '✿'}
                         </span>
                         <div>
-                            <span className="bm-eyebrow">QUẢN LÝ LÔ HÀNG & HẠN SỬ DỤNG</span>
+                            <span className="bm-eyebrow">QUẢN LÝ LÔ HÀNG & TRUY XUẤT NGUỒN GỐC</span>
                             <h2 id="bm-title">{product.name}</h2>
                             <small>Mã SP: SP-{product.id} · Đơn vị chuẩn: {product.unit}</small>
                         </div>
@@ -307,7 +320,7 @@ export default function BatchModal({ product, onClose, onChanged }) {
                 {/* Form Nhập lô hàng mới */}
                 {showImportForm && (
                     <form className="bm-subform" onSubmit={handleImportSubmit}>
-                        <h3>Nhập lô hàng mới vào kho</h3>
+                        <h3>Phiếu nhập lô hàng & Truy xuất nguồn gốc</h3>
                         <div className="bm-form-grid">
                             {hasVariants && (
                                 <label>
@@ -357,7 +370,7 @@ export default function BatchModal({ product, onClose, onChanged }) {
                                 />
                             </label>
                             <label>
-                                Mã lô (để trống để tự sinh)
+                                Mã lô / Số phiếu nhập (tự sinh nếu trống)
                                 <input
                                     type="text"
                                     maxLength={50}
@@ -367,15 +380,38 @@ export default function BatchModal({ product, onClose, onChanged }) {
                                 />
                             </label>
                             <label>
-                                Nhà vườn / Nguồn cung cấp
-                                <input
-                                    type="text"
-                                    maxLength={200}
-                                    placeholder="VD: HTX Rau sạch Đà Lạt"
-                                    value={importForm.supplierName}
-                                    onChange={e => setImportForm({ ...importForm, supplierName: e.target.value })}
-                                />
+                                Nhà cung cấp / Nhà vườn
+                                <select
+                                    value={importForm.supplierId}
+                                    onChange={e =>
+                                        setImportForm({
+                                            ...importForm,
+                                            supplierId: e.target.value,
+                                            supplierName: ''
+                                        })
+                                    }
+                                >
+                                    <option value="">-- Chọn nhà vườn / nhà cung cấp --</option>
+                                    {suppliers.map(s => (
+                                        <option key={s.id} value={s.id}>
+                                            {s.name} [{s.certificationType}]
+                                        </option>
+                                    ))}
+                                    <option value="manual">✎ Nhập tên nguồn khác bên ngoài…</option>
+                                </select>
                             </label>
+                            {importForm.supplierId === 'manual' && (
+                                <label>
+                                    Tên nhà vườn / Nguồn nhập ngoài
+                                    <input
+                                        type="text"
+                                        maxLength={200}
+                                        placeholder="VD: Vườn rau Đà Lạt"
+                                        value={importForm.supplierName}
+                                        onChange={e => setImportForm({ ...importForm, supplierName: e.target.value })}
+                                    />
+                                </label>
+                            )}
                             <label>
                                 Giá vốn nhập / {product.unit} (VNĐ)
                                 <input
@@ -398,6 +434,20 @@ export default function BatchModal({ product, onClose, onChanged }) {
                                 />
                             </label>
                         </div>
+
+                        {selectedSupplier && (
+                            <div className="bm-supplier-preview">
+                                <span className={getCertBadgeClass(selectedSupplier.certificationType)}>
+                                    {selectedSupplier.certificationType}
+                                </span>
+                                <span>
+                                    <strong>{selectedSupplier.name}</strong>
+                                    {selectedSupplier.address ? ` · Vùng trồng: ${selectedSupplier.address}` : ''}
+                                    {selectedSupplier.certificationCode ? ` · Mã CN: ${selectedSupplier.certificationCode}` : ''}
+                                </span>
+                            </div>
+                        )}
+
                         <div className="bm-form-actions">
                             <button type="submit" className="bm-btn-primary" disabled={submitting}>
                                 {submitting ? 'Đang lưu lô…' : 'Xác nhận nhập kho'}
@@ -473,14 +523,15 @@ export default function BatchModal({ product, onClose, onChanged }) {
                         batches.length === 0 ? (
                             <div className="bm-empty">
                                 <p>Sản phẩm này chưa có lô nhập kho nào.</p>
-                                <small>Bấm <strong>+ Nhập lô mới</strong> ở góc trên để bắt đầu theo dõi hạn sử dụng.</small>
+                                <small>Bấm <strong>+ Nhập lô mới</strong> ở góc trên để bắt đầu theo dõi hạn sử dụng & nguồn gốc.</small>
                             </div>
                         ) : (
                             <div className="bm-table-wrap">
                                 <table className="bm-table">
                                     <thead>
                                         <tr>
-                                            <th>Mã lô & Nguồn</th>
+                                            <th>Mã lô</th>
+                                            <th>Nhà cung cấp & Chứng nhận</th>
                                             <th>Ngày nhập</th>
                                             <th>Hạn sử dụng</th>
                                             <th>Tồn lô / Nhập</th>
@@ -496,8 +547,22 @@ export default function BatchModal({ product, onClose, onChanged }) {
                                                     <td>
                                                         <strong>{b.batchCode}</strong>
                                                         {b.variantName && <small className="bm-variant-tag">Loại: {b.variantName}</small>}
-                                                        {b.supplierName && <small>NCC: {b.supplierName}</small>}
                                                         {b.importPrice != null && <small>Giá nhập: {money(b.importPrice)}</small>}
+                                                    </td>
+                                                    <td>
+                                                        {b.supplierName ? (
+                                                            <div className="bm-origin-cell">
+                                                                <strong>{b.supplierName}</strong>
+                                                                {b.certificationType && (
+                                                                    <span className={getCertBadgeClass(b.certificationType)}>
+                                                                        {b.certificationType}
+                                                                    </span>
+                                                                )}
+                                                                {b.supplierAddress && <small>{b.supplierAddress}</small>}
+                                                            </div>
+                                                        ) : (
+                                                            <small>Chưa gắn nhà vườn</small>
+                                                        )}
                                                     </td>
                                                     <td>{formatDate(b.importDate)}</td>
                                                     <td>

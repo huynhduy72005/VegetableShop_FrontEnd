@@ -91,6 +91,18 @@ export const api = {
     updateVoucher: (id, data) => client.put(`${API_BASE_URL}/vouchers/${id}`, data),
     deleteVoucher: (id) => client.delete(`${API_BASE_URL}/vouchers/${id}`),
 
+    // ========== QUẢN LÝ NHÀ CUNG CẤP / NHÀ VƯỜN ==========
+    getSuppliers: (params) =>
+        client.get(`${API_BASE_URL}/Suppliers`, { params }),
+    getSupplierById: (id) =>
+        client.get(`${API_BASE_URL}/Suppliers/${id}`),
+    createSupplier: (data) =>
+        client.post(`${API_BASE_URL}/Suppliers`, data),
+    updateSupplier: (id, data) =>
+        client.put(`${API_BASE_URL}/Suppliers/${id}`, data),
+    deleteSupplier: (id) =>
+        client.delete(`${API_BASE_URL}/Suppliers/${id}`),
+
     // ========== QUẢN LÝ LÔ HÀNG & HẠN SỬ DỤNG ==========
     getBatchesByProduct: (productId) =>
         client.get(`${API_BASE_URL}/ProductBatches/product/${productId}`),

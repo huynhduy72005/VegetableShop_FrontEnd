@@ -430,3 +430,25 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Khung xem trước nhà cung cấp & cột nguồn gốc trong BatchModal */
+.bm-supplier-preview {
+    margin-top: 0.75rem;
+    padding: 0.65rem 0.9rem;
+    background: #f2faf4;
+    border: 1px solid #cce7d4;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    color: #1f402c;
+}
+
+.bm-origin-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}

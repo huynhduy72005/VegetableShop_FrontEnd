@@ -1,10 +1,20 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './ProductDetail.css';
 import VariantPicker from '../components/VariantPicker';
 import { buildCartLine, getDefaultVariant, getVariants } from '../services/ProductVariants';
+import { api } from '../services/api';
 
 const money = value =>
     Number(value || 0).toLocaleString('vi-VN') + ' đ';
+
+const formatDate = value => {
+    if (!value) return '';
+    return new Date(value).toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    });
+};
 
 // Icon SVG, không cần cài thư viện.
 const paths = {
@@ -14,7 +24,8 @@ const paths = {
     arrow: 'M5 12h14 m-6-6 6 6-6 6',
     back: 'M19 12H5 m6-6-6 6 6 6',
     check: 'm5 12 4 4L19 6',
-    box: 'm12 3 9 5v8l-9 5-9-5V8Z m-9 5 9 5 9-5 M12 13v8'
+    box: 'm12 3 9 5v8l-9 5-9-5V8Z m-9 5 9 5 9-5 M12 13v8',
+    shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z m-3-10 2 2 4-4'
 };
 
 function DetailIcon({ name, size = 20 }) {
@@ -70,6 +81,21 @@ function ProductDetailContent({
     const [quantity, setQuantity] = useState('1');
     const [imageError, setImageError] = useState(false);
     const [activeTab, setActiveTab] = useState('description');
+    const [origin, setOrigin] = useState(() => product.origin || product.Origin || null);
+
+    useEffect(() => {
+        let active = true;
+        if (product?.id) {
+            api.getProductById(product.id)
+                .then(({ data }) => {
+                    if (!active) return;
+                    const resolvedOrigin = data?.origin || data?.Origin || null;
+                    setOrigin(resolvedOrigin);
+                })
+                .catch(() => {});
+        }
+        return () => { active = false; };
+    }, [product?.id]);
 
     // Biến thể: mặc định chọn loại còn hàng đầu tiên
     const variants = getVariants(product);
@@ -135,6 +161,9 @@ function ProductDetailContent({
         // Dòng giỏ hàng gồm cả biến thể đã chọn (giá, tồn kho, tên loại)
         onAddToCart(buildCartLine(product, selectedVariant, amount));
     }
+
+    const isCertified =
+        origin?.certificationType && origin.certificationType !== 'Thông thường';
 
     return (
         <div className="vd-page">
@@ -217,6 +246,50 @@ function ProductDetailContent({
                         {product.description ||
                             'Chọn số lượng và thêm sản phẩm vào giỏ hàng để tiếp tục mua sắm tại Vườn Nhà.'}
                     </p>
+
+                    {/* Khung Truy xuất nguồn gốc nông sản */}
+                    {origin && (
+                        <div className="vd-origin-card" aria-label="Truy xuất nguồn gốc">
+                            <div className="vd-origin-head">
+                                <span className="vd-origin-title">
+                                    <DetailIcon name="shield" size={16} />
+                                    TRUY XUẤT NGUỒN GỐC NÔNG SẢN
+                                </span>
+                                {isCertified && (
+                                    <span className="vd-origin-cert-badge">
+                                        ✓ Đạt chuẩn {origin.certificationType}
+                                    </span>
+                                )}
+                            </div>
+                            <dl className="vd-origin-grid">
+                                <div>
+                                    <dt>Nhà vườn / Đơn vị cung ứng</dt>
+                                    <dd>{origin.supplierName}</dd>
+                                </div>
+                                {origin.farmAddress && (
+                                    <div>
+                                        <dt>Vùng trồng</dt>
+                                        <dd>{origin.farmAddress}</dd>
+                                    </div>
+                                )}
+                                {origin.certificationCode && (
+                                    <div>
+                                        <dt>Mã chứng nhận</dt>
+                                        <dd>{origin.certificationCode}</dd>
+                                    </div>
+                                )}
+                                {origin.batchCode && (
+                                    <div>
+                                        <dt>Mã lô nhập kho</dt>
+                                        <dd>
+                                            {origin.batchCode}
+                                            {origin.importDate ? ` (Nhập ${formatDate(origin.importDate)})` : ''}
+                                        </dd>
+                                    </div>
+                                )}
+                            </dl>
+                        </div>
+                    )}
 
                     {/* Giá bán */}
                     <div className="vd-price-panel">
