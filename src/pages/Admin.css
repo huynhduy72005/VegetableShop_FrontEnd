@@ -150,10 +150,6 @@ body:has(.adm-shell),
 .adm-order-detail .adm-order-items{padding:0 0 18px}
 .adm-order-detail .adm-order-items table{min-width:520px}
 .adm-users .adm-pagination{border-top:1px solid #edf1eb}
-.adm-reset-requests{margin:0 24px 24px;border-top:1px solid #edf1eb}
-.adm-reset-requests .adm-detail-head{padding:18px 0}
-.adm-reset-requests .adm-table-scroll{border:1px solid #edf1eb;border-radius:10px}
-.adm-reset-requests .adm-actions{flex-wrap:wrap}
 .adm-order-status-control{align-items:flex-start}
 .adm-status-editor{display:flex;align-items:center;gap:7px;width:100%;margin-top:5px}
 .adm-shell .adm-status-editor select{min-width:0;flex:1;padding:8px;font-size:11px}
@@ -875,7 +871,6 @@ body:has(.adm-shell),
 .adm-vip-shell .adm-detail-head,
 .adm-vip-shell .adm-order-detail,
 .adm-vip-shell .adm-customer-orders,
-.adm-vip-shell .adm-reset-requests,
 .adm-vip-shell tfoot td {
     border-color: rgba(126, 255, 157, .09);
 }
@@ -886,8 +881,7 @@ body:has(.adm-shell),
 .adm-vip-shell .adm-filters,
 .adm-vip-shell .adm-orders-table th,
 .adm-vip-shell .adm-order-items table,
-.adm-vip-shell tfoot td,
-.adm-vip-shell .adm-reset-requests .adm-table-scroll {
+.adm-vip-shell tfoot td {
     background: #101612;
 }
 

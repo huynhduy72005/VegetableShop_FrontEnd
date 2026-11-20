@@ -44,7 +44,6 @@ const initials = name => (name || '?')
 
 export default function AdminUserManagement({ currentUser }) {
     const [users, setUsers] = useState([]);
-    const [passwordResetRequests, setPasswordResetRequests] = useState([]);
     const [roleDrafts, setRoleDrafts] = useState({});
     const [loading, setLoading] = useState(true);
     const [savingId, setSavingId] = useState(null);
@@ -68,22 +67,10 @@ export default function AdminUserManagement({ currentUser }) {
         return Array.isArray(data) ? data : [];
     }, []);
 
-    const fetchPasswordResetRequests = useCallback(async () => {
-        const { data } = await api.getPasswordResetRequests();
-        if (!Array.isArray(data))
-            throw new Error('Dữ liệu yêu cầu đặt lại mật khẩu không hợp lệ.');
-        return data;
-    }, []);
-
     const loadUsers = useCallback(async () => {
         setLoading(true);
         try {
-            const [userData, requestData] = await Promise.all([
-                fetchUsers(),
-                fetchPasswordResetRequests()
-            ]);
-            setUsers(userData);
-            setPasswordResetRequests(requestData);
+            setUsers(await fetchUsers());
             setRoleDrafts({});
             setNotice(null);
         } catch (error) {
@@ -94,15 +81,14 @@ export default function AdminUserManagement({ currentUser }) {
         } finally {
             setLoading(false);
         }
-    }, [fetchPasswordResetRequests, fetchUsers]);
+    }, [fetchUsers]);
 
     useEffect(() => {
         let active = true;
-        Promise.all([fetchUsers(), fetchPasswordResetRequests()])
-            .then(([userData, requestData]) => {
+        fetchUsers()
+            .then(userData => {
                 if (active) {
                     setUsers(userData);
-                    setPasswordResetRequests(requestData);
                     setNotice(null);
                 }
             })
@@ -119,31 +105,7 @@ export default function AdminUserManagement({ currentUser }) {
                     setLoading(false);
             });
         return () => { active = false; };
-    }, [fetchPasswordResetRequests, fetchUsers]);
-
-    async function reviewPasswordResetRequest(request, decision) {
-        const action = decision === 'approve' ? 'chấp nhận' : 'từ chối';
-        if (!window.confirm(`Bạn có chắc muốn ${action} yêu cầu của ${request.email}?`))
-            return;
-
-        setSavingId(request.id);
-        try {
-            const response = decision === 'approve'
-                ? await api.approvePasswordResetRequest(request.id)
-                : await api.rejectPasswordResetRequest(request.id);
-            setPasswordResetRequests(previous =>
-                previous.filter(item => item.id !== request.id)
-            );
-            setNotice({ text: response.data?.message || 'Đã xử lý yêu cầu.' });
-        } catch (error) {
-            setNotice({
-                error: true,
-                text: error.response?.data?.message || 'Không thể xử lý yêu cầu đổi mật khẩu.'
-            });
-        } finally {
-            setSavingId(null);
-        }
-    }
+    }, [fetchUsers]);
 
     async function updateRole(user) {
         const role = roleDrafts[user.id] ?? user.role;
@@ -591,59 +553,6 @@ export default function AdminUserManagement({ currentUser }) {
                                 </button>
                             </div>
                         </div>
-                        <section className="adm-reset-requests">
-                            <header className="adm-detail-head">
-                                <div>
-                                    <h3>Yêu cầu đổi mật khẩu</h3>
-                                    <p>{passwordResetRequests.length} yêu cầu đang chờ xử lý</p>
-                                </div>
-                            </header>
-                            {!passwordResetRequests.length ? (
-                                <p className="adm-empty">Hiện không có yêu cầu đang chờ duyệt.</p>
-                            ) : (
-                                <div className="adm-table-scroll">
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>Tài khoản</th>
-                                                <th>Thời gian</th>
-                                                <th>Thao tác</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {passwordResetRequests.map(request => (
-                                                <tr key={request.id}>
-                                                    <td>
-                                                        <strong>{request.fullName}</strong>
-                                                        <small>{request.email}</small>
-                                                    </td>
-                                                    <td>{formatDate(request.createdAtUtc)}</td>
-                                                    <td>
-                                                        <div className="adm-actions">
-                                                            <button
-                                                                type="button"
-                                                                disabled={savingId !== null}
-                                                                onClick={() => reviewPasswordResetRequest(request, 'approve')}
-                                                            >
-                                                                Chấp nhận
-                                                            </button>
-                                                            <button
-                                                                type="button"
-                                                                className="adm-danger"
-                                                                disabled={savingId !== null}
-                                                                onClick={() => reviewPasswordResetRequest(request, 'reject')}
-                                                            >
-                                                                Từ chối
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
-                        </section>
                     </>
                 )}
             </section>

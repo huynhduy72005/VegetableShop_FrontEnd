@@ -44,12 +44,6 @@ export const api = {
         client.post(`${API_BASE_URL}/users/password-reset/send-otp`, { email }),
     confirmPasswordReset: (data) =>
         client.post(`${API_BASE_URL}/users/password-reset/confirm`, data),
-    getPasswordResetRequests: () =>
-        client.get(`${API_BASE_URL}/users/password-reset-requests`),
-    approvePasswordResetRequest: (id) =>
-        client.post(`${API_BASE_URL}/users/password-reset-requests/${id}/approve`),
-    rejectPasswordResetRequest: (id) =>
-        client.post(`${API_BASE_URL}/users/password-reset-requests/${id}/reject`),
     changePassword: (id, passwordData) =>
         client.put(`${API_BASE_URL}/users/change-password/${id}`, passwordData),
 
