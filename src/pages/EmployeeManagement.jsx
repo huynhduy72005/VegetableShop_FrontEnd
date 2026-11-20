@@ -246,19 +246,25 @@ export default function EmployeeManagement({ currentUser }) {
             };
 
             let createdCredentials = null;
+            let emailSent = null;
             if (editingId) {
                 await api.updateEmployee(editingId, payload);
             } else {
                 const result = await api.createEmployee(payload);
                 createdCredentials = result.data.initialCredentials;
+                emailSent = result.data.emailSent;
             }
 
             const refreshed = await loadEmployees();
             setErrors({});
             setMessage(refreshed
-                ? (createdCredentials
-                    ? 'Đã tạo nhân viên và tài khoản đăng nhập.'
-                    : 'Đã lưu thông tin nhân viên thành công.')
+                ? (editingId
+                    ? 'Đã cập nhật thông tin nhân viên.'
+                    : emailSent === false
+                        ? 'Đã thêm nhân viên nhưng chưa gửi được email thông báo.'
+                        : createdCredentials
+                            ? 'Đã tạo nhân viên, tài khoản đăng nhập và gửi email thông báo.'
+                            : 'Đã thêm nhân viên và gửi email thông báo.')
                 : 'Đã lưu nhân viên nhưng không tải lại được danh sách.');
             setForm(emptyForm);
             setUsernameEdited(false);
@@ -326,7 +332,7 @@ export default function EmployeeManagement({ currentUser }) {
         setMessage('');
 
         try {
-            await api.updateEmployeePermissions(
+            const result = await api.updateEmployeePermissions(
                 selected.id,
                 {
                     canManageProducts: selected.canManageProducts,
@@ -341,9 +347,14 @@ export default function EmployeeManagement({ currentUser }) {
             );
 
             const refreshed = await loadEmployees();
+            const updateMessage = result.data?.emailSent === false
+                ? 'Đã cập nhật quyền nhưng chưa gửi được email thông báo.'
+                : result.data?.emailSent === true
+                    ? result.data.message
+                    : 'Đã cập nhật quyền.';
             setMessage(refreshed
-                ? 'Đã cập nhật quyền.'
-                : 'Đã cập nhật quyền nhưng không tải lại được danh sách.');
+                ? updateMessage
+                : `${updateMessage} Không tải lại được danh sách.`);
             setTab('list');
         } catch (err) {
             setMessage(err.response?.data?.message
@@ -526,9 +537,6 @@ export default function EmployeeManagement({ currentUser }) {
                                                         {emp.accountIsActive
                                                             ? 'Đang hoạt động'
                                                             : 'Đã khóa'}
-                                                        {emp.mustChangePassword
-                                                            ? ' · Cần đổi mật khẩu'
-                                                            : ''}
                                                     </small>
                                                 </>
                                             ) : 'Chưa có tài khoản'}
@@ -683,7 +691,7 @@ export default function EmployeeManagement({ currentUser }) {
                                     {!form.generateTemporaryPassword &&
                                         field('Mật khẩu ban đầu', 'initialPassword', 'password')}
                                     <p className="emp-permission-hint">
-                                        Mật khẩu ban đầu chỉ hiển thị một lần sau khi tạo. Nhân viên phải đổi mật khẩu ở lần đăng nhập đầu tiên.
+                                        Mật khẩu ban đầu chỉ hiển thị một lần sau khi tạo. Hãy gửi riêng cho nhân viên và lưu lại an toàn.
                                     </p>
                                 </>
                             )}
@@ -838,8 +846,7 @@ export default function EmployeeManagement({ currentUser }) {
                     >
                         <h3 id="emp-credential-title">Tài khoản đã được tạo</h3>
                         <p>
-                            Mật khẩu này chỉ hiển thị lần này. Hãy gửi riêng cho nhân viên;
-                            họ sẽ phải đổi mật khẩu khi đăng nhập lần đầu.
+                            Mật khẩu này chỉ hiển thị lần này. Hãy gửi riêng cho nhân viên và lưu lại an toàn.
                         </p>
                         <dl>
                             <dt>Tên đăng nhập</dt>

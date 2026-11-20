@@ -152,8 +152,11 @@ export default function AdminUserManagement({ currentUser }) {
 
         setSavingId(user.id);
         try {
-            await api.updateUserRole(user.id, { role });
-            setNotice({ text: `Đã cập nhật vai trò cho ${user.email}.` });
+            const response = await api.updateUserRole(user.id, { role });
+            setNotice({
+                text: response.data?.message
+                    || `Đã cập nhật vai trò cho ${user.email}.`
+            });
             await loadUsers();
         } catch (error) {
             setNotice({
@@ -172,11 +175,15 @@ export default function AdminUserManagement({ currentUser }) {
 
         setSavingId(user.id);
         try {
+            let response;
             if (active)
-                await api.restoreUser(user.id);
+                response = await api.restoreUser(user.id);
             else
-                await api.deleteUser(user.id);
-            setNotice({ text: `Đã ${action} tài khoản ${user.email}.` });
+                response = await api.deleteUser(user.id);
+            setNotice({
+                text: response.data?.message
+                    || `Đã ${action} tài khoản ${user.email}.`
+            });
             await loadUsers();
         } catch (error) {
             setNotice({
@@ -308,8 +315,7 @@ export default function AdminUserManagement({ currentUser }) {
                                 ['Số điện thoại', selectedUser.phone || 'Chưa cập nhật'],
                                 ['Giới tính', selectedUser.gender || 'Chưa cập nhật'],
                                 ['Ngày sinh', formatDateOfBirth(selectedUser.dateOfBirth)],
-                                ['Trạng thái', selectedUser.isActive ? 'Đang hoạt động' : 'Đã khóa'],
-                                ['Đổi mật khẩu', selectedUser.mustChangePassword ? 'Cần đổi mật khẩu' : 'Không yêu cầu']
+                                ['Trạng thái', selectedUser.isActive ? 'Đang hoạt động' : 'Đã khóa']
                             ].map(([label, value]) => (
                                 <div key={label}><dt>{label}</dt><dd>{value}</dd></div>
                             ))}

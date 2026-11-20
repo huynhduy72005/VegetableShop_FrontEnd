@@ -33,9 +33,7 @@ export default function App() {
         }
     });
     const [activePage, setActivePage] = useState(() =>
-        currentUser?.mustChangePassword
-            ? 'account'
-            : ['Staff', 'AdminVIP'].includes(currentUser?.role) ? 'admin' : 'home'
+        ['Staff', 'AdminVIP'].includes(currentUser?.role) ? 'admin' : 'home'
     );
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [selectedCategoryId, setSelectedCategoryId] = useState(null);
@@ -44,8 +42,6 @@ export default function App() {
     const [checkoutCartItemIds, setCheckoutCartItemIds] = useState(null);
     const [wishlistItems, setWishlistItems] = useState([]);
     const detailPreviousPage = useRef('home');
-    const mustChangePassword = Boolean(currentUser?.mustChangePassword);
-
     const handleViewDetail = (product) => {
         if (activePage !== 'detail') {
             detailPreviousPage.current = activePage;
@@ -211,7 +207,7 @@ export default function App() {
 
     return (
         <div className="app-container">
-          {!mustChangePassword && <Header
+          <Header
             setActivePage={setActivePage}
             activePage={activePage}
             cartCount={cartItems.reduce(
@@ -222,7 +218,7 @@ export default function App() {
             currentUser={currentUser}
             onSelectCategory={setSelectedCategoryId}
             onViewProduct={handleViewDetail}
-/>}
+/>
 
             <main className="main-content">
                 {activePage === 'home' && (
@@ -310,13 +306,6 @@ export default function App() {
                             if (token) sessionStorage.setItem('token', token);
                             sessionStorage.setItem('currentUser', JSON.stringify(user));
                             setCurrentUser(user);
-                            if (currentUser?.mustChangePassword && !user.mustChangePassword) {
-                                setActivePage(
-                                    ['Staff', 'AdminVIP'].includes(user.role)
-                                        ? 'admin'
-                                        : 'home'
-                                );
-                            }
                         }}
                         onLogout={() => {
                             sessionStorage.removeItem('token');
@@ -360,11 +349,9 @@ export default function App() {
                             sessionStorage.setItem('currentUser', JSON.stringify(user));
                             setCurrentUser(user);
                             setActivePage(
-                                user.mustChangePassword
-                                    ? 'account'
-                                    : ['Staff', 'AdminVIP'].includes(user.role)
-                                        ? 'admin'
-                                        : 'home'
+                                ['Staff', 'AdminVIP'].includes(user.role)
+                                    ? 'admin'
+                                    : 'home'
                             );
                         }}
                         onSwitchToRegister={() => setActivePage('register')}
@@ -375,13 +362,13 @@ export default function App() {
                 )}
             </main>
 
-            {!mustChangePassword && <Footer />}
+            <Footer />
 
             {/* Gemini AI Chatbot */}
-            {!mustChangePassword && <ChatWidget
+            <ChatWidget
                 onAddToCart={handleAddToCart}
                 onAddMultipleToCart={handleAddMultipleToCart}
-            />}
+            />
         </div>
 
         

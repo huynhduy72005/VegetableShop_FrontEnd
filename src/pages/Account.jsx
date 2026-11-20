@@ -63,11 +63,7 @@ export default function Account({
     onBrowseProducts,
     onUseVoucher
 }) {
-    const [tab, setTab] = useState(
-        currentUser?.mustChangePassword && !currentUser?.isVipAdmin
-            ? 'change_password'
-            : 'profile'
-    );
+    const [tab, setTab] = useState('profile');
     const [users, setUsers] = useState([]);
     const [passwordResetRequests, setPasswordResetRequests] = useState([]);
     const [profile, setProfile] = useState({
@@ -101,9 +97,6 @@ export default function Account({
     });
     const isAdmin = currentUser?.role === 'Admin' || currentUser?.role === 'AdminVIP';
     const isVipAdmin = Boolean(currentUser?.isVipAdmin);
-    const forcePasswordChange =
-        !isVipAdmin && Boolean(currentUser?.mustChangePassword);
-
     function openUserDetails(user) {
         setSelectedOrderId(null);
         setSelectedOrderDetail(null);
@@ -335,7 +328,7 @@ export default function Account({
                 newPassword: passwords.newPassword
             });
             onUserUpdated(
-                response.data?.user || { ...currentUser, mustChangePassword: false },
+                response.data?.user || currentUser,
                 response.data?.token
             );
             setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -365,14 +358,12 @@ export default function Account({
     const management = isAdmin && tab === 'manage_users';
 
     return (
-        <div className={`acc2-page${forcePasswordChange ? ' acc2-password-required' : ''}`}>
+        <div className="acc2-page">
             <div className="acc2-top">
                 <div>
                     <p className="acc2-eyebrow"></p>
                     <h1>
-                        {forcePasswordChange
-                            ? 'Đổi mật khẩu bắt buộc'
-                            : management
+                        {management
                             ? 'Nhân sự & phân quyền'
                             : isAdmin && tab === 'manage_employees'
                                 ? 'Quản lý nhân viên'
@@ -380,9 +371,7 @@ export default function Account({
                     </h1>
 
                     <p>
-                        {forcePasswordChange
-                            ? 'Bạn cần tạo mật khẩu mới trước khi tiếp tục sử dụng hệ thống.'
-                            : management
+                        {management
                             ? 'Quản lý thành viên và vai trò trong cửa hàng.'
                             : isAdmin && tab === 'manage_employees'
                                 ? 'Thêm, chỉnh sửa, phân quyền và xem nhật ký hoạt động nhân viên.'
@@ -392,7 +381,7 @@ export default function Account({
                 <span className="acc2-top-tag">✿ Cùng cửa hàng phát triển</span>
             </div>
 
-            <div className={`acc2-layout${forcePasswordChange ? ' acc2-password-required' : ''}`}>
+            <div className="acc2-layout">
                 <aside className="acc2-sidebar">
                     <div className="acc2-person">
                         <div className="acc2-avatar large">{initials(currentUser.fullName)}</div>
@@ -401,7 +390,7 @@ export default function Account({
                         {isAdmin && <span className="acc2-badge Admin">{roles[currentUser.role]}</span>}
                     </div>
 
-                    {!forcePasswordChange && <nav aria-label="Tài khoản">
+                    <nav aria-label="Tài khoản">
                         <button className={tab === 'profile' ? 'active' : ''} onClick={() => setTab('profile')}>
                             <span>◉</span>Thông tin cá nhân
                         </button>
@@ -453,7 +442,7 @@ export default function Account({
                                 </button>
                             </>
                         )}
-                    </nav>}
+                    </nav>
 
                     <button className="acc2-logout" onClick={onLogout}>↪ Đăng xuất</button>
                 </aside>
@@ -492,8 +481,7 @@ export default function Account({
                                     ['Giới tính', selectedUser.gender || 'Chưa cập nhật'],
                                     ['Ngày sinh', formatDateOfBirth(selectedUser.dateOfBirth)],
                                     ['Trạng thái', selectedUser.isActive ? 'Đang hoạt động' : 'Đã khóa'],
-                                    ['Ngày tạo', formatAccountDate(selectedUser.createdAtUtc || selectedUser.createdAt)],
-                                    ['Đổi mật khẩu', selectedUser.mustChangePassword ? 'Cần đổi mật khẩu' : 'Không yêu cầu']
+                                    ['Ngày tạo', formatAccountDate(selectedUser.createdAtUtc || selectedUser.createdAt)]
                                 ].map(([label, value]) => (
                                     <div key={label}><dt>{label}</dt><dd>{value}</dd></div>
                                 ))}
@@ -649,7 +637,6 @@ export default function Account({
                                                                     <small>{user.email}</small>
                                                                     <small>
                                                                         {user.username} · {user.isActive ? 'Đang hoạt động' : 'Đã khóa'}
-                                                                        {user.mustChangePassword ? ' · Cần đổi mật khẩu' : ''}
                                                                     </small>
                                                                 </div>
                                                             </div>
@@ -728,9 +715,7 @@ export default function Account({
                             <header className="acc2-panel-head">
                                 <div>
                                     <h2>Đổi mật khẩu</h2>
-                                    <p>{forcePasswordChange
-                                        ? 'Đổi mật khẩu ban đầu trước khi tiếp tục sử dụng hệ thống.'
-                                        : 'Nhập mật khẩu hiện tại để xác nhận thay đổi bảo mật tài khoản.'}</p>
+                                    <p>Nhập mật khẩu hiện tại để xác nhận thay đổi bảo mật tài khoản.</p>
                                 </div>
                             </header>
                             <form className="acc2-password-form" onSubmit={changePassword}>
