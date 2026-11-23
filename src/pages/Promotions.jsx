@@ -146,7 +146,7 @@ const Promotions = ({ currentUser, onNavigateToLogin, onBrowseProducts }) => {
           <h1 id="promo-title">Bữa ăn xanh, ưu đãi lành</h1>
           <p>
             Chọn thực phẩm tươi sạch cho gia đình và tận hưởng những ưu đãi dành riêng
-            từ Vườn Nhà.
+            từ VEGETABLE.
           </p>
           <a className="promo-hero-button" href="#promo-vouchers">Khám phá ưu đãi <span aria-hidden="true">↓</span></a>
         </div>
@@ -217,7 +217,7 @@ const Promotions = ({ currentUser, onNavigateToLogin, onBrowseProducts }) => {
                   >
                     <div className="voucher-left">
                       <span className="voucher-discount-text">{discount}</span>
-                      <span className="voucher-brand">VƯỜN NHÀ</span>
+                      <span className="voucher-brand">VEGETABLE</span>
                     </div>
                     <div className="voucher-right">
                       <div className="voucher-info">
@@ -274,7 +274,7 @@ const Promotions = ({ currentUser, onNavigateToLogin, onBrowseProducts }) => {
                   <span className="discount-badge">Tiết kiệm {combo.discountTag}</span>
                 </div>
                 <div className="combo-content">
-                  <span className="combo-kicker">COMBO VƯỜN NHÀ</span>
+                  <span className="combo-kicker">COMBO VEGETABLE</span>
                   <h3>{combo.name}</h3>
                   <p className="combo-desc">{combo.desc}</p>
                   <div className="combo-price-row">
@@ -297,7 +297,7 @@ const Promotions = ({ currentUser, onNavigateToLogin, onBrowseProducts }) => {
           <div className="footer-banner-content">
             <span className="promo-eyebrow">AN TÂM CHỌN LỰA</span>
             <h2>Tươi sạch từ vườn, trọn vị trong bữa cơm</h2>
-            <p>Tất cả nông sản tại Vườn Nhà đều được tuyển chọn kỹ lưỡng, giao đến bạn trong trạng thái tươi ngon mỗi ngày.</p>
+            <p>Tất cả nông sản tại VEGETABLE đều được tuyển chọn kỹ lưỡng, giao đến bạn trong trạng thái tươi ngon mỗi ngày.</p>
           </div>
           <button className="promo-footer-button" type="button" onClick={onBrowseProducts}>Ghé cửa hàng <span aria-hidden="true">↗</span></button>
         </aside>

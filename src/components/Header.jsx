@@ -93,8 +93,10 @@ export default function Header({
     const categoryRef = useRef(null);
     const menuRef = useRef(null);
 
-    // Lấy danh mục từ backend.
+    // Tải lại danh mục khi mở menu để phản ánh các thay đổi vừa lưu.
     useEffect(() => {
+        if (!categoryOpen) return undefined;
+
         let active = true;
 
         api.getCategories()
@@ -111,7 +113,7 @@ export default function Header({
         return () => {
             active = false;
         };
-    }, []);
+    }, [categoryOpen]);
 
     // Tải sản phẩm khi mở ô tìm kiếm.
     useEffect(() => {
@@ -260,14 +262,14 @@ export default function Header({
                     type="button"
                     className="vh-logo"
                     onClick={() => navigate('home')}
-                    aria-label="Vườn Nhà — về trang chủ"
+                    aria-label="VEGETABLE — về trang chủ"
                 >
                     <span className="vh-logo-icon">
                         <Icon name="leaf" size={27} />
                     </span>
 
                     <span className="vh-logo-copy">
-                        <strong>Vườn Nhà</strong>
+                        <strong>VEGETABLE</strong>
                         <small>RAU CỦ & TRÁI CÂY</small>
                     </span>
                 </button>
@@ -614,10 +616,12 @@ export default function Header({
                                                         )
                                                     }
                                                 >
-                                                    <Icon
-                                                        name="leaf"
-                                                        size={17}
-                                                    />
+                                                    <span
+                                                        className="vh-category-emoji"
+                                                        aria-hidden="true"
+                                                    >
+                                                        {category.icon || '🥬'}
+                                                    </span>
                                                     {category.name}
                                                     <span>↗</span>
                                                 </button>

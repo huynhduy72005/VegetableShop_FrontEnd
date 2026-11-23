@@ -69,7 +69,7 @@ export default function ProductCard({ product, batchAlert, onViewDetail, onBuyNo
                 </button>
             </div>
             <div className="pc-details">
-                <span className="pc-brand">🌱 VƯỜN NHÀ</span>
+                <span className="pc-brand">🌱 VEGETABLE</span>
                 <h4>{product.name}</h4>
                 <div className="pc-price-row">
                     {hasVariants && <span className="unit">Từ</span>}

@@ -247,7 +247,7 @@ export default function Orders({ currentUser, onBuyAgain, embedded = false }) {
             {!embedded && (
                 <section className="orders-hero">
                     <div className="orders-container orders-hero-content">
-                        <span className="orders-eyebrow">VƯỜN NHÀ · ĐƠN HÀNG CỦA BẠN</span>
+                        <span className="orders-eyebrow">VEGETABLE · ĐƠN HÀNG CỦA BẠN</span>
                         <h1>Theo dõi đơn hàng</h1>
                         <p>Cập nhật hành trình đơn hàng và xem lại lịch sử mua sắm của bạn.</p>
                         <div className="orders-hero-note"><span aria-hidden="true">✦</span> Nông sản tươi ngon, giao tận nhà</div>
@@ -415,7 +415,7 @@ export default function Orders({ currentUser, onBuyAgain, embedded = false }) {
                                                 <div className="order-summary-icon" aria-hidden="true">▧</div>
                                                 <div className="order-summary-copy">
                                                     <strong>{itemCount} sản phẩm</strong>
-                                                    <span>{order.shippingAddress || 'Đơn hàng từ Vườn Nhà'}</span>
+                                                    <span>{order.shippingAddress || 'Đơn hàng từ VEGETABLE'}</span>
                                                 </div>
                                                 <div className="order-total"><span>Tổng thanh toán</span><strong>{money(order.totalAmount ?? order.totalPrice)}</strong></div>
                                             </div>

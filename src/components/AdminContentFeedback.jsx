@@ -18,7 +18,7 @@ const CONTACT_STATUS_META = {
 const emptyTipForm = {
     title: '',
     category: 'Mẹo bảo quản',
-    authorName: 'Bếp Vườn Nhà',
+    authorName: 'Bếp VEGETABLE',
     image: '',
     summary: '',
     content: '',
@@ -162,7 +162,7 @@ export default function AdminContentFeedback({ onChanged }) {
                 id: tip.id,
                 title: tip.title || '',
                 category: tip.category || 'Mẹo bảo quản',
-                authorName: tip.authorName || 'Bếp Vườn Nhà',
+                authorName: tip.authorName || 'Bếp VEGETABLE',
                 image: tip.image || '',
                 summary: tip.summary || '',
                 content: tip.content || '',
@@ -197,7 +197,7 @@ export default function AdminContentFeedback({ onChanged }) {
         const payload = {
             title,
             category: tipForm.category || 'Mẹo bảo quản',
-            authorName: (tipForm.authorName || '').trim() || 'Bếp Vườn Nhà',
+            authorName: (tipForm.authorName || '').trim() || 'Bếp VEGETABLE',
             image: (tipForm.image || '').trim() || null,
             summary: (tipForm.summary || '').trim() || null,
             content,
@@ -501,7 +501,7 @@ export default function AdminContentFeedback({ onChanged }) {
                                 <input
                                     type="text"
                                     maxLength={120}
-                                    placeholder="Bếp Vườn Nhà"
+                                    placeholder="Bếp VEGETABLE"
                                     value={tipForm.authorName}
                                     onChange={e => setTipForm({ ...tipForm, authorName: e.target.value })}
                                 />
@@ -638,7 +638,7 @@ export default function AdminContentFeedback({ onChanged }) {
                                                     <div>
                                                         <strong>{t.title}</strong>
                                                         <small>
-                                                            Tác giả: {t.authorName || 'Bếp Vườn Nhà'}
+                                                            Tác giả: {t.authorName || 'Bếp VEGETABLE'}
                                                             {t.summary ? ` · ${t.summary.slice(0, 70)}${t.summary.length > 70 ? '…' : ''}` : ''}
                                                         </small>
                                                     </div>
@@ -776,7 +776,7 @@ export default function AdminContentFeedback({ onChanged }) {
                                         <td className="acf-reply-cell">
                                             {r.adminReply ? (
                                                 <div className="acf-shop-reply">
-                                                    <strong>Vườn Nhà phản hồi:</strong>
+                                                    <strong>VEGETABLE phản hồi:</strong>
                                                     <p>{r.adminReply}</p>
                                                 </div>
                                             ) : (
@@ -952,11 +952,11 @@ export default function AdminContentFeedback({ onChanged }) {
                         </div>
                         <form onSubmit={handleSaveReply} className="acf-modal-form">
                             <label>
-                                Nội dung phản hồi chính thức từ Vườn Nhà
+                                Nội dung phản hồi chính thức từ VEGETABLE
                                 <textarea
                                     rows="4"
                                     maxLength={1000}
-                                    placeholder="Cảm ơn bạn đã tin tưởng ủng hộ rau sạch Vườn Nhà..."
+                                    placeholder="Cảm ơn bạn đã tin tưởng ủng hộ rau sạch VEGETABLE..."
                                     value={replyText}
                                     onChange={e => setReplyText(e.target.value)}
                                 />

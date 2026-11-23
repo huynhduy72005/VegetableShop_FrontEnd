@@ -86,7 +86,7 @@ export default function Vouchers({ currentUser, onUseVoucher, embedded = false }
         <div className={`vc-page${embedded ? ' vc-embedded' : ''}`}>
             <section className="vc-banner">
                 <div>
-                    <span className="vc-eyebrow">ƯU ĐÃI VƯỜN NHÀ</span>
+                    <span className="vc-eyebrow">ƯU ĐÃI VEGETABLE</span>
                     <h1>
                         Ví Voucher
                         <span>{availableVouchers.length}</span>
@@ -105,7 +105,7 @@ export default function Vouchers({ currentUser, onUseVoucher, embedded = false }
                         type="text"
                         value={promoCode}
                         onChange={e => setPromoCode(e.target.value.toUpperCase())}
-                        placeholder="Nhập mã ưu đãi (VD: VUONNHA20)"
+                        placeholder="Nhập mã ưu đãi (VD: VEGETABLE20)"
                         maxLength={30}
                         aria-label="Nhập mã voucher"
                     />
@@ -160,7 +160,7 @@ export default function Vouchers({ currentUser, onUseVoucher, embedded = false }
                     <p>
                         {filter === 'available'
                             ? 'Chuyển sang tab "Săn thêm mã" hoặc nhập mã khuyến mãi ở khung phía trên để lưu vào ví.'
-                            : 'Các ưu đãi mới từ Vườn Nhà sẽ sớm được cập nhật tại đây.'}
+                            : 'Các ưu đãi mới từ VEGETABLE sẽ sớm được cập nhật tại đây.'}
                     </p>
                     {filter === 'available' && discoverable.length > 0 && (
                         <button

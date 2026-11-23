@@ -67,14 +67,14 @@ const AboutUs = () => {
           <span className="about-badge">🌱 Câu chuyện thương hiệu</span>
           <h1>Mang nông trại xanh đến từng bữa ăn của gia đình bạn.</h1>
           <p>
-            Tại <strong>Vườn Nhà</strong>, chúng tôi tin rằng thực phẩm sạch không chỉ là nguồn dinh dưỡng,
+            Tại <strong>VEGETABLE</strong>, chúng tôi tin rằng thực phẩm sạch không chỉ là nguồn dinh dưỡng,
             mà còn là sự chăm sóc, sự tin cậy và niềm yêu thương cho cả gia đình. Mỗi sản phẩm mà chúng tôi mang
             đến đều được lựa chọn cẩn thận từ nguồn trồng trọt an toàn, mang theo sự tươi ngon nguyên bản và giá trị cao.
           </p>
 
           <div className="about-hero__actions">
             <a href="#story" className="primary-btn">Khám phá câu chuyện</a>
-            <a href="mailto:hello@vuonnha.vn" className="secondary-btn">Liên hệ tư vấn</a>
+            <a href="mailto:hello@vegetable.vn" className="secondary-btn">Liên hệ tư vấn</a>
           </div>
 
           <div className="about-trust">
@@ -104,7 +104,7 @@ const AboutUs = () => {
 
       <section className="about-stats">
         <div className="section-heading">
-          <span className="section-tag">Tại sao chọn Vườn Nhà</span>
+          <span className="section-tag">Tại sao chọn VEGETABLE</span>
           <h2>Chuỗi giá trị thực phẩm sạch, đúng chuẩn và đáng tin cậy.</h2>
         </div>
       </section>
@@ -124,7 +124,7 @@ const AboutUs = () => {
             <span className="section-tag">Tầm nhìn</span>
             <h3>Trở thành thương hiệu nông sản sạch hàng đầu trong lòng người tiêu dùng Việt Nam.</h3>
             <p>
-              Với sự kết nối chặt chẽ giữa nông dân, nhà sản xuất và khách hàng, Vườn Nhà hướng đến xây dựng hệ sinh thái thực phẩm sạch, minh bạch và bền vững.
+              Với sự kết nối chặt chẽ giữa nông dân, nhà sản xuất và khách hàng, VEGETABLE hướng đến xây dựng hệ sinh thái thực phẩm sạch, minh bạch và bền vững.
             </p>
           </div>
         </div>
@@ -175,7 +175,7 @@ const AboutUs = () => {
 
       <section className="gallery-section">
         <div className="section-heading center">
-          <span className="section-tag">Không gian Vườn Nhà</span>
+          <span className="section-tag">Không gian VEGETABLE</span>
           <h2>Thực phẩm sạch sống động ngay trong từng khoảnh khắc.</h2>
         </div>
 
@@ -190,7 +190,7 @@ const AboutUs = () => {
 
       <section className="cta-banner">
         <div className="cta-content">
-          <span className="section-tag light">Vườn Nhà cam kết</span>
+          <span className="section-tag light">VEGETABLE cam kết</span>
           <h2>Bữa ăn ngon, an toàn và giàu dinh dưỡng luôn bắt đầu từ nguồn gốc rõ ràng.</h2>
         </div>
         <a href="tel:19006868" className="primary-btn dark">Gọi ngay 1900 6868</a>

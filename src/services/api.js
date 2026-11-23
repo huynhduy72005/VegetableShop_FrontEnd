@@ -15,6 +15,8 @@ client.interceptors.request.use(config => {
 
 export const api = {
     getProducts: () => client.get(`${API_BASE_URL}/products`),
+    getBestSellingProducts: (params) =>
+        client.get(`${API_BASE_URL}/products/best-selling`, { params }),
     getProductById: (id) => client.get(`${API_BASE_URL}/products/${id}`),
     createProduct: (productData) => client.post(`${API_BASE_URL}/products`, productData),
     updateProduct: (id, productData) => client.put(`${API_BASE_URL}/products/${id}`, productData),

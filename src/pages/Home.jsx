@@ -68,7 +68,7 @@ function HomeProductCard({
             </div>
 
             <div className="vn-card-body">
-                <span className="vn-card-brand">VƯỜN NHÀ</span>
+                <span className="vn-card-brand">VEGETABLE</span>
 
                 <button
                     type="button"
@@ -123,9 +123,12 @@ export default function Home({
 }) {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [bestSellingProducts, setBestSellingProducts] = useState([]);
     const [activeCategory, setActiveCategory] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [bestSellingLoading, setBestSellingLoading] = useState(true);
     const [error, setError] = useState('');
+    const [bestSellingError, setBestSellingError] = useState('');
     const [reload, setReload] = useState(0);
 
     useEffect(() => {
@@ -157,7 +160,34 @@ export default function Home({
             }
         }
 
+        async function loadBestSellingProducts() {
+            setBestSellingLoading(true);
+            setBestSellingError('');
+
+            try {
+                const response = await api.getBestSellingProducts({
+                    top: 4,
+                    days: 30
+                });
+
+                if (active) {
+                    setBestSellingProducts(
+                        Array.isArray(response.data) ? response.data : []
+                    );
+                }
+            } catch {
+                if (active) {
+                    setBestSellingError(
+                        'Chưa tải được sản phẩm bán chạy. Bạn hãy thử lại nhé.'
+                    );
+                }
+            } finally {
+                if (active) setBestSellingLoading(false);
+            }
+        }
+
         load();
+        loadBestSellingProducts();
 
         return () => {
             active = false;
@@ -188,6 +218,26 @@ export default function Home({
         });
     }
 
+    function renderProductGrid(items, tag) {
+        return (
+            <div className="vn-grid">
+                {items.map(product => (
+                    <HomeProductCard
+                        key={product.id}
+                        product={product}
+                        tag={tag}
+                        onViewDetail={onViewDetail}
+                        onBuyNow={onBuyNow}
+                        onToggleWishlist={onToggleWishlist}
+                        liked={wishlistItems.some(
+                            item => item.id === product.id
+                        )}
+                    />
+                ))}
+            </div>
+        );
+    }
+
     function renderProducts(items, tag) {
         if (loading) {
             return (
@@ -216,23 +266,7 @@ export default function Home({
             );
         }
 
-        return (
-            <div className="vn-grid">
-                {items.map(product => (
-                    <HomeProductCard
-                        key={product.id}
-                        product={product}
-                        tag={tag}
-                        onViewDetail={onViewDetail}
-                        onBuyNow={onBuyNow}
-                        onToggleWishlist={onToggleWishlist}
-                        liked={wishlistItems.some(
-                            item => item.id === product.id
-                        )}
-                    />
-                ))}
-            </div>
-        );
+        return renderProductGrid(items, tag);
     }
 
     return (
@@ -303,6 +337,7 @@ export default function Home({
             >
                 {[
                     ['vn-categories', '🥬', 'Danh mục'],
+                    ['vn-best-selling', '🔥', 'Bán chạy'],
                     ['vn-good-price', '✦', 'Giá tốt hôm nay'],
                     ['vn-fresh', '🛒', 'Sản phẩm tươi'],
                     ['vn-how', '📦', 'Cách mua hàng']
@@ -364,7 +399,7 @@ export default function Home({
                             }
                         >
                             <span className="vn-category-icon">
-                                {categoryIcon(category.name)}
+                                {category.icon || categoryIcon(category.name)}
                             </span>
 
                             <strong>{category.name}</strong>
@@ -386,6 +421,63 @@ export default function Home({
                         </button>
                     ))}
                 </div>
+            </section>
+
+            {/* Sản phẩm được mua nhiều nhất trong 30 ngày gần đây */}
+            <section
+                className="vn-section"
+                id="vn-best-selling"
+            >
+                <div className="vn-section-head">
+                    <div>
+                        <span className="vn-eyebrow">
+                            ĐƯỢC NHIỀU KHÁCH HÀNG LỰA CHỌN
+                        </span>
+                        <h2>Sản phẩm bán chạy 🔥</h2>
+                        <p>
+                            Những sản phẩm được mua nhiều nhất trong 30 ngày gần đây.
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        className="vn-text-button"
+                        onClick={() => onBrowseProducts(null)}
+                    >
+                        Xem tất cả ↗
+                    </button>
+                </div>
+
+                {bestSellingLoading ? (
+                    <div
+                        className="vn-grid"
+                        aria-label="Đang tải sản phẩm bán chạy"
+                        aria-busy="true"
+                    >
+                        {[1, 2, 3, 4].map(number => (
+                            <div
+                                key={number}
+                                className="vn-skeleton"
+                            />
+                        ))}
+                    </div>
+                ) : bestSellingError ? (
+                    <div className="vn-error" role="alert">
+                        {bestSellingError}
+                        <button
+                            type="button"
+                            onClick={() => setReload(value => value + 1)}
+                        >
+                            Tải lại
+                        </button>
+                    </div>
+                ) : bestSellingProducts.length > 0 ? (
+                    renderProductGrid(bestSellingProducts, 'Bán chạy')
+                ) : (
+                    <p className="vn-empty">
+                        Chưa có sản phẩm bán chạy trong 30 ngày qua.
+                    </p>
+                )}
             </section>
 
             {/* Giá tốt nằm trên sản phẩm tươi mỗi ngày */}
@@ -575,7 +667,7 @@ export default function Home({
             <div className="vn-bottom">
                 <div>
                     <strong>
-                        Vườn Nhà — thêm xanh cho mỗi ngày.
+                        VEGETABLE — thêm xanh cho mỗi ngày.
                     </strong>
                     <p>
                         Tìm hiểu cửa hàng hoặc liên hệ để được hỗ trợ.

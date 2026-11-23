@@ -20,7 +20,7 @@ export default function Footer({ vipMode = false }) {
         <footer className={`site-footer${vipMode ? ' site-footer-vip' : ''}`}>
             <div className="footer-content">
                 <div className="footer-brand">
-                    <div className="footer-logo">🌿 Vườn Nhà</div>
+                    <div className="footer-logo">🌿 VEGETABLE</div>
                     <p>
                         Mang nông trại xanh đến bữa ăn của bạn với thực phẩm sạch, tươi ngon
                         và dịch vụ tận tâm mỗi ngày.
@@ -29,7 +29,7 @@ export default function Footer({ vipMode = false }) {
                     <div className="footer-contact">
                         <p>📍 56 Nguyễn Đức Cảnh, Q.7, TP.HCM</p>
                         <p>📞 1900 6868</p>
-                        <p>✉️ hello@vuonnha.vn</p>
+                        <p>✉️ hello@vegetable.vn</p>
                     </div>
                 </div>
 
@@ -57,7 +57,7 @@ export default function Footer({ vipMode = false }) {
             </div>
 
             <div className="footer-bottom">
-                <p>© 2026 Vườn Nhà. Mọi quyền được bảo lưu.</p>
+                <p>© 2026 VEGETABLE. Mọi quyền được bảo lưu.</p>
                 <p>Thực phẩm tươi sạch • Minh bạch • Bền vững</p>
             </div>
         </footer>

@@ -499,7 +499,16 @@
     color: #8ea574;
 }
 
-.vh-category-panel > button > span {
+.vh-category-emoji {
+    display: inline-grid;
+    place-items: center;
+    width: 17px;
+    flex: 0 0 17px;
+    font-size: 17px;
+    line-height: 1;
+}
+
+.vh-category-panel > button > span:last-child {
     margin-left: auto;
     color: #98a389;
 }

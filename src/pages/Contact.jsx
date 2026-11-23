@@ -40,7 +40,7 @@ const Contact = () => {
       if (response.ok) {
         setStatus({
           type: 'success',
-          text: '🎉 Cảm ơn bạn! Tin nhắn đã được gửi thành công đến hòm thư của Vườn Nhà.'
+          text: '🎉 Cảm ơn bạn! Tin nhắn đã được gửi thành công đến hòm thư của VEGETABLE.'
         });
         setFormData({ fullName: '', email: '', phone: '', subject: 'Hỏi về sản phẩm', message: '' });
       } else {
@@ -64,7 +64,7 @@ const Contact = () => {
     <div className="contact-page">
       <section className="contact-hero" aria-labelledby="contact-title">
         <div className="contact-hero-content">
-          <span className="contact-badge">Đội ngũ Vườn Nhà luôn sẵn sàng hỗ trợ</span>
+          <span className="contact-badge">Đội ngũ VEGETABLE luôn sẵn sàng hỗ trợ</span>
           <h1 id="contact-title">Chúng tôi luôn lắng nghe bạn</h1>
           <p>Cần hỗ trợ về đơn hàng, nông sản hay hợp tác? Hãy chọn cách liên hệ thuận tiện nhất hoặc gửi lời nhắn cho chúng tôi.</p>
         </div>
@@ -77,7 +77,7 @@ const Contact = () => {
       <div className="contact-container">
         <div className="contact-wrapper">
           <div className="contact-info-card">
-            <span className="contact-eyebrow">KẾT NỐI VỚI VƯỜN NHÀ</span>
+            <span className="contact-eyebrow">KẾT NỐI VỚI VEGETABLE</span>
             <h2>Chúng tôi ở đây để giúp bạn</h2>
             <p className="info-desc">Liên hệ trực tiếp hoặc ghé thăm cửa hàng trong giờ hoạt động.</p>
 
@@ -101,7 +101,7 @@ const Contact = () => {
               <div className="info-icon" aria-hidden="true">✉️</div>
               <div>
                 <h4>Email cửa hàng</h4>
-                <p><a href="mailto:hotro@vuonnha.com.vn">hotro@vuonnha.com.vn</a></p>
+                <p><a href="mailto:hotro@vegetable.vn">hotro@vegetable.vn</a></p>
               </div>
             </div>
             <div className="contact-response-note">

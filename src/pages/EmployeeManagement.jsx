@@ -495,25 +495,29 @@ export default function EmployeeManagement({ currentUser }) {
                     </div>
 
                     {/* Bảng danh sách nhân viên */}
+                    <div className="emp-table-heading">
+                        <h3>Danh sách nhân viên</h3>
+                        <span>{filteredEmployees.length} kết quả</span>
+                    </div>
                     <div className="emp-table-wrap">
-                        <table>
+                        <table className="emp-data-table emp-employee-table">
                             <thead>
                                 <tr>
-                                    <th>Mã NV</th>
-                                    <th>Họ tên</th>
-                                    <th>Email</th>
-                                    <th>Số điện thoại</th>
-                                    <th>Chức vụ</th>
-                                    <th>Tài khoản</th>
-                                    <th>Trạng thái</th>
-                                    <th>Thao tác</th>
+                                    <th scope="col">Mã NV</th>
+                                    <th scope="col">Họ tên</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Số điện thoại</th>
+                                    <th scope="col">Chức vụ</th>
+                                    <th scope="col">Tài khoản</th>
+                                    <th scope="col">Trạng thái</th>
+                                    <th scope="col">Thao tác</th>
                                 </tr>
                             </thead>
 
                             <tbody>
                                 {filteredEmployees.length === 0 ? (
                                     <tr>
-                                        <td colSpan="8" style={{ textAlign: 'center' }}>
+                                        <td colSpan="8" className="emp-table-empty">
                                             {searchTerm.trim()
                                                 ? 'Không tìm thấy nhân viên phù hợp.'
                                                 : 'Chưa có hồ sơ nhân viên.'}
@@ -521,42 +525,58 @@ export default function EmployeeManagement({ currentUser }) {
                                     </tr>
                                 ) : filteredEmployees.map(emp => (
                                     <tr key={emp.id}>
-                                        <td>{emp.employeeCode || 'Chưa cấp'}</td>
-                                        <td>{emp.fullName}</td>
-                                        <td>{emp.email}</td>
+                                        <td>
+                                            <span className="emp-code">
+                                                {emp.employeeCode || 'Chưa cấp'}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <strong className="emp-name">
+                                                {emp.fullName}
+                                            </strong>
+                                        </td>
+                                        <td className="emp-cell-wrap">{emp.email}</td>
                                         <td>{emp.phone}</td>
                                         <td>{emp.position || 'Chưa cập nhật'}</td>
 
                                         <td>
                                             {emp.userId ? (
-                                                <>
+                                                <div className="emp-account-cell">
                                                     <strong>{emp.username}</strong>
                                                     <small>
                                                         {userRoles[emp.userRole] || emp.userRole}
-                                                        {' · '}
-                                                        {emp.accountIsActive
-                                                            ? 'Đang hoạt động'
-                                                            : 'Đã khóa'}
                                                     </small>
-                                                </>
-                                            ) : 'Chưa có tài khoản'}
+                                                </div>
+                                            ) : (
+                                                <span className="emp-muted">
+                                                    Chưa có tài khoản
+                                                </span>
+                                            )}
                                         </td>
 
                                         <td>
-                                            {emp.profilePending
-                                                ? 'Chưa có hồ sơ'
-                                                : emp.status}
+                                            <span className={`emp-status-badge ${emp.profilePending ? 'pending' : emp.status === 'Active' ? 'active' : 'inactive'}`}>
+                                                {emp.profilePending
+                                                    ? 'Chưa có hồ sơ'
+                                                    : emp.status === 'Active'
+                                                        ? 'Đang hoạt động'
+                                                        : emp.status === 'Inactive'
+                                                            ? 'Không hoạt động'
+                                                            : emp.status || 'Chưa cập nhật'}
+                                            </span>
                                         </td>
 
                                         <td>
                                             {emp.profilePending && canManageEmployee(emp) ? (
-                                                <button
-                                                    onClick={() => startLinkEmployee(emp)}
-                                                >
-                                                    Tạo hồ sơ
-                                                </button>
+                                                <div className="emp-row-actions">
+                                                    <button
+                                                        onClick={() => startLinkEmployee(emp)}
+                                                    >
+                                                        Tạo hồ sơ
+                                                    </button>
+                                                </div>
                                             ) : canManageEmployee(emp) ? (
-                                                <>
+                                                <div className="emp-row-actions">
                                                     <button
                                                         onClick={() => startEdit(emp)}
                                                     >
@@ -571,9 +591,9 @@ export default function EmployeeManagement({ currentUser }) {
                                                     >
                                                         Phân quyền
                                                     </button>
-                                                </>
+                                                </div>
                                             ) : (
-                                                <small>
+                                                <small className="emp-muted">
                                                     {emp.isVipAdmin || String(emp.userId) === String(currentUser?.id)
                                                         ? 'Tài khoản được bảo vệ'
                                                         : 'Admin thường không thể sửa tài khoản Admin'}
@@ -807,14 +827,14 @@ export default function EmployeeManagement({ currentUser }) {
 
             {tab === 'logs' && (
                 <div className="emp-table-wrap">
-                    <table>
+                    <table className="emp-data-table emp-activity-table">
                         <thead>
                             <tr>
-                                <th>Thời gian (UTC)</th>
-                                <th>ID người thao tác</th>
-                                <th>ID nhân viên</th>
-                                <th>Hành động</th>
-                                <th>Chi tiết</th>
+                                <th scope="col">Thời gian (UTC)</th>
+                                <th scope="col">ID người thao tác</th>
+                                <th scope="col">ID nhân viên</th>
+                                <th scope="col">Hành động</th>
+                                <th scope="col">Chi tiết</th>
                             </tr>
                         </thead>
                         <tbody>

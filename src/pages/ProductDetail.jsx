@@ -261,7 +261,7 @@ function ProductDetailContent({
                     <div className="vd-media">
                         <span className="vd-image-label">
                             <DetailIcon name="leaf" size={15} />
-                            VƯỜN NHÀ
+                            VEGETABLE
                         </span>
 
                         {displayImage && !imageError ? (
@@ -323,7 +323,7 @@ function ProductDetailContent({
 
                     <p className="vd-summary">
                         {product.description ||
-                            'Chọn số lượng và thêm sản phẩm vào giỏ hàng để tiếp tục mua sắm tại Vườn Nhà.'}
+                            'Chọn số lượng và thêm sản phẩm vào giỏ hàng để tiếp tục mua sắm tại VEGETABLE.'}
                     </p>
 
                     {/* Khung Truy xuất nguồn gốc nông sản */}
@@ -718,7 +718,7 @@ function ProductDetailContent({
                                             <p className="vd-review-comment">{rev.comment}</p>
                                             {rev.adminReply && (
                                                 <div className="vd-review-shop-reply">
-                                                    <strong>🌱 Phản hồi từ Vườn Nhà:</strong>
+                                                    <strong>🌱 Phản hồi từ VEGETABLE:</strong>
                                                     <p>{rev.adminReply}</p>
                                                 </div>
                                             )}

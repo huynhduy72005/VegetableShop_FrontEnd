@@ -92,7 +92,7 @@ function WishlistCard({
             </div>
 
             <div className="wl-card-body">
-                <span className="wl-brand">VƯỜN NHÀ</span>
+                <span className="wl-brand">VEGETABLE</span>
 
                 <button
                     type="button"

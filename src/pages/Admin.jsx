@@ -28,7 +28,35 @@ const nextMonthStr = () => {
 };
 
 const emptyProduct = { name: '', price: '', quantity: '', unit: 'kg', image: '', description: '', categoryId: '', isVisible: true, variants: [] };
-const emptyCategory = { name: '', description: '' };
+const emptyCategory = { name: '', description: '', icon: '🥬' };
+const categoryIconOptions = [
+    { icon: '🥬', label: 'Rau lá' },
+    { icon: '🥦', label: 'Bông cải' },
+    { icon: '🥕', label: 'Củ cải' },
+    { icon: '🥔', label: 'Khoai tây' },
+    { icon: '🧅', label: 'Hành tây' },
+    { icon: '🧄', label: 'Tỏi' },
+    { icon: '🍅', label: 'Cà chua' },
+    { icon: '🥒', label: 'Dưa leo' },
+    { icon: '🌽', label: 'Bắp' },
+    { icon: '🍆', label: 'Cà tím' },
+    { icon: '🌶️', label: 'Ớt' },
+    { icon: '🥑', label: 'Bơ' },
+    { icon: '🍄', label: 'Nấm' },
+    { icon: '🍎', label: 'Táo' },
+    { icon: '🍊', label: 'Cam' },
+    { icon: '🍋', label: 'Chanh' },
+    { icon: '🍌', label: 'Chuối' },
+    { icon: '🍇', label: 'Nho' },
+    { icon: '🍓', label: 'Dâu tây' },
+    { icon: '🫐', label: 'Việt quất' },
+    { icon: '🍉', label: 'Dưa hấu' },
+    { icon: '🍍', label: 'Dứa' },
+    { icon: '🥭', label: 'Xoài' },
+    { icon: '🍑', label: 'Đào' },
+    { icon: '🍐', label: 'Lê' },
+    { icon: '🥝', label: 'Kiwi' }
+];
 const emptyVoucher = {
     code: '',
     title: '',
@@ -428,7 +456,9 @@ export default function Admin({ currentUser, onBackToAccount }) {
     // --- CÁC HÀM XỬ LÝ DANH MỤC ---
     function startCatForm(cat) {
         setNotice(null);
-        setCatForm(cat ? { ...cat } : { ...emptyCategory });
+        setCatForm(cat
+            ? { ...cat, icon: cat.icon || emptyCategory.icon }
+            : { ...emptyCategory });
     }
 
     async function saveCategory(event) {
@@ -886,7 +916,7 @@ export default function Admin({ currentUser, onBackToAccount }) {
                                 required
                                 type="text"
                                 maxLength={30}
-                                placeholder="Ví dụ: VUONNHA20"
+                                placeholder="Ví dụ: VEGETABLE20"
                                 value={voucherForm.code}
                                 onChange={e => setVoucherForm({ ...voucherForm, code: e.target.value.toUpperCase() })}
                             />
@@ -1309,6 +1339,27 @@ export default function Admin({ currentUser, onBackToAccount }) {
                                         Tên danh mục
                                         <input required type="text" value={catForm.name} onChange={e => setCatForm({ ...catForm, name: e.target.value })} />
                                     </label>
+                                    <div className="adm-wide">
+                                        <span className="adm-category-picker-label">Biểu tượng danh mục</span>
+                                        <div className="adm-category-icon-picker" role="group" aria-label="Chọn biểu tượng danh mục">
+                                            {categoryIconOptions.map(({ icon, label }) => (
+                                                <button
+                                                    type="button"
+                                                    key={icon}
+                                                    className={`adm-category-icon-option${catForm.icon === icon ? ' active' : ''}`}
+                                                    aria-label={label}
+                                                    aria-pressed={catForm.icon === icon}
+                                                    title={label}
+                                                    onClick={() => setCatForm({ ...catForm, icon })}
+                                                >
+                                                    {icon}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <small>
+                                            Đang chọn: {categoryIconOptions.find(option => option.icon === catForm.icon)?.label || 'Biểu tượng tùy chỉnh'}
+                                        </small>
+                                    </div>
                                     <label className="adm-wide">
                                         Mô tả danh mục
                                         <textarea rows="4" value={catForm.description || ''} onChange={e => setCatForm({ ...catForm, description: e.target.value })} />
@@ -1328,7 +1379,7 @@ export default function Admin({ currentUser, onBackToAccount }) {
                                     {categories.map(c => (
                                         <article className="adm-panel" key={c.id} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                                             <div>
-                                                <span className="adm-category-icon">◈</span>
+                                                <span className="adm-category-icon">{c.icon || '◈'}</span>
                                                 <h2>{c.name}</h2>
                                                 <p>{c.description || 'Chưa có mô tả.'}</p>
                                                 <strong>{products.filter(p => p.categoryId === c.id).length} sản phẩm</strong>

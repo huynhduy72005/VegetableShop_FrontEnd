@@ -85,7 +85,7 @@ export default function KitchenTips({ onBack }) {
                         ← Quay lại cửa hàng
                     </button>
                 )}
-                <span className="kt-eyebrow">CẨM NANG BẾP XANH VƯỜN NHÀ</span>
+                <span className="kt-eyebrow">CẨM NANG BẾP XANH VEGETABLE</span>
                 <h1>Mẹo hay nhà bếp & Dinh dưỡng sạch</h1>
                 <p>
                     Bí quyết bảo quản rau củ tươi lâu, cách sơ chế giữ trọn vitamin và gợi ý
@@ -120,7 +120,7 @@ export default function KitchenTips({ onBack }) {
             {error && <div role="alert" className="kt-alert">{error}</div>}
 
             {loading ? (
-                <p className="kt-empty">Đang tải bài viết từ Bếp Vườn Nhà…</p>
+                <p className="kt-empty">Đang tải bài viết từ Bếp VEGETABLE…</p>
             ) : tips.length === 0 ? (
                 <div className="kt-empty">
                     <p>Chưa có bài viết nào trong chuyên mục này.</p>
@@ -150,7 +150,7 @@ export default function KitchenTips({ onBack }) {
 
                             <div className="kt-card-body">
                                 <div className="kt-card-meta">
-                                    <span>{tip.authorName || 'Bếp Vườn Nhà'}</span>
+                                    <span>{tip.authorName || 'Bếp VEGETABLE'}</span>
                                     <span>·</span>
                                     <span>{formatDate(tip.createdAt)}</span>
                                     <span>·</span>
@@ -199,7 +199,7 @@ export default function KitchenTips({ onBack }) {
                         <div className="kt-modal-content">
                             <div className="kt-card-meta">
                                 <span className="kt-card-badge inline">{activeTip.category}</span>
-                                <span>Tác giả: {activeTip.authorName || 'Bếp Vườn Nhà'}</span>
+                                <span>Tác giả: {activeTip.authorName || 'Bếp VEGETABLE'}</span>
                                 <span>·</span>
                                 <span>{formatDate(activeTip.createdAt)}</span>
                                 <span>·</span>

@@ -201,10 +201,12 @@
 .emp-table-wrap {
     width: 100%;
     overflow-x: auto;
-    margin-top: 20px;
+    max-height: min(68vh, 720px);
+    margin-top: 12px;
     background: white;
     border: 1px solid var(--emp-border);
     border-radius: 14px;
+    overscroll-behavior: contain;
 }
 
 .emp-page table {
@@ -215,19 +217,29 @@
 }
 
 .emp-page th {
-    padding: 16px;
-    background: var(--emp-green-light);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 14px 16px;
+    background: #e8f1e7;
     color: var(--emp-green-dark);
     text-align: left;
     font-weight: 700;
     white-space: nowrap;
+    font-size: 11px;
+    letter-spacing: 0.035em;
+    text-transform: uppercase;
 }
 
 .emp-page td {
     padding: 14px 16px;
-    border-top: 1px solid #edf1eb;
+    border-bottom: 1px solid #edf1eb;
     color: #355344;
     vertical-align: middle;
+}
+
+.emp-page tbody tr:nth-child(even) {
+    background: #fafcf9;
 }
 
 .emp-page tbody tr:hover {
@@ -236,9 +248,177 @@
 
 .emp-page td button {
     min-height: 35px;
-    padding: 7px 12px;
-    margin: 3px;
+    padding: 7px 10px;
+    font-size: 12px;
+}
+
+.emp-table-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 26px;
+    color: var(--emp-green-dark);
+}
+
+.emp-table-heading h3 {
+    margin: 0;
+    font-size: 17px;
+}
+
+.emp-table-heading > span {
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--emp-green-light);
+    color: var(--emp-green-dark);
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.emp-data-table {
+    border-collapse: separate !important;
+    border-spacing: 0;
+}
+
+.emp-employee-table {
+    min-width: 1080px;
+}
+
+.emp-employee-table th:nth-child(1) { width: 95px; }
+.emp-employee-table th:nth-child(2) { width: 155px; }
+.emp-employee-table th:nth-child(3) { width: 190px; }
+.emp-employee-table th:nth-child(4) { width: 125px; }
+.emp-employee-table th:nth-child(5) { width: 140px; }
+.emp-employee-table th:nth-child(6) { width: 190px; }
+.emp-employee-table th:nth-child(7) { width: 135px; }
+.emp-employee-table th:nth-child(8) { width: 170px; }
+
+.emp-employee-table tbody tr:last-child td,
+.emp-activity-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.emp-employee-table td {
+    line-height: 1.5;
+}
+
+.emp-code {
+    display: inline-block;
+    padding: 5px 8px;
+    border: 1px solid #e0eadc;
+    border-radius: 7px;
+    background: #f4f8f1;
+    color: #416347;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.emp-name {
+    color: #203d30;
     font-size: 13px;
+}
+
+.emp-cell-wrap {
+    min-width: 150px;
+    overflow-wrap: anywhere;
+}
+
+.emp-account-cell {
+    display: grid;
+    justify-items: start;
+    gap: 3px;
+    min-width: 140px;
+}
+
+.emp-account-cell > strong {
+    color: #203d30;
+    font-size: 12px;
+}
+
+.emp-account-cell > small {
+    color: #77887b;
+    font-size: 10px;
+}
+
+.emp-status-badge {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 5px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.emp-status-badge.active {
+    background: #e8f5e9;
+    color: #2e7043;
+}
+
+.emp-status-badge.inactive {
+    background: #f1f2ef;
+    color: #667168;
+}
+
+.emp-status-badge.pending {
+    background: #fff3dc;
+    color: #8b641e;
+}
+
+.emp-row-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 150px;
+}
+
+.emp-page .emp-row-actions button {
+    min-height: 32px;
+    margin: 0;
+    padding: 6px 9px;
+    border-radius: 8px;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.emp-muted {
+    color: #839087 !important;
+    font-size: 11px !important;
+    line-height: 1.5;
+}
+
+.emp-table-empty {
+    padding: 38px 20px !important;
+    color: #78877b !important;
+    text-align: center;
+}
+
+.emp-activity-table {
+    min-width: 820px;
+}
+
+.emp-activity-table td:last-child {
+    min-width: 280px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 650px) {
+    .emp-table-heading {
+        margin-top: 20px;
+    }
+
+    .emp-table-heading h3 {
+        font-size: 15px;
+    }
+
+    .emp-table-wrap {
+        max-height: 65vh;
+        border-radius: 11px;
+    }
 }
 
 /* Checkbox phân quyền - giữ cho các form khác nếu còn sử dụng */

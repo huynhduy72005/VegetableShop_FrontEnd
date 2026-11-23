@@ -292,7 +292,7 @@ export default function Checkout({ cartItems, currentUser, onOrderSuccess }) {
     return (
         <div className="checkout-page">
             <header className="checkout-header">
-                <div className="checkout-eyebrow">VƯỜN NHÀ · THANH TOÁN AN TOÀN</div>
+                <div className="checkout-eyebrow">VEGETABLE · THANH TOÁN AN TOÀN</div>
                 <h2>Hoàn tất đơn hàng</h2>
                 <p>Chỉ còn một bước để những sản phẩm tươi ngon được giao đến bạn.</p>
                 <div className="checkout-steps" aria-label="Tiến trình đặt hàng">
@@ -628,8 +628,8 @@ export default function Checkout({ cartItems, currentUser, onOrderSuccess }) {
                         <h3 id="order-success-title">Đặt hàng thành công!</h3>
                         <p className="order-success-sub">
                             {successInfo.paymentMethod === 'Transfer'
-                                ? 'Cảm ơn bạn! Vườn Nhà đã ghi nhận yêu cầu thanh toán chuyển khoản của bạn 🥬'
-                                : 'Cảm ơn bạn đã mua sắm tại Vườn Nhà 🥬'}
+                                ? 'Cảm ơn bạn! VEGETABLE đã ghi nhận yêu cầu thanh toán chuyển khoản của bạn 🥬'
+                                : 'Cảm ơn bạn đã mua sắm tại VEGETABLE 🥬'}
                         </p>
 
                         <div className="order-success-details">

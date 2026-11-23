@@ -169,7 +169,7 @@
 
 .vn-quick {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     margin: 22px 0 44px;
     padding: 10px;
     border: 1px solid #e3e9df;

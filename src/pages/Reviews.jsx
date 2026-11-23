@@ -49,7 +49,7 @@ const Reviews = () => {
       rating: 5,
       date: '05/10/2026',
       productName: 'Cải bó xôi hữu cơ',
-      comment: 'An tâm tuyệt đối khi mua hàng ở Vườn Nhà. Rau đúng chuẩn hữu cơ sạch, giá cả lại hợp lý hơn siêu thị lớn.',
+      comment: 'An tâm tuyệt đối khi mua hàng ở VEGETABLE. Rau đúng chuẩn hữu cơ sạch, giá cả lại hợp lý hơn siêu thị lớn.',
       verified: true
     }
   ]);
@@ -89,7 +89,7 @@ const Reviews = () => {
         <div className="reviews-hero-content">
           <span className="reviews-badge">⭐ Đánh giá từ khách hàng</span>
           <h1>Niềm Tin Từ Sự Chất Lượng</h1>
-          <p>Lắng nghe những chia sẻ thực tế từ hàng nghìn khách hàng đã tin tưởng chọn lựa nông sản Vườn Nhà.</p>
+          <p>Lắng nghe những chia sẻ thực tế từ hàng nghìn khách hàng đã tin tưởng chọn lựa nông sản VEGETABLE.</p>
         </div>
       </div>
 
@@ -97,7 +97,7 @@ const Reviews = () => {
         {/* Toast thành công */}
         {successMsg && (
           <div className="review-toast">
-            🎉 Cảm ơn bạn đã gửi đánh giá! Ý kiến của bạn rất quan trọng với Vườn Nhà.
+            🎉 Cảm ơn bạn đã gửi đánh giá! Ý kiến của bạn rất quan trọng với VEGETABLE.
           </div>
         )}
 
@@ -116,7 +116,7 @@ const Reviews = () => {
             <div className="bar-row"><span>1 sao</span><div className="bar"><div className="fill" style={{width: '0%'}}></div></div><span className="percent">0%</span></div>
           </div>
           <div className="rating-action-box">
-            <p>Bạn đã trải nghiệm sản phẩm của Vườn Nhà?</p>
+            <p>Bạn đã trải nghiệm sản phẩm của VEGETABLE?</p>
             <button className="write-review-btn" onClick={() => setShowForm(!showForm)}>
               {showForm ? 'Đóng form' : '✍️ Viết đánh giá của bạn'}
             </button>
@@ -189,7 +189,7 @@ const Reviews = () => {
                 <img src={rev.avatar} alt={rev.name} className="reviewer-avatar" />
                 <div>
                   <h4>{rev.name}</h4>
-                  <span className="verified-badge">✓ Đã mua hàng tại Vườn Nhà</span>
+                  <span className="verified-badge">✓ Đã mua hàng tại VEGETABLE</span>
                 </div>
                 <span className="review-date">{rev.date}</span>
               </div>

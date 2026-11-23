@@ -109,7 +109,7 @@ export default function Products({ categoryId, onViewDetail, onBuyNow, onAddToCa
         <div className="products-container">
             <div className="products-topbar">
                 <div>
-                    <span className="prod-sub-title">CỬA HÀNG VƯỜN NHÀ</span>
+                    <span className="prod-sub-title">CỬA HÀNG VEGETABLE</span>
                     <h1>{activeCategoryName || 'Tất cả sản phẩm'}</h1>
                     <p className="products-count">
                         {loading ? 'Đang tải...' : `${filteredProducts.length} sản phẩm`}
@@ -145,7 +145,7 @@ export default function Products({ categoryId, onViewDetail, onBuyNow, onAddToCa
                                     className={activeCategory === cat.id ? 'active' : ''}
                                     onClick={() => setActiveCategory(cat.id)}
                                 >
-                                    <span>{categoryIcons[cat.name] || '🌱'} {cat.name}</span>
+                                    <span>{cat.icon || categoryIcons[cat.name] || '🌱'} {cat.name}</span>
                                     <span className="sidebar-count">{countInCategory(cat.id)}</span>
                                 </li>
                             ))}
