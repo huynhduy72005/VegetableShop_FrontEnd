@@ -389,7 +389,7 @@ export default function Account({
                                         setNotice(null);
                                     }}
                                 >
-                                    <span>👥</span>Quản lý nhân viên
+                                    <span>☷</span>Quản lý nhân viên
                                 </button>
 
                                 <button onClick={onNavigateToAdmin}>
