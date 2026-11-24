@@ -3,6 +3,9 @@ import { api } from '../services/api';
 import './Auth.css';
 
 export default function Login({ onLoginSuccess, onSwitchToRegister }) {
+    const [forcedLogoutReason, setForcedLogoutReason] = useState(() =>
+        sessionStorage.getItem('authLogoutReason') || ''
+    );
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isRequestingReset, setIsRequestingReset] = useState(false);
@@ -31,6 +34,8 @@ export default function Login({ onLoginSuccess, onSwitchToRegister }) {
         e.preventDefault();
         try {
             const res = await api.login({ login: email.trim(), password });
+            sessionStorage.removeItem('authLogoutReason');
+            setForcedLogoutReason('');
             alert(res.data.message);
             onLoginSuccess(res.data.user, res.data.token);
         } catch (err) {
@@ -230,6 +235,11 @@ export default function Login({ onLoginSuccess, onSwitchToRegister }) {
                 ) : (
                     <>
                         <h2>Đăng nhập tài khoản</h2>
+                        {forcedLogoutReason && (
+                            <p className="auth-feedback error" role="alert">
+                                {forcedLogoutReason}
+                            </p>
+                        )}
                         <form onSubmit={handleLogin} className="auth-form">
                             <div className="form-group">
                                 <label htmlFor="login-identifier">Tên đăng nhập hoặc email</label>

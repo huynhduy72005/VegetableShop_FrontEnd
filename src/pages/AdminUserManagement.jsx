@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../services/api';
+import { forceLogoutAccount } from '../services/authSession';
 
 const roleLabels = {
     Admin: 'Quản trị viên',
@@ -115,6 +116,10 @@ export default function AdminUserManagement({ currentUser }) {
         setSavingId(user.id);
         try {
             const response = await api.updateUserRole(user.id, { role });
+            forceLogoutAccount(
+                user.id,
+                `Vai trò tài khoản đã được đổi thành ${roleLabels[role]}. Vui lòng đăng nhập lại.`
+            );
             setNotice({
                 text: response.data?.message
                     || `Đã cập nhật vai trò cho ${user.email}.`
@@ -142,6 +147,12 @@ export default function AdminUserManagement({ currentUser }) {
                 response = await api.restoreUser(user.id);
             else
                 response = await api.deleteUser(user.id);
+            forceLogoutAccount(
+                user.id,
+                active
+                    ? 'Tài khoản của bạn đã được khôi phục. Vui lòng đăng nhập lại.'
+                    : 'Tài khoản của bạn đã bị quản trị viên vô hiệu hóa.'
+            );
             setNotice({
                 text: response.data?.message
                     || `Đã ${action} tài khoản ${user.email}.`

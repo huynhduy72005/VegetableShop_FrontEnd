@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -17,6 +17,7 @@ import Promotions from './pages/Promotions';
 import Reviews from './pages/Reviews';
 import Contact from './pages/Contact';
 import ChatWidget from './components/ChatWidget';
+import { listenForForcedLogout } from './services/authSession';
 
 import Orders from './pages/Orders';
 import { cartKeyOf, cartKeyOfItem, getDefaultVariant, hasVariants } from './services/ProductVariants';
@@ -42,6 +43,99 @@ export default function App() {
     const [checkoutCartItemIds, setCheckoutCartItemIds] = useState(null);
     const [wishlistItems, setWishlistItems] = useState([]);
     const detailPreviousPage = useRef('home');
+    const getPendingPurchaseAction = () => {
+        try {
+            return JSON.parse(sessionStorage.getItem('pendingPurchaseAction'));
+        } catch {
+            return null;
+        }
+    };
+    const requireLoginForPurchase = (action, data) => {
+        const token = sessionStorage.getItem('token');
+        if (currentUser && token) return false;
+
+        sessionStorage.setItem('pendingPurchaseAction', JSON.stringify({ action, data }));
+        setActivePage('login');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return true;
+    };
+    const executePendingPurchaseAction = (pending) => {
+        if (!pending) return;
+
+        if (pending.action === 'add') {
+            const product = pending.data;
+            const key = product.cartKey ?? cartKeyOf(product.id, product.variantId);
+            setCartItems(prev => {
+                const exist = prev.find(item => cartKeyOfItem(item) === key);
+                const qty = product.quantity || 1;
+                if (exist) {
+                    return prev.map(item =>
+                        cartKeyOfItem(item) === key
+                            ? { ...item, quantity: item.quantity + qty }
+                            : item
+                    );
+                }
+                return [...prev, { ...product, cartKey: key, quantity: qty }];
+            });
+            setActivePage('cart');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (pending.action === 'buy') {
+            setCheckoutItems([{
+                ...pending.data,
+                quantity: Number(pending.data.quantity) || 1
+            }]);
+            setCheckoutCartItemIds(null);
+            setActivePage('checkout');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (pending.action === 'addMultiple') {
+            setCartItems(prev => {
+                const updatedCart = prev.map(item => ({ ...item }));
+                for (const product of Array.isArray(pending.data) ? pending.data : []) {
+                    const id = Number(product.id);
+                    const variant = hasVariants(product) ? getDefaultVariant(product) : null;
+                    const cartKey = cartKeyOf(id, variant?.id);
+                    const stock = Number(variant ? variant.quantity : product.stockQuantity);
+                    const price = Number(variant ? variant.price : product.price);
+                    if (!Number.isInteger(id) || id <= 0 || !Number.isInteger(stock) || stock <= 0 || !Number.isFinite(price) || price < 0) continue;
+                    const index = updatedCart.findIndex(item => cartKeyOfItem(item) === cartKey);
+                    if (index >= 0) {
+                        if (updatedCart[index].quantity < stock) updatedCart[index].quantity++;
+                    } else {
+                        updatedCart.push({
+                            ...product,
+                            id,
+                            price,
+                            stockQuantity: stock,
+                            variantId: variant?.id ?? null,
+                            variantName: variant?.name ?? null,
+                            cartKey,
+                            quantity: 1
+                        });
+                    }
+                }
+                return updatedCart;
+            });
+            setActivePage('cart');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+    const handleLogout = (reason = '') => {
+        if (reason) {
+            sessionStorage.setItem('authLogoutReason', reason);
+        } else {
+            sessionStorage.removeItem('authLogoutReason');
+        }
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('currentUser');
+        setCurrentUser(null);
+        setActivePage('login');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    useEffect(() => listenForForcedLogout(({ userId, reason }) => {
+        if (String(currentUser?.id) !== String(userId)) return;
+        handleLogout(reason || 'Tài khoản của bạn vừa được quản trị viên cập nhật. Vui lòng đăng nhập lại.');
+    }), [currentUser?.id]);
     const handleViewDetail = (product) => {
         if (activePage !== 'detail') {
             detailPreviousPage.current = activePage;
@@ -57,6 +151,7 @@ export default function App() {
     };
 
     const handleBuyNow = (product) => {
+        if (requireLoginForPurchase('buy', product)) return;
         // Sản phẩm có nhiều loại mà chưa chọn loại: mở trang chi tiết để khách chọn
         if (hasVariants(product) && product.variantId == null) {
             handleViewDetail(product);
@@ -96,6 +191,7 @@ export default function App() {
 
     // Thêm một sản phẩm vào giỏ hàng
     const handleAddToCart = (product) => {
+        if (requireLoginForPurchase('add', product)) return;
         // Cùng sản phẩm nhưng khác loại (500g / 1kg) là hai dòng riêng trong giỏ
         const key = product.cartKey ?? cartKeyOf(product.id, product.variantId);
         setCartItems(prev => {
@@ -115,6 +211,7 @@ export default function App() {
 
     // Thêm nhiều sản phẩm do Gemini AI đề xuất vào giỏ hàng
     const handleAddMultipleToCart = (products) => {
+        if (requireLoginForPurchase('addMultiple', products)) return;
         if (!Array.isArray(products) || products.length === 0) {
             alert('Không có sản phẩm để thêm.');
             return;
@@ -307,12 +404,7 @@ export default function App() {
                             sessionStorage.setItem('currentUser', JSON.stringify(user));
                             setCurrentUser(user);
                         }}
-                        onLogout={() => {
-                            sessionStorage.removeItem('token');
-                            sessionStorage.removeItem('currentUser');
-                            setCurrentUser(null);
-                            setActivePage('home');
-                        }}
+                        onLogout={() => handleLogout()}
                         onViewOrders={() => setActivePage('orders')}
                         wishlistItems={wishlistItems}
                         onViewDetail={handleViewDetail}
@@ -336,6 +428,7 @@ export default function App() {
                     ['Admin', 'AdminVIP', 'Staff'].includes(currentUser?.role) && (
                         <Admin
                             currentUser={currentUser}
+                            onLogout={handleLogout}
                             onBackToAccount={() => {
                                 setActivePage('account');
                                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -348,6 +441,12 @@ export default function App() {
                             sessionStorage.setItem('token', token);
                             sessionStorage.setItem('currentUser', JSON.stringify(user));
                             setCurrentUser(user);
+                            const pending = getPendingPurchaseAction();
+                            sessionStorage.removeItem('pendingPurchaseAction');
+                            if (pending) {
+                                executePendingPurchaseAction(pending);
+                                return;
+                            }
                             setActivePage(
                                 ['Staff', 'AdminVIP'].includes(user.role)
                                     ? 'admin'

@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { api } from '../services/api';
+import { forceLogoutAccount } from '../services/authSession';
 import './EmployeeManagement.css';
 
 const validateEmployee = (form, isVipAdmin) => {
@@ -345,6 +346,12 @@ export default function EmployeeManagement({ currentUser }) {
                     status: selected.status
                 }
             );
+            if (selected.userId) {
+                forceLogoutAccount(
+                    selected.userId,
+                    'Quyền hoặc trạng thái tài khoản của bạn vừa được cập nhật. Vui lòng đăng nhập lại.'
+                );
+            }
 
             const refreshed = await loadEmployees();
             const updateMessage = result.data?.emailSent === false
@@ -687,7 +694,7 @@ export default function EmployeeManagement({ currentUser }) {
                                         >
                                             <option
                                                 value="active"
-                                                disabled={!isVipAdmin && !selected.accountIsActive}
+                                                disabled={!isVipAdmin && !form.accountIsActive}
                                             >
                                                 Đang hoạt động
                                             </option>

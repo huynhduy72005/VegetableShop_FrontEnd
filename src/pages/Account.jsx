@@ -5,6 +5,7 @@ import Orders from './Orders';
 import Wishlist from './Wishlist';
 import Vouchers from './Vouchers';
 import EmployeeManagement from './EmployeeManagement';
+import { forceLogoutAccount } from '../services/authSession';
 
 const roles = { Admin: 'Quản trị viên', AdminVIP: 'Quản trị viên VIP', Staff: 'Nhân viên', Customer: 'Khách hàng' };
 const genders = ['Nam', 'Nữ', 'Khác', 'Không muốn tiết lộ'];
@@ -206,6 +207,10 @@ export default function Account({
         setBusy(true); setNotice(null);
         try {
             const response = await api.updateUserRole(user.id, { role: newRole });
+            forceLogoutAccount(
+                user.id,
+                `Vai trò tài khoản đã được đổi thành ${roles[newRole]}. Vui lòng đăng nhập lại.`
+            );
             setUsers(previous => previous.map(item => item.id === user.id ? { ...item, role: newRole } : item));
             setNotice({ text: response.data?.message || 'Đã cập nhật quyền.' });
         } catch { setNotice({ error: true, text: 'Cập nhật thất bại.' }); }
@@ -219,6 +224,10 @@ export default function Account({
         setBusy(true); setNotice(null);
         try {
             const response = await api.deleteUser(user.id);
+            forceLogoutAccount(
+                user.id,
+                'Tài khoản của bạn đã bị quản trị viên vô hiệu hóa.'
+            );
             setUsers(previous => previous.map(item =>
                 item.id === user.id ? { ...item, isActive: false } : item
             ));
